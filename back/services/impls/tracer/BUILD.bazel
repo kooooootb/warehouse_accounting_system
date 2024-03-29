@@ -1,0 +1,13 @@
+package(default_visibility = ["//back/services:__subpackages__"])
+
+cc_library(
+    name = "tracer",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        "//back:ifaces",
+        "//back/utilities:holders",
+    ],
+)

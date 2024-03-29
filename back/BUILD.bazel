@@ -1,0 +1,15 @@
+cc_library(
+    name = "ifaces",
+    hdrs = glob(["include/ifaces/*.h"]),
+    includes = ["./include"],
+    visibility = ["//visibility:public"],
+    deps = ["//back/instrumental:include"],
+)
+
+cc_binary(
+    name = "rms314",
+    srcs = [
+        "main.cpp",
+    ],
+    deps = ["//back/services:locator"],
+)

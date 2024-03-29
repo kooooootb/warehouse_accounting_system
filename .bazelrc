@@ -1,0 +1,6 @@
+startup --output_base=C:/bazel
+startup --windows_enable_symlinks
+
+build --enable_runfiles
+
+common --enable_bzlmod
