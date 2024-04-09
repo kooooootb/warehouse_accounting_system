@@ -3,9 +3,19 @@ code 314
 """
 
 register_execution_platforms(
-    "//:x64_windows-clang-cl"
+    "//:x64_windows-clang-cl",
 )
 
 register_toolchains(
-    "@@local_config_cc//:cc-toolchain-x64_windows-clang-cl",
+    "//toolchain:cc_toolchain_for_linux_x86_64",
+    "//toolchain:cc_toolchain_for_windows_x86_64",
 )
+
+# JSON parser
+bazel_dep(name = "nlohmann_json", version = "3.11.3")
+
+# cmake integration
+bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
+
+# fmt
+bazel_dep(name = "fmt", version = "10.2.1")

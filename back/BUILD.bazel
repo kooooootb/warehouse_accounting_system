@@ -1,15 +1,15 @@
-cc_library(
-    name = "ifaces",
-    hdrs = glob(["include/ifaces/*.h"]),
-    includes = ["./include"],
-    visibility = ["//visibility:public"],
-    deps = ["//back/instrumental:include"],
-)
-
 cc_binary(
     name = "rms314",
     srcs = [
         "main.cpp",
     ],
-    deps = ["//back/services:locator"],
+    deps = [
+        "//back/components/authorizer:lib",
+        "//back/components/db_connector:lib",
+        "//back/components/task_manager:lib",
+        "//back/components/webserver:lib",
+        "//back/services/locator:lib",
+        "//back/services/tracer:iface",
+        "//back/utilities/document_manager:lib",
+    ],
 )

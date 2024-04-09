@@ -1,0 +1,36 @@
+package(default_visibility = ["//back/components/task_manager:__subpackages__"])
+
+cc_library(
+    name = "base",
+    srcs = glob([
+        "include/**/*.cpp",
+    ]),
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
+    includes = ["./include"],
+    deps = [
+        "//back/components/task_manager:callback",
+        "//back/components/task_manager/source/dependency_manager:iface",
+        "//back/instrumental:include",
+        "//back/services/tracer:iface",
+        "@nlohmann_json//:json",
+    ],
+)
+
+cc_library(
+    name = "task_list",
+    srcs = glob([
+        "protocol/**/*.cpp",
+    ]),
+    hdrs = glob([
+        "protocol/**/*.h",
+    ]),
+    includes = ["."],
+    deps = [
+        ":base",
+        "//back/components/db_connector:data",
+        "//back/services/tracer:iface",
+        "//back/utilities/hash",
+    ],
+)

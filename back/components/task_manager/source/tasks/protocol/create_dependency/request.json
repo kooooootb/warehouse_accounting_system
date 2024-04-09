@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "requirement_id": {
+      "type": "integer"
+    },
+    "dependencies_ids": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "requirement_id": {
+              "type": "integer"
+            },
+            "dependency_type": {
+              "type": "string",
+              "description": "available values: horizontal, vertical, copied"
+            }
+          },
+          "required": [
+            "requirement_id",
+            "dependency_type"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "requirement_id",
+    "dependencies_ids"
+  ]
+}

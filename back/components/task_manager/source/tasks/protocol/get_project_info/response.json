@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "requirement_ids": {
+      "type": "array",
+      "items": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    },
+    "specification_ids": {
+      "type": "array",
+<<<<<<< HEAD
+      "items": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    },
+    "date": {
+      "type": "string"
+=======
+      "items": {
+        "type": "integer"
+      }
+>>>>>>> 1aa89d9 (add all main functionality, move to v1.0)
+    }
+  },
+  "required": [
+    "name",
+    "requirement_ids",
+    "specification_ids"
+  ]
+}

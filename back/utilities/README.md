@@ -1,0 +1,1 @@
+Section for simple classes that dont drive main project logic

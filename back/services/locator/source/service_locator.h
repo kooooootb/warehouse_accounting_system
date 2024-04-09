@@ -1,29 +1,56 @@
 #ifndef H_3E34BE93_DE6D_4EDA_9131_8485052DE06B
 #define H_3E34BE93_DE6D_4EDA_9131_8485052DE06B
 
-#include <map>
 #include <memory>
+#include <unordered_map>
 
-#include <ifaces/service_locator.h>
 #include <instrumental/interface.h>
 #include <instrumental/types.h>
+#include <locator/service_locator.h>
 
-namespace srv {
+namespace srv
+{
 
-class ServiceLocator : public IServiceLocator {
+class ServiceLocator : public IServiceLocator
+{
 public:
     ServiceLocator();
 
+    void RegisterDefaults() override;
+
 protected:
-    ufa::IBase* GetInterfaceImpl(ufa::iid_t iid) override;
-    ufa::Result RegisterInterfaceImpl(std::unique_ptr<ufa::IBase> object, ufa::iid_t iid) override;
+    std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) override;
+    ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) override;
 
 private:
+    /**
+     * @brief try register default interface if it is not already in map
+     * @return ufa::Result SUCCESS on success, REREGISTERING_INTERFACE otherwise
+     */
+    template <class T>
+    ufa::Result TryRegisterDefaultInterface();
+
     void Setup();
 
 private:
-    std::map<ufa::iid_t, std::unique_ptr<ufa::IBase>> m_ifaceStorage;
+    std::unordered_map<srv::iid_t, std::shared_ptr<srv::IService>> m_ifaceStorage;
 };
+
+template <class T>
+ufa::Result ServiceLocator::TryRegisterDefaultInterface()
+{
+    const auto iid = GET_IID(T);
+    const auto it = m_ifaceStorage.find(iid);
+    if (it == m_ifaceStorage.cend())
+    {
+        RegisterDefaultInterface<T>();
+        return ufa::Result::SUCCESS;
+    }
+    else
+    {
+        return ufa::Result::REREGISTERING_INTERFACE;
+    }
+}
 
 }  // namespace srv
 

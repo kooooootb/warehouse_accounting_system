@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "requirement": {
+      "type": "object",
+      "properties": {
+        "type_id": {
+          "type": "string",
+          "description": "available values: functional, nonfunctional"
+        },
+        "in_specification": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status_req": {
+          "type": "string",
+          "description": "available values: new, inspecification, negotiation, approved, developed, supported, deleted"
+        },
+        "release": {
+          "type": "string"
+        },
+        "project": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type_id",
+        "in_specification",
+        "describtion",
+        "status_req",
+        "release",
+        "project"
+      ]
+    }
+  },
+  "required": [
+    "requirement"
+  ]
+}

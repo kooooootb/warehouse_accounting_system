@@ -1,6 +1,14 @@
-startup --output_base=C:/bazel
-startup --windows_enable_symlinks
-
 build --enable_runfiles
-
 common --enable_bzlmod
+
+build --noincompatible_sandbox_hermetic_tmp
+
+build --cxxopt="-std=c++17"
+
+# boost configuration
+build --@boost//:beast_use_std_string_view
+
+# debugging
+build:dbg --copt="-g"
+build:dbg --strip=never
+build:dbg --copt="-fno-limit-debug-info"

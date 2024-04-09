@@ -1,0 +1,31 @@
+package(default_visibility = ["//back:__subpackages__"])
+
+cc_library(
+    name = "iface",
+    hdrs = glob(
+        [
+            "include/**/*.h",
+        ],
+        exclude = glob(["include/**/hash.h"]),
+    ),
+    includes = ["./include"],
+    deps = [
+        "//back/components/db_connector:iface",
+        "//back/instrumental:include",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "//:jwt",
+        "//back/services/date_provider:iface",
+        "//back/services/locator:iface",
+        "//back/services/tracer:iface",
+    ],
+)

@@ -1,0 +1,1 @@
+Section for object, that provide helpful functions, store state that needs to be preserved between calls, can be retrieved via service locator but dont drive main project logic

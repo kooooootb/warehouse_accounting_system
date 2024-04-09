@@ -1,3 +1,5 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
 platform(
     name = "x64_windows-clang-cl",
     constraint_values = [
@@ -5,4 +7,33 @@ platform(
         "@@platforms//os:windows",
         "@@bazel_tools//tools/cpp:clang-cl",
     ],
+)
+
+platform(
+    name = "x64_linux-clang",
+    constraint_values = [
+        "@@platforms//cpu:x86_64",
+        "@@platforms//os:linux",
+        "@@bazel_tools//tools/cpp:clang",
+    ],
+)
+
+cmake(
+    name = "jwt",
+    lib_source = "@Thalhammer_jwt//:all_srcs",
+    linkopts = ["-lm"],
+    out_headers_only = True,
+    tags = ["requires-network"],
+    visibility = ["//visibility:public"],
+)
+
+cmake(
+    name = "libpqxx",
+    lib_source = "@jtv_libpqxx//:all_srcs",
+    linkopts = [
+        "-lpq",
+        "-lm",
+    ],
+    tags = ["requires-network"],
+    visibility = ["//visibility:public"],
 )

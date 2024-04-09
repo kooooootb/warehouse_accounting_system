@@ -1,0 +1,48 @@
+package(default_visibility = ["//back:__subpackages__"])
+
+cc_library(
+    name = "callback",
+    hdrs = glob(
+        [
+            "include/**/callback.h",
+        ],
+    ),
+    includes = ["./include"],
+    deps = [
+        "//back/instrumental:include",
+        "//back/utilities/document_manager:iface",
+    ],
+)
+
+cc_library(
+    name = "iface",
+    hdrs = glob(
+        [
+            "include/**/*.h",
+        ],
+        exclude = ["include/**/callback.h"],
+    ),
+    includes = ["./include"],
+    deps = [
+        ":callback",
+        "//back/components/authorizer:iface",
+        "//back/components/db_connector:iface",
+        "//back/instrumental:include",
+        "//back/services/locator:iface",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "//back/components/task_manager/source/dependency_manager:lib",
+        "//back/components/task_manager/source/tasks:task_list",
+        "//back/services/tracer:iface",
+        "@nlohmann_json//:json",
+    ],
+)

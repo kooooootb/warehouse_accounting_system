@@ -1,0 +1,28 @@
+package(default_visibility = ["//back/components/task_manager:__subpackages__"])
+
+cc_library(
+    name = "iface",
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
+    includes = ["./include"],
+    deps = [
+        "//back/components/authorizer:iface",
+        "//back/components/db_connector:iface",
+        "//back/instrumental:include",
+        "//back/services/locator:iface",
+        "//back/utilities/document_manager:iface",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "//back/services/tracer:iface",
+    ],
+)

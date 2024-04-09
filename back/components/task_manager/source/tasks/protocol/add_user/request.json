@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "login": {
+      "type": "string"
+    },
+    "per_password": {
+      "type": "string"
+    },
+    "per_role": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name",
+    "login",
+    "per_password",
+    "per_role"
+  ]
+}

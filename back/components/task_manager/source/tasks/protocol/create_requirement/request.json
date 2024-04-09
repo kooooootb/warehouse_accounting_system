@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+<<<<<<< HEAD
+    "type_id": {
+      "type": "integer"
+=======
+    "type": {
+      "type": "integer",
+      "description": "available values: functional, nonfunctional"
+>>>>>>> 1aa89d9 (add all main functionality, move to v1.0)
+    },
+    "description": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "integer"
+    }
+  },
+  "required": [
+<<<<<<< HEAD
+    "type_id",
+=======
+    "type",
+>>>>>>> 1aa89d9 (add all main functionality, move to v1.0)
+    "description",
+    "project_id"
+  ]
+}

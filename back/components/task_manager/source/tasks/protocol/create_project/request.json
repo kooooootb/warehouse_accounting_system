@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_name"
+  ]
+}
