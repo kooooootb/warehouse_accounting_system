@@ -4,6 +4,7 @@
 
 namespace srv {
 namespace tracer {
+namespace detail {
 
 void TraceMessage::AddToBack(std::string data)
 {
@@ -17,7 +18,9 @@ void TraceMessage::AddToFront(std::string data)
 
 size_t TraceMessage::GetMessageSize() const
 {
-    return std::accumulate(std::cbegin(m_message), std::cend(m_message), 0);
+    return std::accumulate(std::cbegin(m_message), std::cend(m_message), 0, [](const auto& m, const auto& size) {
+        return m.size() + size;
+    });
 }
 
 std::string TraceMessage::ToString() const
@@ -33,5 +36,6 @@ std::string TraceMessage::ToString() const
     return result;
 }
 
+}  // namespace detail
 }  // namespace tracer
 }  // namespace srv

@@ -1,0 +1,31 @@
+load("//back:common_variables.bzl", "CPP_STANDART")
+
+package(default_visibility = ["//back:__subpackages__"])
+
+cc_library(
+    name = "iface",
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
+    copts = [
+        CPP_STANDART,
+    ],
+    includes = ["./include"],
+    deps = [
+        "//back/instrumental:include",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    copts = [
+        CPP_STANDART,
+    ],
+    deps = [
+        ":iface",
+    ],
+)

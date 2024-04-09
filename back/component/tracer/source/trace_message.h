@@ -4,25 +4,28 @@
 #include <list>
 #include <string>
 
+#include <tracer/tracer.h>
+
 namespace srv {
 namespace tracer {
+namespace detail {
 
-class TraceMessage {
+class TraceMessage : public ITraceMessage {
 public:
     TraceMessage() = default;
 
-    void AddToBack(std::string);
-    void AddToFront(std::string);
-
-    std::string ToString() const;
+    void AddToBack(std::string data) override;
+    void AddToFront(std::string data) override;
+    std::string ToString() const override;
 
 private:
-    size_t GetMessageSize() const;
+    inline size_t GetMessageSize() const;
 
 private:
     std::list<std::string> m_message;
 };
 
+}  // namespace detail
 }  // namespace tracer
 }  // namespace srv
 

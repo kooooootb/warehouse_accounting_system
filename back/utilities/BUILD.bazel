@@ -3,5 +3,4 @@ cc_library(
     hdrs = glob(["holders/**/*.h"]),
     includes = ["."],
     visibility = ["//visibility:public"],
-    deps = ["//back:ifaces"],
 )
