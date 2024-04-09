@@ -1,1 +1,1 @@
-# for vscode extension to detect root folder
+# for vscode extension to detect root folderr
