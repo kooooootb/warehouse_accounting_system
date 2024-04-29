@@ -1,0 +1,40 @@
+#ifndef H_CE50211F_FC7E_4799_9C4E_77E496F2C3F1
+#define H_CE50211F_FC7E_4799_9C4E_77E496F2C3F1
+
+#include <atomic>
+
+#include <date_provider/date_provider.h>
+#include <locator/service_locator.h>
+#include <tracer/tracer.h>
+
+#include "trace_writer.h"
+
+namespace srv
+{
+namespace tracer
+{
+
+class Tracer : public ITracer, std::enable_shared_from_this<Tracer>
+{
+public:
+    Tracer(IServiceLocator* serviceLocator);
+
+    TraceCollectorProxy StartCollecting(TraceLevel traceLevel) override;
+    void SetSettings(TracerSettings&& settings) override;
+    void Trace(std::unique_ptr<tracer::ITraceMessage> traceMessage, TraceLevel traceLevel) override;
+
+private:
+    bool IsTracing() const;
+
+private:
+    std::unique_ptr<TraceWriter> m_traceWriter;
+    TraceLevel m_maxTraceLevel;
+
+    mutable std::atomic<uint64_t> index;
+    std::shared_ptr<IDateProvider> m_dateProvider;
+};
+
+}  // namespace tracer
+}  // namespace srv
+
+#endif  // H_CE50211F_FC7E_4799_9C4E_77E496F2C3F1

@@ -1,0 +1,62 @@
+#ifndef H_A31BCC98_25B8_478D_B49D_B23AF4148D4F
+#define H_A31BCC98_25B8_478D_B49D_B23AF4148D4F
+
+#include <memory>
+
+#include <instrumental/interface.h>
+
+#include "service.h"
+
+namespace srv
+{
+
+struct IServiceLocator : ufa::IBase
+{
+public:
+    DECLARE_IID(0x37787C77)
+
+    template <class T>
+    ufa::Result GetInterface(std::shared_ptr<T>& object);
+
+    template <class T>
+    ufa::Result RegisterInterface(std::shared_ptr<T> object);
+
+protected:
+    virtual std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) = 0;
+    virtual ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) = 0;
+
+    template <class T>
+    void RegisterDefaultInterface();
+};
+
+template <class T>
+ufa::Result IServiceLocator::GetInterface(std::shared_ptr<T>& object)
+{
+    auto iface = GetInterfaceImpl(GET_IID(T));
+    object = std::static_pointer_cast<T>(iface);
+
+    return iface != nullptr ? ufa::Result::SUCCESS : ufa::Result::NO_INTERFACE;
+}
+
+template <class T>
+ufa::Result IServiceLocator::RegisterInterface(std::shared_ptr<T> object)
+{
+    static_assert(std::is_base_of_v<srv::IService, T>, "Type should be derived from IService");
+
+    return RegisterInterfaceImpl(std::move(object), GET_IID(T));
+}
+
+#define DECLARE_DEFAULT_INTERFACE(IfaceType, ImplType)               \
+    template <>                                                      \
+    void srv::IServiceLocator::RegisterDefaultInterface<IfaceType>() \
+    {                                                                \
+        auto _impl = std::make_shared<ImplType>(this);               \
+                                                                     \
+        srv::IServiceLocator::RegisterInterface(std::move(_impl));   \
+    }
+
+ufa::Result CreateServiceLocator(std::unique_ptr<srv::IServiceLocator>& object);
+
+}  // namespace srv
+
+#endif  // H_A31BCC98_25B8_478D_B49D_B23AF4148D4F

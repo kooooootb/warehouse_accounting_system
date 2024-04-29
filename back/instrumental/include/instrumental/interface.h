@@ -5,26 +5,16 @@
 
 #include "types.h"
 
-namespace ufa {
+namespace ufa
+{
 
 /**
  * @brief base interface struct
  */
-struct IBase {
+struct IBase
+{
     virtual ~IBase() = default;
 };
-
-/**
- * @brief interface id tools
- */
-#define GET_IID(Type) Type::_iid
-#define DECLARE_IID(iid) constexpr static ufa::iid_t _iid = iid;
-
-template <typename Interface>
-std::shared_ptr<Interface> CreateDefaultImpl()
-{
-    static_assert(false, "No default implementation for interface");
-}
 
 }  // namespace ufa
 
