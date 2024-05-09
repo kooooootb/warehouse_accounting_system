@@ -14,14 +14,14 @@ namespace srv
 namespace tracer
 {
 
-class Tracer : public ITracer, std::enable_shared_from_this<Tracer>
+class Tracer : public ITracer, public std::enable_shared_from_this<ITracer>
 {
 public:
     Tracer(IServiceLocator* serviceLocator);
 
     TraceCollectorProxy StartCollecting(TraceLevel traceLevel) override;
     void SetSettings(TracerSettings&& settings) override;
-    void Trace(std::unique_ptr<tracer::ITraceMessage> traceMessage, TraceLevel traceLevel) override;
+    void Trace(std::unique_ptr<tracer::ITraceMessage> traceMessage) override;
 
 private:
     bool IsTracing() const;
@@ -29,8 +29,9 @@ private:
 private:
     std::unique_ptr<TraceWriter> m_traceWriter;
     TraceLevel m_maxTraceLevel;
+    std::mutex m_settingsMutex;
 
-    mutable std::atomic<uint64_t> index;
+    mutable std::atomic<uint64_t> m_index;
     std::shared_ptr<IDateProvider> m_dateProvider;
 };
 

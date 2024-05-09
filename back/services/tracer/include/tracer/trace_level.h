@@ -23,14 +23,14 @@ enum class TraceLevel : int32_t
     DEBUG = 1200,    // same as INFO but with big messages that may affect the performance
 };
 
-#define TRACE(traceLevel) GetTracer().StartCollecting(traceLevel)
+#define TRACE(traceLevel) GetTracer()->StartCollecting(traceLevel)
 
-#define TRACE_ALW TRACE(ufa::tracer::TraceLevel::ALWAYS)
-#define TRACE_CRT TRACE(ufa::tracer::TraceLevel::CRITICAL)
-#define TRACE_ERR TRACE(ufa::tracer::TraceLevel::ERROR)
-#define TRACE_WRN TRACE(ufa::tracer::TraceLevel::WARNING)
-#define TRACE_INF TRACE(ufa::tracer::TraceLevel::INFO)
-#define TRACE_DBG TRACE(ufa::tracer::TraceLevel::DEBUG)
+#define TRACE_ALW TRACE(srv::tracer::TraceLevel::ALWAYS)
+#define TRACE_CRT TRACE(srv::tracer::TraceLevel::CRITICAL)
+#define TRACE_ERR TRACE(srv::tracer::TraceLevel::ERROR)
+#define TRACE_WRN TRACE(srv::tracer::TraceLevel::WARNING)
+#define TRACE_INF TRACE(srv::tracer::TraceLevel::INFO)
+#define TRACE_DBG TRACE(srv::tracer::TraceLevel::DEBUG)
 
 }  // namespace tracer
 }  // namespace srv

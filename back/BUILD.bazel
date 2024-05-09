@@ -3,5 +3,9 @@ cc_binary(
     srcs = [
         "main.cpp",
     ],
-    deps = ["//back/services/locator:iface"],
+    deps = [
+        "//back/services/locator:iface",
+        "//back/services/locator:lib",
+        "//back/services/tracer:iface",
+    ],
 )

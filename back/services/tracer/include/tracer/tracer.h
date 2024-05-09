@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <type_traits>
 
 #include <instrumental/settings.h>
 #include <instrumental/string_converters.h>
@@ -67,25 +68,26 @@ struct ITraceCollector : public ufa::IBase
     virtual void AddMessage(const char* message) = 0;
 };
 
-std::unique_ptr<ITraceCollector> CreateTraceCollector(std::unique_ptr<ITraceMessage> traceMessage, std::shared_ptr<ITracer> tracer);
-
 /**
- * @brief stores trace level and forward trace collect calls to implementation
+ * @brief forward trace collect calls to implementation if not nullptr
  */
 class TraceCollectorProxy
 {
 public:
-    TraceCollectorProxy(std::shared_ptr<ITracer> tracer, std::unique_ptr<ITraceMessage> traceMessage, bool shouldTrace)
-    {
-        if (shouldTrace)
-            m_traceCollector = CreateTraceCollector(std::move(traceMessage), tracer);
-    }
+    TraceCollectorProxy(std::unique_ptr<ITraceCollector> traceCollector) : m_traceCollector(std::move(traceCollector)) {}
 
-    template <typename StringType>
-    TraceCollectorProxy& operator<<(StringType&& message)
+    TraceCollectorProxy& operator<<(std::string message)
     {
         if (m_traceCollector != nullptr)
-            m_traceCollector->AddMessage(std::forward(message));
+            m_traceCollector->AddMessage(std::move(message));
+
+        return *this;
+    }
+
+    TraceCollectorProxy& operator<<(const char* message)
+    {
+        if (m_traceCollector != nullptr)
+            m_traceCollector->AddMessage(message);
 
         return *this;
     }
@@ -115,8 +117,23 @@ struct ITracer : public srv::IService
     /**
      * @brief inner method for straight tracing
      */
-    virtual void Trace(std::unique_ptr<tracer::ITraceMessage> traceMessage, tracer::TraceLevel traceLevel) = 0;
+    virtual void Trace(std::unique_ptr<tracer::ITraceMessage> traceMessage) = 0;
 };
+
+#define LOCAL_TRACER(_tracer)                                                               \
+    class _LocalTracer                                                                      \
+    {                                                                                       \
+    public:                                                                                 \
+        _LocalTracer(std::shared_ptr<srv::ITracer> tracer) : m_tracer(std::move(tracer)) {} \
+        std::shared_ptr<srv::ITracer> operator()()                                          \
+        {                                                                                   \
+            return m_tracer;                                                                \
+        }                                                                                   \
+                                                                                            \
+    private:                                                                                \
+        std::shared_ptr<srv::ITracer> m_tracer;                                             \
+    };                                                                                      \
+    _LocalTracer GetTracer(_tracer);
 
 }  // namespace srv
 

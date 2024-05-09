@@ -1,2 +1,6 @@
 build --enable_runfiles
 common --enable_bzlmod
+
+# debugging
+build --copt="-g"
+build --strip=never

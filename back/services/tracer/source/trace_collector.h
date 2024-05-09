@@ -11,7 +11,7 @@ namespace tracer
 class TraceCollector : public ITraceCollector
 {
 public:
-    TraceCollector(TraceLevel traceLevel, std::shared_ptr<ITracer> tracer);
+    TraceCollector(std::shared_ptr<ITracer> tracer, std::unique_ptr<ITraceMessage> traceMessage);
 
     ~TraceCollector() noexcept;
 
@@ -19,7 +19,6 @@ public:
     void AddMessage(const char* message) override;
 
 private:
-    TraceLevel m_traceLevel;
     std::shared_ptr<ITracer> m_tracer;
     std::unique_ptr<ITraceMessage> m_traceMessage;
 };

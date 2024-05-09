@@ -1,0 +1,1 @@
+Section with main project components that drive project logic

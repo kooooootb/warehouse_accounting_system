@@ -3,10 +3,13 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <filesystem>
+#include <fstream>
 #include <mutex>
 #include <queue>
 #include <thread>
 
+#include <date_provider/date_provider.h>
 #include <tracer/tracer.h>
 
 namespace srv
@@ -20,26 +23,41 @@ namespace tracer
 class TraceWriter
 {
 public:
-    TraceWriter(std::filesystem::path traceFolder);
+    TraceWriter(std::filesystem::path traceFolder, std::shared_ptr<IDateProvider> dateProvider);
+
+    ~TraceWriter() noexcept;
 
     void SetFolder(std::filesystem::path traceFolder);
-    void Queue(std::string message);
+    void Queue(std::unique_ptr<ITraceMessage> traceMessage);
+
+    void Stop();
 
 private:
-    void PrintHeader() const;
+    // decorations
+    void PrintHeader(std::ostream& stream) const;
+    std::string GetFilename() const;
+
+    // worker jobs
+    void Run();
+    void WriteToFile(std::unique_ptr<ITraceMessage> traceMessage);
 
 private:
     // writer
     std::thread m_writer;
     std::condition_variable m_writerCv;
-    std::atomic<bool> m_stopFlag;
+    std::atomic<bool> m_stop{false};
 
     // messages
     std::queue<std::unique_ptr<ITraceMessage>> m_messagesQueue;
     std::mutex m_messagesMutex;
 
-    // settings
+    // files
     std::filesystem::path m_traceFile;
+    std::mutex m_fileMutex;
+    std::ofstream m_fileStream;
+
+    // dependecies
+    std::shared_ptr<IDateProvider> m_dateProvider;
 };
 
 }  // namespace tracer
