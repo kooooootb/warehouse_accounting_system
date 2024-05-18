@@ -1,4 +1,5 @@
 #include "trace_writer.h"
+#include <chrono>
 #include <filesystem>
 #include <mutex>
 #include <thread>
@@ -9,7 +10,8 @@ namespace tracer
 {
 
 TraceWriter::TraceWriter(std::filesystem::path traceFolder, std::shared_ptr<IDateProvider> dateProvider)
-    : m_writer(&TraceWriter::Run, this), m_dateProvider(std::move(dateProvider))
+    : m_writer(&TraceWriter::Run, this)
+    , m_dateProvider(std::move(dateProvider))
 {
     SetFolder(traceFolder);
 }
@@ -88,6 +90,7 @@ void TraceWriter::WriteToFile(std::unique_ptr<ITraceMessage> traceMessage)
     }
 
     m_fileStream << traceMessage->ToString();
+    m_fileStream.flush();
 }
 
 void TraceWriter::PrintHeader(std::ostream& stream) const
@@ -97,7 +100,9 @@ void TraceWriter::PrintHeader(std::ostream& stream) const
 
 std::string TraceWriter::GetFilename() const
 {
-    const std::string timestamp = std::to_string(m_dateProvider->GetTimestamp());
+    std::string timestamp = m_dateProvider->GetTimeString();
+    std::replace(std::begin(timestamp), std::end(timestamp), ':', '.');
+
     const std::string fileSuffix = "_rms_logfile.log";
     return timestamp + fileSuffix;
 }

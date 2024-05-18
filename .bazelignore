@@ -1,0 +1,4 @@
+bazel-bin/
+bazel-out/
+bazel-requirement_management_system/
+bazel-testlogs/

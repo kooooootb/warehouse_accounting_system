@@ -1,30 +1,39 @@
 #include <iostream>
 #include <memory>
-#include "instrumental/include/instrumental/check.h"
 
+#include <db_connector/accessor.h>
 #include <instrumental/common.h>
 #include <locator/service_locator.h>
+#include <task_manager/task_manager.h>
 #include <tracer/tracer.h>
+#include <webserver/server.h>
 
 int main(int argc, char* argv[])
 {
     std::cout << "start" << std::endl;
 
-    std::unique_ptr<srv::IServiceLocator> serviceLocator;
-    CHECK_SUCCESS(srv::CreateServiceLocator(serviceLocator));
+    std::shared_ptr<srv::IServiceLocator> serviceLocator;
+    CHECK_SUCCESS(srv::IServiceLocator::Create(serviceLocator));
 
     std::shared_ptr<srv::ITracer> tracer;
     CHECK_SUCCESS(serviceLocator->GetInterface(tracer));
     LOCAL_TRACER(tracer);
 
-    srv::tracer::TracerSettings settings;
-    settings.traceFolder = "/home/kotb/notes/rms";
-    settings.traceLevel = srv::tracer::TraceLevel::DEBUG;
-    tracer->SetSettings(std::move(settings));
+    TRACE_INF << "Services initialized";
 
-    TRACE_INF << "asd " << std::to_string((long)tracer.get());
+    std::shared_ptr<db::IAccessor> accessor;
 
-    std::cout << "end" << std::endl;
+    std::shared_ptr<taskmgr::ITaskManager> taskManager;
+    CHECK_SUCCESS(taskmgr::ITaskManager::Create(serviceLocator, accessor, taskManager));
 
+    std::shared_ptr<ws::IServer> server;
+    CHECK_SUCCESS(ws::IServer::Create(serviceLocator, taskManager, server));
+
+    server->Start();
+
+    int a;
+    std::cin >> a;
+
+    TRACE_INF << "Exiting main";
     return 0;
 }

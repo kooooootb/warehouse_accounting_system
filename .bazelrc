@@ -1,6 +1,12 @@
 build --enable_runfiles
 common --enable_bzlmod
 
+build --cxxopt="-std=c++17"
+
+# boost configuration
+build --@boost//:beast_use_std_string_view
+
 # debugging
-build --copt="-g"
-build --strip=never
+build:dbg --copt="-g"
+build:dbg --strip=never
+build:dbg --copt="-fno-limit-debug-info"

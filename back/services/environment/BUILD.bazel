@@ -1,5 +1,3 @@
-load("//back:common_variables.bzl", "CPP_STANDART")
-
 package(default_visibility = ["//back:__subpackages__"])
 
 cc_library(
@@ -7,9 +5,6 @@ cc_library(
     hdrs = glob([
         "include/**/*.h",
     ]),
-    copts = [
-        CPP_STANDART,
-    ],
     includes = ["./include"],
     deps = [
         "//back/services/locator:iface",
@@ -22,9 +17,6 @@ cc_library(
         "source/**/*.h",
         "source/**/*.cpp",
     ]),
-    copts = [
-        CPP_STANDART,
-    ],
     deps = [
         ":iface",
         "//back/services/locator:iface",

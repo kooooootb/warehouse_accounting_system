@@ -10,3 +10,6 @@ register_toolchains(
     "//toolchain:cc_toolchain_for_linux_x86_64",
     "//toolchain:cc_toolchain_for_windows_x86_64",
 )
+
+# JSON parser
+bazel_dep(name = "nlohmann_json", version = "3.11.3")

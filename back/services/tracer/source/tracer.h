@@ -28,10 +28,11 @@ private:
 
 private:
     std::unique_ptr<TraceWriter> m_traceWriter;
-    TraceLevel m_maxTraceLevel;
+    TraceLevel m_maxTraceLevel = TraceLevel::DISABLED;
+    std::filesystem::path m_traceFolder;
     std::mutex m_settingsMutex;
 
-    mutable std::atomic<uint64_t> m_index;
+    std::atomic<uint64_t> m_index;
     std::shared_ptr<IDateProvider> m_dateProvider;
 };
 

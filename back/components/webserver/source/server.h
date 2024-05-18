@@ -1,0 +1,53 @@
+#ifndef H_F0D260A1_91BD_4ACD_A03B_CF935FB0E198
+#define H_F0D260A1_91BD_4ACD_A03B_CF935FB0E198
+
+#include <boost/asio.hpp>
+#include <boost/beast.hpp>
+
+#include <locator/service_locator.h>
+#include <task_manager/task_manager.h>
+#include <tracer/tracer_provider.h>
+#include <webserver/server.h>
+
+#include "listener.h"
+#include "session_factory.h"
+
+namespace asio = boost::asio;  // dumb clangd cant find asio ns w/out using
+
+namespace ws
+{
+
+class Server : public IServer, public srv::tracer::TracerProvider
+{
+public:
+    Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<taskmgr::ITaskManager> taskManager);
+
+    ~Server() noexcept override;
+
+    ufa::Result Start() override;
+    ufa::Result Stop() override;
+    void SetSettings(ServerSettings&& settings) override;
+
+private:
+    void SetWorkers(int numWorkers);
+    void RunWorker();
+
+    void FillEmptySettings(ServerSettings& settings);
+
+private:
+    std::shared_ptr<asio::io_context> m_ioContext;
+
+    std::vector<std::unique_ptr<std::thread>> m_workers;
+    asio::executor_work_guard<boost::asio::io_context::executor_type> m_workGuard;
+
+    std::shared_ptr<Listener> m_listener;
+
+    std::string m_savedDocumentRoot{DEFAULT_DOCUMENT_ROOT};
+    bool m_savedIsSecured{DEFAULT_IS_SECURED};
+
+    std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+};
+
+}  // namespace ws
+
+#endif  // H_F0D260A1_91BD_4ACD_A03B_CF935FB0E198

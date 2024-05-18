@@ -12,6 +12,7 @@
 #include <locator/service.h>
 
 #include "trace_level.h"
+#include "trace_macros.h"
 
 namespace srv
 {
@@ -27,7 +28,7 @@ namespace tracer
 class TracerSettings : public ufa::settings::SettingsBase
 {
 public:
-    TracerSettings()
+    SETTINGS_INIT(TracerSettings)
     {
         SETTINGS_INIT_FIELD(traceLevel);
         SETTINGS_INIT_FIELD(traceFolder);
@@ -76,10 +77,11 @@ class TraceCollectorProxy
 public:
     TraceCollectorProxy(std::unique_ptr<ITraceCollector> traceCollector) : m_traceCollector(std::move(traceCollector)) {}
 
-    TraceCollectorProxy& operator<<(std::string message)
+    template <typename SourceT>
+    TraceCollectorProxy& operator<<(SourceT&& message)
     {
         if (m_traceCollector != nullptr)
-            m_traceCollector->AddMessage(std::move(message));
+            m_traceCollector->AddMessage(string_converters::ToString(std::forward<SourceT>(message)));
 
         return *this;
     }

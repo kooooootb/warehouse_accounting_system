@@ -14,13 +14,15 @@ namespace settings_provider
 
 SettingsProvider::SettingsProvider(IServiceLocator* locator)
 {
-    std::string configPath;
+    std::string configPathStr;
     std::shared_ptr<srv::IEnvironment> environment;
-    if (!(locator->GetInterface(environment) == ufa::Result::SUCCESS && environment->GetValue(SETTINGS_DIR_ENV, configPath) == ufa::Result::SUCCESS))
+    if (!(locator->GetInterface(environment) == ufa::Result::SUCCESS && environment->GetValue(SETTINGS_DIR_ENV, configPathStr) == ufa::Result::SUCCESS))
     {
-        configPath = std::filesystem::current_path();
+        configPathStr = std::filesystem::current_path();
     }
-    configPath += SETTINGS_FILENAME;
+
+    std::filesystem::path configPath(std::move(configPathStr));
+    configPath /= SETTINGS_FILENAME;
 
     m_configReader = std::make_unique<ConfigReader>(std::move(configPath));
 }
@@ -28,7 +30,7 @@ SettingsProvider::SettingsProvider(IServiceLocator* locator)
 ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase* settings) const
 {
     const auto fields = settings->GetFields();
-    std::map<std::string, std::string> settingsMap;
+    std::map<ufa::settings::SettingsBase::Name, ufa::settings::SettingsBase::Value> settingsMap;
     ufa::Result result = ufa::Result::SUCCESS;
 
     std::for_each(std::cbegin(fields), std::cend(fields),

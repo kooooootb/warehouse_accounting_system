@@ -25,7 +25,7 @@ namespace string_converters
 {
 
 template <>
-inline std::string ToString(const ::ufa::Result& result)
+inline std::string ToString(::ufa::Result result)
 {
     switch (result)
     {

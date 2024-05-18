@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <instrumental/check.h>
 #include <instrumental/interface.h>
 
 #include "service.h"
@@ -19,7 +20,12 @@ public:
     ufa::Result GetInterface(std::shared_ptr<T>& object);
 
     template <class T>
+    std::shared_ptr<T> GetInterface();
+
+    template <class T>
     ufa::Result RegisterInterface(std::shared_ptr<T> object);
+
+    static ufa::Result Create(std::shared_ptr<srv::IServiceLocator>& object);
 
 protected:
     virtual std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) = 0;
@@ -39,6 +45,14 @@ ufa::Result IServiceLocator::GetInterface(std::shared_ptr<T>& object)
 }
 
 template <class T>
+std::shared_ptr<T> IServiceLocator::GetInterface()
+{
+    auto iface = std::static_pointer_cast<T>(GetInterfaceImpl(GET_IID(T)));
+    CHECK_TRUE(iface != nullptr);
+    return iface;
+}
+
+template <class T>
 ufa::Result IServiceLocator::RegisterInterface(std::shared_ptr<T> object)
 {
     static_assert(std::is_base_of_v<srv::IService, T>, "Type should be derived from IService");
@@ -54,8 +68,6 @@ ufa::Result IServiceLocator::RegisterInterface(std::shared_ptr<T> object)
                                                                      \
         srv::IServiceLocator::RegisterInterface(std::move(_impl));   \
     }
-
-ufa::Result CreateServiceLocator(std::unique_ptr<srv::IServiceLocator>& object);
 
 }  // namespace srv
 

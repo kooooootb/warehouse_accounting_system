@@ -13,7 +13,7 @@ namespace ufa
  */
 struct IBase
 {
-    virtual ~IBase() = default;
+    virtual ~IBase() noexcept = default;
 };
 
 }  // namespace ufa

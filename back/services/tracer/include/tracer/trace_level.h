@@ -23,15 +23,6 @@ enum class TraceLevel : int32_t
     DEBUG = 1200,    // same as INFO but with big messages that may affect the performance
 };
 
-#define TRACE(traceLevel) GetTracer()->StartCollecting(traceLevel)
-
-#define TRACE_ALW TRACE(srv::tracer::TraceLevel::ALWAYS)
-#define TRACE_CRT TRACE(srv::tracer::TraceLevel::CRITICAL)
-#define TRACE_ERR TRACE(srv::tracer::TraceLevel::ERROR)
-#define TRACE_WRN TRACE(srv::tracer::TraceLevel::WARNING)
-#define TRACE_INF TRACE(srv::tracer::TraceLevel::INFO)
-#define TRACE_DBG TRACE(srv::tracer::TraceLevel::DEBUG)
-
 }  // namespace tracer
 }  // namespace srv
 
@@ -39,7 +30,7 @@ namespace string_converters
 {
 
 template <>
-inline std::string ToString(const ::srv::tracer::TraceLevel& traceLevel)
+inline std::string ToString(::srv::tracer::TraceLevel traceLevel)
 {
     switch (traceLevel)
     {

@@ -36,7 +36,7 @@ std::pair<std::string_view, std::string_view> ConfigReader::SplitLine(std::strin
 
     if (splitterPos == line.npos)
     {
-        CHECK_SUCCESS(ufa::Result::WRONG_FORMAT, "met wrong formatted config line: " << line)
+        CHECK_SUCCESS(ufa::Result::WRONG_FORMAT, "met wrong formatted config line: " << line);
     }
     else
     {

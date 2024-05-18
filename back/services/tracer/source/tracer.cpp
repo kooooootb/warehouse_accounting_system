@@ -46,8 +46,20 @@ TraceCollectorProxy Tracer::StartCollecting(TraceLevel traceLevel)
 void Tracer::SetSettings(TracerSettings&& settings)
 {
     std::lock_guard lock(m_settingsMutex);
-    const auto oldLevel = m_maxTraceLevel;
 
+    // Set trace folder
+    if (settings.traceFolder.has_value())
+    {
+        m_traceFolder = std::move(settings.traceFolder.value());
+
+        if (m_traceWriter != nullptr)
+        {
+            m_traceWriter->SetFolder(std::move(m_traceFolder));
+        }
+    }
+
+    // Set trace level
+    const auto oldLevel = m_maxTraceLevel;
     if (settings.traceLevel.has_value())
     {
         m_maxTraceLevel = settings.traceLevel.value();
@@ -61,13 +73,7 @@ void Tracer::SetSettings(TracerSettings&& settings)
     else if (oldLevel == srv::tracer::TraceLevel::DISABLED && m_maxTraceLevel != srv::tracer::TraceLevel::DISABLED)
     {
         // we turn on tracer and run new tracewriter
-        m_traceWriter = std::make_unique<TraceWriter>(std::move(settings.traceFolder.value_or("")), m_dateProvider);
-    }
-    else if (settings.traceFolder.has_value())
-    {
-        // we already have running tracewriter and can set its folder
-        CHECK_TRUE(m_traceWriter);  // sane check, we should always have it here
-        m_traceWriter->SetFolder(std::move(settings.traceFolder.value()));
+        m_traceWriter = std::make_unique<TraceWriter>(m_traceFolder, m_dateProvider);
     }
 }
 

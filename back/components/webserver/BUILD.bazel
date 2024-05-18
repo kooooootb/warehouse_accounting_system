@@ -1,6 +1,31 @@
+package(default_visibility = ["//back:__subpackages__"])
+
 cc_library(
-    name = "include",
-    hdrs = glob(["include/**/*.h"]),
+    name = "iface",
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
     includes = ["./include"],
-    visibility = ["//visibility:public"],
+    deps = [
+        "//back/components/task_manager:iface",
+        "//back/instrumental:include",
+        "//back/services/locator:iface",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "//back/components/task_manager:lib",
+        "//back/services/locator:iface",
+        "//back/services/settings_provider:iface",
+        "//back/services/tracer:iface",
+        "@boost//:asio_ssl",
+        "@boost//:beast",
+    ],
 )

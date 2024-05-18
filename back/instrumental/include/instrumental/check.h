@@ -25,16 +25,24 @@
         throw std::runtime_error(_message.str());   \
     }
 
-#define CHECK_SUCCESS(...) CHECK_SUCCESS_INTERNAL(CHECK_GENERATOR_MSG(__VA_ARGS__), __VA_ARGS__)
+#define CHECK_SUCCESS(...)                                                    \
+    do                                                                        \
+    {                                                                         \
+        CHECK_SUCCESS_INTERNAL(CHECK_GENERATOR_MSG(__VA_ARGS__), __VA_ARGS__) \
+    } while (false)
 
 #define CHECK_TRUE_INTERNAL(__generator, x, ...)  \
-    if (!!x != true)                              \
+    if (!!(x) != true)                            \
     {                                             \
         std::stringstream _message;               \
         __generator(__VA_ARGS__);                 \
         throw std::runtime_error(_message.str()); \
     }
 
-#define CHECK_TRUE(...) CHECK_TRUE_INTERNAL(CHECK_GENERATOR_MSG(__VA_ARGS__), __VA_ARGS__)
+#define CHECK_TRUE(...)                                                    \
+    do                                                                     \
+    {                                                                      \
+        CHECK_TRUE_INTERNAL(CHECK_GENERATOR_MSG(__VA_ARGS__), __VA_ARGS__) \
+    } while (false)
 
 #endif  // H_DAC5609F_E690_4C8B_B978_BADD9E7556C5

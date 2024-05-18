@@ -1,123 +1,96 @@
 #ifndef H_BB4F8FFF_2AD4_42E7_B55D_F313131E7CFA
 #define H_BB4F8FFF_2AD4_42E7_B55D_F313131E7CFA
 
-#include <algorithm>
-#include <functional>
-#include <map>
-#include <optional>
-#include <string>
-#include <variant>
-#include <vector>
-
+#include "check.h"
+#include "settings_detail.h"
 #include "string_converters.h"
 
 #define SETTINGS_FIELD(_fieldName, _type) std::optional<_type> _fieldName;
 
-#define SETTINGS_DEFAULT_FILLER(_fieldName) string_converters::FromString<decltype(_fieldName)::value_type>
+#define SETTINGS_DEFAULT_FROMCONVERTER(_fieldName) string_converters::FromString<decltype(_fieldName)::value_type>
 
-#define SETTINGS_SET_FILLER(_fieldName, _converter)                            \
-    AddFiller(                                                                 \
-        [this](const NameType& fieldName, const ValueType& fieldValue) -> bool \
-        {                                                                      \
-            if (fieldName == #_fieldName)                                      \
-            {                                                                  \
-                this->_fieldName = _converter(fieldValue);                     \
-                return true;                                                   \
-            }                                                                  \
-            return false;                                                      \
+#define SETTINGS_DEFAULT_TOCONVERTER(_fieldName)                                                     \
+    string_converters::ToString<std::conditional<std::is_scalar_v<decltype(_fieldName)::value_type>, \
+        decltype(_fieldName)::value_type,                                                            \
+        const decltype(_fieldName)::value_type&>::type>
+
+#define SETTINGS_SET_FILLER(_fieldName, _from_converter, _to_converter) \
+    AddFiller(                                                          \
+        [this](const Name& fieldName, const Value& fieldValue) -> bool  \
+        {                                                               \
+            if (fieldName == #_fieldName)                               \
+            {                                                           \
+                this->_fieldName = _from_converter(fieldValue);         \
+                return true;                                            \
+            }                                                           \
+            return false;                                               \
+        });                                                             \
+    AddGetter(                                                          \
+        [this]() -> std::string                                         \
+        {                                                               \
+            if (this->_fieldName.has_value())                           \
+                return _to_converter(this->_fieldName.value());         \
+            else                                                        \
+                return "<unspecified>";                                 \
         });
 
-#define SETTINGS_SET_GETTER(_fieldName) \
-    AddGetter(                          \
-        []() -> NameType                \
-        {                               \
-            return #_fieldName;         \
-        });
+#define SETTINGS_ADD_FIELDNAME(_fieldName) AddFieldName(#_fieldName);
 
-#define SETTINGS_INIT_FIELD_WITH_FILLER(_fieldName, _converter) \
-    SETTINGS_SET_FILLER(_fieldName, _converter);                \
-    SETTINGS_SET_GETTER(_fieldName);
+#define SETTINGS_INIT_FIELD_WITH_CONVERTER(_fieldName, _from_converter, _to_converter) \
+    SETTINGS_SET_FILLER(_fieldName, _from_converter, _to_converter);                   \
+    SETTINGS_ADD_FIELDNAME(_fieldName);
 
-#define SETTINGS_INIT_FIELD_WITHOUT_FILLER(_fieldName)                    \
-    SETTINGS_SET_FILLER(_fieldName, SETTINGS_DEFAULT_FILLER(_fieldName)); \
-    SETTINGS_SET_GETTER(_fieldName);
+#define SETTINGS_INIT_FIELD_WITHOUT_CONVERTER(_fieldName)                                                                  \
+    SETTINGS_SET_FILLER(_fieldName, SETTINGS_DEFAULT_FROMCONVERTER(_fieldName), SETTINGS_DEFAULT_TOCONVERTER(_fieldName)); \
+    SETTINGS_ADD_FIELDNAME(_fieldName);
 
-#define SETTINGS_INIT_FIELD_SWITCHER_GET(_fieldName, arg1, macro, ...) macro
-#define SETTINGS_INIT_FIELD_SWITCHER(...) SETTINGS_INIT_FIELD_SWITCHER_GET(__VA_ARGS__, SETTINGS_INIT_FIELD_WITH_FILLER, SETTINGS_INIT_FIELD_WITHOUT_FILLER)
+#define SETTINGS_INIT_FIELD_SWITCHER_GET(_fieldName, arg1, arg2, macro, ...) macro
+
+#define SETTINGS_INIT_FIELD_SWITCHER(...) \
+    SETTINGS_INIT_FIELD_SWITCHER_GET(__VA_ARGS__, SETTINGS_INIT_FIELD_WITH_CONVERTER, arg, SETTINGS_INIT_FIELD_WITHOUT_CONVERTER)
 
 #define SETTINGS_INIT_FIELD(...) SETTINGS_INIT_FIELD_SWITCHER(__VA_ARGS__)(__VA_ARGS__);
 
-namespace ufa
+#define SETTINGS_INIT(_settingsName)   \
+    std::string_view GetSettingsName() \
+    {                                  \
+        return #_settingsName;         \
+    }                                  \
+    _settingsName()
+
+namespace string_converters
 {
 
-namespace settings
+template <>
+inline std::string ToString(const ufa::settings::SettingsBase& settings)
 {
+    auto fieldNames = settings.GetFields();
+    auto fieldValues = settings.GetValues();
 
-namespace converters
-{
+    std::stringstream result;
+    result << '<';
 
-template <typename To>
-To Convert(const std::string& from)
-{
-    return ::string_converters::FromString<To>(from);
+    CHECK_TRUE(fieldNames.size() == fieldValues.size());
+    for (size_t i = 0; i < fieldNames.size(); ++i)
+    {
+        result << fieldNames[i] << " = " << fieldValues[i];
+    }
+
+    result << '>';
+
+    return result.str();
 }
 
-}  // namespace converters
-
-class SettingsBase
+// for derived from SettingsBase
+template <typename FromT>
+inline std::enable_if_t<std::is_base_of_v<ufa::settings::SettingsBase, std::decay_t<FromT>> &&
+                            !std::is_same_v<std::decay_t<FromT>, ufa::settings::SettingsBase>,
+    std::string>
+ToString(const FromT& settings)
 {
-public:
-    using NameType = std::string;
-    using ValueType = std::string;
-    using FillerType = std::function<bool(NameType, ValueType)>;
-    using GetterType = std::function<NameType()>;
+    return ToString<const ufa::settings::SettingsBase&>(settings);
+}
 
-    std::vector<NameType> GetFields() const
-    {
-        std::vector<NameType> fieldNames;
-        fieldNames.reserve(m_getters.size());
-
-        std::for_each(std::cbegin(m_getters), std::cend(m_getters),
-            [&fieldNames](const GetterType& getter)
-            {
-                fieldNames.emplace_back(getter());
-            });
-
-        return fieldNames;
-    }
-
-    void FillSettings(std::map<NameType, ValueType> values)
-    {
-        std::for_each(std::cbegin(values), std::cend(values),
-            [this](const auto& field)
-            {
-                for (const FillerType& filler : m_fillers)
-                {
-                    if (filler(field.first, field.second))
-                        break;
-                }
-            });
-    }
-
-protected:
-    void AddFiller(FillerType&& filler)
-    {
-        m_fillers.emplace_back(std::move(filler));
-    }
-
-    void AddGetter(GetterType&& getter)
-    {
-        m_getters.emplace_back(std::move(getter));
-    }
-
-    void InitField() {}
-
-private:
-    std::vector<GetterType> m_getters;
-    std::vector<FillerType> m_fillers;
-};
-
-}  // namespace settings
-}  // namespace ufa
+}  // namespace string_converters
 
 #endif  // H_BB4F8FFF_2AD4_42E7_B55D_F313131E7CFA

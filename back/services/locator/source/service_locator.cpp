@@ -13,6 +13,12 @@ ServiceLocator::ServiceLocator()
     Setup();
 }
 
+ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& object)
+{
+    object = std::make_unique<ServiceLocator>();
+    return ufa::Result::SUCCESS;
+}
+
 void ServiceLocator::Setup()
 {
     RegisterDefaultInterface<srv::IEnvironment>();
@@ -33,13 +39,6 @@ ufa::Result ServiceLocator::RegisterInterfaceImpl(std::shared_ptr<srv::IService>
     const auto pair = m_ifaceStorage.insert(std::make_pair(iid, std::move(object)));
 
     return pair.second ? ufa::Result::SUCCESS : ufa::Result::REREGISTERING_INTERFACE;
-}
-
-ufa::Result CreateServiceLocator(std::unique_ptr<srv::IServiceLocator>& object)
-{
-    object = std::make_unique<ServiceLocator>();
-
-    return ufa::Result::SUCCESS;
 }
 
 }  // namespace srv
