@@ -1,0 +1,9 @@
+{
+  "status" : 200,
+  "specialization" : {
+    "spec_name": "spec1",
+    "analytic": 1,
+    "status_spec" : 1,
+    "project": 1
+  }
+}
