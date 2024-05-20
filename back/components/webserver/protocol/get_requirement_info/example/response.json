@@ -1,6 +1,6 @@
 {
   "status" : 200,
-  "requirement"{
+  "requirement": {
     "type_id" : 2,
     "in_specification" : 2,
     "describtion": "The high should be ubove 3m",
