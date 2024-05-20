@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "integer"
+    },
+    "projects": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "project_id": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "project_id"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "projects"
+  ]
+}
