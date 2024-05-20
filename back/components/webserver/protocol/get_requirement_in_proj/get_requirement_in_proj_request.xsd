@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "user_token": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "user_token",
+    "project_id"
+  ]
+}
