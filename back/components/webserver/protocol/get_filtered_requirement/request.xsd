@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "user_token": {
+      "type": "string"
+    },
+    "filter_key": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_token",
+    "filter_key"
+  ]
+}
