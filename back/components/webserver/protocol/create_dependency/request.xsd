@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "user_token": {
+      "type": "string"
+    },
+    "requirement_id": {
+      "type": "integer"
+    },
+    "dependent_id": {
+      "type": "array",
+      "items": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    }
+  },
+  "required": [
+    "user_token",
+    "requirement_id",
+    "dependent_id"
+  ]
+}
