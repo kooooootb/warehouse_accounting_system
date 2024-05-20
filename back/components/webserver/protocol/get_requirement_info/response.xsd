@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "integer"
+    },
+    "requirement": {
+      "type": "object",
+      "properties": {
+        "type_id": {
+          "type": "integer"
+        },
+        "in_specification": {
+          "type": "integer"
+        },
+        "describtion": {
+          "type": "string"
+        },
+        "status_req": {
+          "type": "integer"
+        },
+        "release": {
+          "type": "string"
+        },
+        "project": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type_id",
+        "in_specification",
+        "describtion",
+        "status_req",
+        "release",
+        "project"
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "requirement"
+  ]
+}
