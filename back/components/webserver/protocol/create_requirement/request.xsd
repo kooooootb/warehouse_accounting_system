@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "user_token": {
+      "type": "string"
+    },
+    "requirement": {
+      "type": "object",
+      "properties": {
+        "type_id": {
+          "type": "integer"
+        },
+        "in_specification": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status_req": {
+          "type": "integer"
+        },
+        "project": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type_id",
+        "in_specification",
+        "description",
+        "status_req",
+        "project"
+      ]
+    }
+  },
+  "required": [
+    "user_token",
+    "requirement"
+  ]
+}
