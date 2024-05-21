@@ -1,16 +1,1 @@
-{
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
-  "properties": {
-    "status": {
-      "type": "integer"
-    },
-    "user_token": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "status",
-    "user_token"
-  ]
-}
+
