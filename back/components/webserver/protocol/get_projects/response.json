@@ -2,9 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "status": {
-      "type": "integer"
-    },
     "projects": {
       "type": "array",
       "items": [
@@ -23,7 +20,6 @@
     }
   },
   "required": [
-    "status",
     "projects"
   ]
 }
