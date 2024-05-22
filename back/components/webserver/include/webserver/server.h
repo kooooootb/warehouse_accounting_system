@@ -14,9 +14,6 @@ constexpr int DEFAULT_WORKERS_NUMBER = 4;
 constexpr std::string_view DEFAULT_ADDRESS = "0.0.0.0";
 constexpr int DEFAULT_PORT = 10000;
 constexpr bool DEFAULT_IS_SECURED = false;
-constexpr std::string_view DEFAULT_DOCUMENT_ROOT = ".";
-
-constexpr std::string_view INDEX_FILENAME = "index.html";
 
 class ServerSettings : public ufa::settings::SettingsBase
 {

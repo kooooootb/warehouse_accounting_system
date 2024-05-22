@@ -7,6 +7,7 @@
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer_provider.h>
+#include <utilities/document_manager.h>
 #include <webserver/server.h>
 
 #include "listener.h"
@@ -42,7 +43,7 @@ private:
 
     std::shared_ptr<Listener> m_listener;
 
-    std::string m_savedDocumentRoot{DEFAULT_DOCUMENT_ROOT};
+    std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
     bool m_savedIsSecured{DEFAULT_IS_SECURED};
 
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
