@@ -3,12 +3,15 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
+#include <memory>
 
 #include <instrumental/check.h>
 #include <instrumental/types.h>
 #include <task_manager/task.h>
 #include <task_manager/task_manager.h>
+#include <tracer/tracer.h>
 #include <tracer/tracer_provider.h>
+#include <utilities/document_manager.h>
 #include <webserver/server.h>
 
 #include "server_certificate.h"
@@ -71,59 +74,19 @@ std::string_view GetMimeType(const std::filesystem::path& extension)
     return "application/text";
 }
 
-class PlainSession : public srv::tracer::TracerProvider, public ISession, public std::enable_shared_from_this<PlainSession>
+class BaseSession : public srv::tracer::TracerProvider, public ISession, public std::enable_shared_from_this<BaseSession>
 {
 public:
-    PlainSession(std::shared_ptr<srv::ITracer> tracer,
+    BaseSession(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
-        tcp::socket&& socket,
-        std::shared_ptr<std::filesystem::path> documentRoot)
+        std::shared_ptr<docmgr::IDocumentManager> documentManager)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_taskManager(std::move(taskManager))
-        , m_stream(std::move(socket))
-        , m_documentRoot(std::move(documentRoot))
+        , m_documentManager(std::move(documentManager))
     {
     }
 
-    void Run() override
-    {
-        asio::dispatch(m_stream.get_executor(), beast::bind_front_handler(&PlainSession::DoRead, shared_from_this()));
-    }
-
-private:
-    void DoRead()
-    {
-        m_request = {};
-
-        // Set the timeout.
-        beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(30));
-
-        // Read a request
-        http::async_read(m_stream, m_buffer, m_request, beast::bind_front_handler(&PlainSession::OnRead, shared_from_this()));
-    }
-
-    void OnRead(boost::system::error_code ec, std::size_t bytesTransferred)
-    {
-        boost::ignore_unused(bytesTransferred);
-
-        // This means they closed the connection
-        if (ec == http::error::end_of_stream)
-            return DoClose();
-        CHECK_TRUE(!ec, "Read failed with error: " << ec << ", message: " << ec.message());
-
-        try
-        {
-            HandleRequest();
-        }
-        catch (const std::exception& ex)
-        {
-            TRACE_ERR << TRACE_HEADER << "Caught exception while handling request, target: " << m_request.target() << ", body: \""
-                      << std::string(m_request.body()) << "\"";
-            SendResponse(PrepareResponse("Server Error", http::status::internal_server_error));
-            throw;
-        }
-    }
-
+protected:
     void HandleRequest()
     {
         if (m_request.method() != http::verb::get && m_request.method() != http::verb::post)
@@ -183,30 +146,24 @@ private:
             firstWordEnd = target.size();
 
         std::filesystem::path file(target.substr(1, firstWordEnd - 1));
-        if (file.empty())
-            file = INDEX_FILENAME;
+        const auto result = m_documentManager->RestoreDocument(file);
 
-        file = file.lexically_normal();
-        if (file.is_absolute() || !file.has_filename())
+        if (result == ufa::Result::WRONG_FORMAT)
         {
             TRACE_ERR << TRACE_HEADER << "Requested invalid file: " << file.c_str() << "\"";
-            SendResponse(PrepareResponse("Invalid filename", http::status::bad_request));
+            return SendResponse(PrepareResponse("Invalid filename", http::status::bad_request));
         }
 
-        file = *m_documentRoot / file;
-        TRACE_INF << TRACE_HEADER << "Restored filename: " << file.c_str();
+        if (result == ufa::Result::NOT_FOUND)
+        {
+            TRACE_ERR << TRACE_HEADER << "Can't find requested file: " << file.c_str() << "\"";
+            return SendResponse(PrepareResponse("File not found", http::status::not_found));
+        }
 
         beast::error_code ec;
         http::file_body::value_type body;
+
         body.open(file.c_str(), beast::file_mode::scan, ec);
-
-        // Handle the case where the file doesn't exist
-        if (ec == beast::errc::no_such_file_or_directory)
-        {
-            TRACE_ERR << TRACE_HEADER << "File not found: " << file.c_str();
-            return SendResponse(PrepareResponse("Requested file doesn't exists", http::status::not_found));
-        }
-
         CHECK_TRUE(!ec, "Error opening file: " << ec << ", message: " << ec.message());
 
         // Cache the size since we need it after the move
@@ -247,14 +204,80 @@ private:
         return res;
     }
 
-    void SendResponse(http::message_generator&& message)
+    virtual void SendResponse(http::message_generator&& message) = 0;
+
+protected:
+    http::request<http::string_body> m_request;
+    beast::flat_buffer m_buffer;
+
+private:
+    std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+    std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
+};
+
+class PlainSession : public BaseSession
+{
+public:
+    PlainSession(std::shared_ptr<srv::ITracer> tracer,
+        std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager,
+        tcp::socket&& socket)
+        : BaseSession(std::move(tracer), std::move(taskManager), std::move(documentManager))
+        , m_stream(std::move(socket))
+    {
+    }
+
+    void Run() override
+    {
+        asio::dispatch(m_stream.get_executor(),
+            beast::bind_front_handler(&PlainSession::DoRead, std::static_pointer_cast<PlainSession>(shared_from_this())));
+    }
+
+private:
+    void DoRead()
+    {
+        m_request = {};
+
+        // Set the timeout.
+        beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(30));
+
+        // Read a request
+        http::async_read(m_stream,
+            m_buffer,
+            m_request,
+            beast::bind_front_handler(&PlainSession::OnRead, std::static_pointer_cast<PlainSession>(shared_from_this())));
+    }
+
+    void OnRead(boost::system::error_code ec, std::size_t bytesTransferred)
+    {
+        boost::ignore_unused(bytesTransferred);
+
+        // This means they closed the connection
+        if (ec == http::error::end_of_stream)
+            return DoClose();
+        CHECK_TRUE(!ec, "Read failed with error: " << ec << ", message: " << ec.message());
+
+        try
+        {
+            HandleRequest();
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Caught exception while handling request, target: " << m_request.target() << ", body: \""
+                      << std::string(m_request.body()) << "\"";
+            SendResponse(PrepareResponse("Server Error", http::status::internal_server_error));
+            throw;
+        }
+    }
+
+    void SendResponse(http::message_generator&& message) override
     {
         bool keepAlive = message.keep_alive();
 
         // Write the response
         beast::async_write(m_stream,
             std::move(message),
-            beast::bind_front_handler(&PlainSession::OnWrite, shared_from_this(), keepAlive));
+            beast::bind_front_handler(&PlainSession::OnWrite, std::static_pointer_cast<PlainSession>(shared_from_this()), keepAlive));
     }
 
     void OnWrite(bool keepAlive, boost::system::error_code ec, std::size_t bytesTransferred)
@@ -282,32 +305,28 @@ private:
     }
 
 private:
-    std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
     beast::tcp_stream m_stream;
-    beast::flat_buffer m_buffer;
-    http::request<http::string_body> m_request;
-    std::shared_ptr<std::filesystem::path> m_documentRoot;
 };
 
 class PlainSessionFactory : public srv::tracer::TracerProvider, public ISessionFactory
 {
 public:
     PlainSessionFactory(std::shared_ptr<srv::ITracer> tracer,
-        std::string documentRoot,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager,
         std::shared_ptr<taskmgr::ITaskManager> taskManager)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_taskManager(std::move(taskManager))
-        , m_documentRoot(std::make_shared<std::filesystem::path>(std::move(documentRoot)))
+        , m_documentManager(std::move(documentManager))
     {
     }
 
     std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) override
     {
-        return std::make_shared<PlainSession>(GetTracer(), m_taskManager, std::move(socket), m_documentRoot);
+        return std::make_shared<PlainSession>(GetTracer(), m_taskManager, m_documentManager, std::move(socket));
     }
 
 private:
-    std::shared_ptr<std::filesystem::path> m_documentRoot;
+    std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
 };
 
@@ -315,13 +334,13 @@ private:
 
 std::unique_ptr<ISessionFactory> ISessionFactory::CreateSessionFactory(std::shared_ptr<srv::ITracer> tracer,
     std::shared_ptr<taskmgr::ITaskManager> taskManager,
-    bool isSecured,
-    std::string documentRoot)
+    std::shared_ptr<docmgr::IDocumentManager> documentManager,
+    bool isSecured)
 {
     if (isSecured)
         CHECK_TRUE(false, "Secure connection not yet implemented");
     else
-        return std::make_unique<PlainSessionFactory>(std::move(tracer), std::move(documentRoot), std::move(taskManager));
+        return std::make_unique<PlainSessionFactory>(std::move(tracer), std::move(documentManager), std::move(taskManager));
 }
 
 }  // namespace ws

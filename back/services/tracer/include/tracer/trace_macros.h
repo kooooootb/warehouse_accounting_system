@@ -10,8 +10,6 @@
 #define TRACE_INF TRACE(srv::tracer::TraceLevel::INFO)
 #define TRACE_DBG TRACE(srv::tracer::TraceLevel::DEBUG)
 
-#define TRACE_HEADER                   \
-    __FILE__ << "(" << __LINE__ << ")" \
-             << " [" << __func__ << "]"
+#define TRACE_HEADER " [" << __func__ << "]"
 
 #endif  // H_7B67306B_DEBA_437F_9642_FA08C676F92B

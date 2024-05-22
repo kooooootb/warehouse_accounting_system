@@ -11,6 +11,7 @@
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
 #include <tracer/tracer_provider.h>
+#include <utilities/document_manager.h>
 #include <webserver/server.h>
 
 #include "listener.h"
@@ -28,6 +29,7 @@ Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<ta
     , m_ioContext(std::make_shared<asio::io_context>())
     , m_taskManager(std::move(taskManager))
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
+    , m_documentManager(docmgr::IDocumentManager::Create(GetTracer()))
 {
     TRACE_INF << TRACE_HEADER << "Creating Server";
 
@@ -101,9 +103,9 @@ void Server::SetSettings(ServerSettings&& settings)
         m_savedIsSecured = settings.isSecured.value();
 
     if (settings.documentRoot.has_value())
-        m_savedDocumentRoot = settings.documentRoot.value();
+        m_documentManager->SetRoot(std::move(settings.documentRoot.value()));
 
-    auto sessionFactory = ISessionFactory::CreateSessionFactory(GetTracer(), m_taskManager, m_savedIsSecured, m_savedDocumentRoot);
+    auto sessionFactory = ISessionFactory::CreateSessionFactory(GetTracer(), m_taskManager, m_documentManager, m_savedIsSecured);
 
     if (shouldResetListener)
     {
@@ -246,9 +248,6 @@ void Server::FillEmptySettings(ServerSettings& settings)
 
     if (!settings.isSecured.has_value())
         settings.isSecured = DEFAULT_IS_SECURED;
-
-    if (!settings.documentRoot.has_value())
-        settings.documentRoot = DEFAULT_DOCUMENT_ROOT;
 }
 
 }  // namespace ws
