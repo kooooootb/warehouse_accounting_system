@@ -224,8 +224,8 @@ void Server::RunWorker()
         }
         catch (const std::exception& ex)
         {
-            TRACE_ERR << TRACE_HEADER << "Worker caught exception, what():" << ex.what();
-            std::cerr << "Worker caught exception, what():" << ex.what() << std::endl;
+            TRACE_ERR << TRACE_HEADER << "Worker caught exception, what() :" << ex.what();
+            std::cerr << "Worker caught exception, what() :" << ex.what() << std::endl;
         }
         catch (...)
         {
