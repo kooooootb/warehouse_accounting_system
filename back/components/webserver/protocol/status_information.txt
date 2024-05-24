@@ -1,5 +1,6 @@
-200 ок
-401 если авторизация слетела
-500 ошибка сервера
-404 если например требование не нашлось или ещё что
-400 если запрос с фронта неправильно составлен
+List of available http statuses:
+200 ok
+401 authorization error
+500 server internal error
+404 not found
+400 invalid request

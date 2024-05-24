@@ -2,24 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "requirements": {
-      "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "requirement_id": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "requirement_id"
-          ]
-        }
-      ]
+    "requirement_ids": {
+      "type": "integer"
     }
   },
   "required": [
-    "requirements"
+    "requirement_ids"
   ]
 }

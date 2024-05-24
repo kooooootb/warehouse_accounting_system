@@ -2,35 +2,24 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "requirement": {
-      "type": "object",
-      "properties": {
-        "type_id": {
-          "type": "integer"
-        },
-        "in_specification": {
-          "type": "integer"
-        },
-        "description": {
-          "type": "string"
-        },
-        "status_req": {
-          "type": "integer"
-        },
-        "project": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "type_id",
-        "in_specification",
-        "description",
-        "status_req",
-        "project"
-      ]
+    "type_id": {
+      "type": "string",
+      "description": "available values: functional, nonfunctional"
+    },
+    "in_specification": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "integer"
     }
   },
   "required": [
-    "requirement"
+    "type_id",
+    "in_specification",
+    "description",
+    "project_id"
   ]
 }

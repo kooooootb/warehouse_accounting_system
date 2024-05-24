@@ -12,7 +12,7 @@
           "type": "integer"
         },
         "status_spec": {
-          "type": "integer"
+          "type": "string"
         },
         "project": {
           "type": "integer"

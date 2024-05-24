@@ -1,9 +1,6 @@
 {
-  "requirement": {
-    "type_id": 2,
-    "in_specification": 3,
-    "description": "A must be greater than B",
-    "status_req": 1,
-    "project": 4
-  }
+  "type_id": 2,
+  "in_specification": 3,
+  "description": "A must be greater than B",
+  "project_id": 4
 }

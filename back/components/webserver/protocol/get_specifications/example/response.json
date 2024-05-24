@@ -1,10 +1,7 @@
 {
-  "specifications" : [
-    {
-      "specification_id" : 2
-    },
-    {
-      "specification_id" : 3
-    }
+  "specification_ids": [
+    1,
+    2,
+    3
   ]
 }

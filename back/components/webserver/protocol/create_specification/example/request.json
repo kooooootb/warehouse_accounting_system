@@ -1,8 +1,4 @@
 {
-  "specialization":{
-    "spec_name": "spec1",
-    "analytic": 4,
-    "status_spec": 2,
-    "project": 3
-  }
+  "spec_name": "spec1",
+  "project": 3
 }

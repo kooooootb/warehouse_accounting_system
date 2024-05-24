@@ -5,17 +5,24 @@
     "requirement_id": {
       "type": "integer"
     },
-    "dependent_id": {
+    "dependent_ids": {
       "type": "array",
       "items": [
         {
-          "type": "integer"
-        },
-        {
-          "type": "integer"
-        },
-        {
-          "type": "integer"
+          "type": "object",
+          "properties": {
+            "requirement_id": {
+              "type": "integer"
+            },
+            "dependency_type": {
+              "type": "string",
+              "description": "available values: horizontal, vertical, copied"
+            }
+          },
+          "required": [
+            "requirement_id",
+            "dependent_id"
+          ]
         }
       ]
     }

@@ -2,27 +2,25 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "project": {
-      "type": "object",
-      "properties": {
-        "requirements": {
-          "type": "integer"
-        },
-        "specifications": {
-          "type": "integer"
-        },
-        "date": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "requirements",
-        "specifications",
-        "date"
-      ]
+    "requirement_ids": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "specification_ids": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "date": {
+      "type": "string"
     }
   },
   "required": [
-    "project"
+    "requirement_ids",
+    "specification_ids",
+    "date"
   ]
 }

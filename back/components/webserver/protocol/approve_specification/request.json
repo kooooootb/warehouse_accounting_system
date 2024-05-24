@@ -4,6 +4,9 @@
   "properties": {
     "specification_id": {
       "type": "integer"
+    },
+    "comment": {
+      "type": "string"
     }
   },
   "required": [

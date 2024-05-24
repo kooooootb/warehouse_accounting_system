@@ -1,7 +1,7 @@
 {
-  "requirements": [
-    {
-      "requirement_id" : 2
-    }
+  "requirement_ids": [
+    1,
+    2,
+    3
   ]
 }

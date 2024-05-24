@@ -6,16 +6,16 @@
       "type": "object",
       "properties": {
         "type_id": {
-          "type": "integer"
+          "type": "string"
         },
         "in_specification": {
           "type": "integer"
         },
-        "describtion": {
+        "description": {
           "type": "string"
         },
         "status_req": {
-          "type": "integer"
+          "type": "string"
         },
         "release": {
           "type": "string"
