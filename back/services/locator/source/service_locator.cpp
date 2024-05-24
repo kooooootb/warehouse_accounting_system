@@ -8,10 +8,7 @@
 namespace srv
 {
 
-ServiceLocator::ServiceLocator()
-{
-    Setup();
-}
+ServiceLocator::ServiceLocator() {}
 
 ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& object)
 {
@@ -19,12 +16,17 @@ ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& objec
     return ufa::Result::SUCCESS;
 }
 
+void ServiceLocator::RegisterDefaults()
+{
+    Setup();
+}
+
 void ServiceLocator::Setup()
 {
-    RegisterDefaultInterface<srv::IEnvironment>();
-    RegisterDefaultInterface<srv::IDateProvider>();
-    RegisterDefaultInterface<srv::ISettingsProvider>();
-    RegisterDefaultInterface<srv::ITracer>();
+    TryRegisterDefaultInterface<srv::IEnvironment>();
+    TryRegisterDefaultInterface<srv::IDateProvider>();
+    TryRegisterDefaultInterface<srv::ISettingsProvider>();
+    TryRegisterDefaultInterface<srv::ITracer>();
 }
 
 std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid)

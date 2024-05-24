@@ -25,14 +25,25 @@ public:
     template <class T>
     ufa::Result RegisterInterface(std::shared_ptr<T> object);
 
+    /**
+     * @brief register default common services
+     * If other interface is already registered with some default interfaces's id
+     * then don't register this one default interface
+     */
+    virtual void RegisterDefaults() = 0;
+
+    /**
+     * @brief client services implement this template to include it in default initialization
+     * return shared pointer to newly added service
+     */
+    template <class T>
+    std::shared_ptr<T> RegisterDefaultInterface();
+
     static ufa::Result Create(std::shared_ptr<srv::IServiceLocator>& object);
 
 protected:
     virtual std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) = 0;
     virtual ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) = 0;
-
-    template <class T>
-    void RegisterDefaultInterface();
 };
 
 template <class T>
@@ -60,13 +71,14 @@ ufa::Result IServiceLocator::RegisterInterface(std::shared_ptr<T> object)
     return RegisterInterfaceImpl(std::move(object), GET_IID(T));
 }
 
-#define DECLARE_DEFAULT_INTERFACE(IfaceType, ImplType)               \
-    template <>                                                      \
-    void srv::IServiceLocator::RegisterDefaultInterface<IfaceType>() \
-    {                                                                \
-        auto _impl = std::make_shared<ImplType>(this);               \
-                                                                     \
-        srv::IServiceLocator::RegisterInterface(std::move(_impl));   \
+#define DECLARE_DEFAULT_INTERFACE(IfaceType, ImplType)                                     \
+    template <>                                                                            \
+    std::shared_ptr<IfaceType> srv::IServiceLocator::RegisterDefaultInterface<IfaceType>() \
+    {                                                                                      \
+        auto _impl = std::make_shared<ImplType>(this);                                     \
+                                                                                           \
+        srv::IServiceLocator::RegisterInterface(_impl);                                    \
+        return std::move(_impl);                                                           \
     }
 
 }  // namespace srv

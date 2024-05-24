@@ -7,6 +7,7 @@ cc_library(
     ]),
     includes = ["./include"],
     deps = [
+        "//back/instrumental:include",
         "//back/services/locator:iface",
     ],
 )

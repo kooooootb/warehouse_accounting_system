@@ -16,7 +16,8 @@ enum class Result : int32_t
     REREGISTERING_INTERFACE = 0x801,  // if trying to reregister interface
     NOT_FOUND = 0x1600,               // not found
     NO_STRING_CONVERTER = 0x8000,     // specifically for converter at the bottom
-    WRONG_FORMAT = 0x16000            // met wrong input format
+    WRONG_FORMAT = 0x16000,           // met wrong input format
+    DUPLICATE = 0x32000               // something duplicated
 };
 
 }  // namespace ufa
@@ -43,6 +44,8 @@ inline std::string ToString(::ufa::Result result)
             return "NO_STRING_CONVERTER";
         case ::ufa::Result::WRONG_FORMAT:
             return "WRONG_FORMAT";
+        case ::ufa::Result::DUPLICATE:
+            return "DUPLICATE";
         default:
             return std::to_string(static_cast<int32_t>(result));
     }
@@ -63,6 +66,8 @@ inline ::ufa::Result FromString(const std::string& string)
         return ::ufa::Result::NOT_FOUND;
     if (string == "WRONG_FORMAT")
         return ::ufa::Result::WRONG_FORMAT;
+    if (string == "DUPLICATE")
+        return ::ufa::Result::DUPLICATE;
 
     return ::ufa::Result::NO_STRING_CONVERTER;
 }

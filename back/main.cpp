@@ -1,8 +1,11 @@
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 
 #include <db_connector/accessor.h>
+#include <environment/environment.h>
 #include <instrumental/common.h>
+#include <instrumental/types.h>
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer.h>
@@ -14,6 +17,22 @@ int main(int argc, char* argv[])
 
     std::shared_ptr<srv::IServiceLocator> serviceLocator;
     CHECK_SUCCESS(srv::IServiceLocator::Create(serviceLocator));
+
+    if (const auto res = serviceLocator->RegisterDefaultInterface<srv::IEnvironment>()->HandleCommandLine(argc, argv);
+        res != ufa::Result::SUCCESS)
+    {
+        if (res == ufa::Result::DUPLICATE)
+        {
+            std::cout << "Input key duplicated, fix it then return" << std::endl;
+            return EXIT_FAILURE;
+        }
+        else if (res == ufa::Result::WRONG_FORMAT)
+        {
+            std::cout << "Extra key in command line parameters, ignoring" << std::endl;
+        }
+    }
+
+    serviceLocator->RegisterDefaults();
 
     std::shared_ptr<srv::ITracer> tracer;
     CHECK_SUCCESS(serviceLocator->GetInterface(tracer));
@@ -35,5 +54,5 @@ int main(int argc, char* argv[])
     std::cin >> a;
 
     TRACE_INF << "Exiting main";
-    return 0;
+    return EXIT_SUCCESS;
 }

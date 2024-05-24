@@ -15,6 +15,20 @@ public:
     Environment(IServiceLocator*);
 
     ufa::Result GetValue(const char* key, std::string& toValue) const override;
+    ufa::Result HandleCommandLine(int argc, char* argv[]) override;
+
+private:
+    /**
+    * @brief Skip dashes, slashes in front
+    */
+    void FormatKey(std::string_view& key) const;
+    ufa::Result AddParameter(std::string_view key, std::string_view value);
+
+    ufa::Result GetValueFromArguments(std::string_view key, std::string& toValue) const;
+    ufa::Result GetValueFromEnvironment(std::string_view key, std::string& toValue) const;
+
+private:
+    std::unordered_map<std::string_view, std::string_view> m_cmdArguments;
 };
 
 }  // namespace environment
