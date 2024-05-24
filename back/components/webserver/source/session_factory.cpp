@@ -1,9 +1,10 @@
 #include <filesystem>
+#include <memory>
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
-#include <memory>
 
 #include <instrumental/check.h>
 #include <instrumental/types.h>
@@ -21,6 +22,7 @@
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
 namespace asio = boost::asio;
+namespace ssl = boost::asio::ssl;
 
 namespace ws
 {
@@ -236,6 +238,8 @@ public:
 private:
     void DoRead()
     {
+        TRACE_DBG << TRACE_HEADER << "Reading plain";
+
         m_request = {};
 
         // Set the timeout.
@@ -301,11 +305,136 @@ private:
     {
         beast::error_code ec;
         m_stream.socket().shutdown(tcp::socket::shutdown_send, ec);
-        CHECK_TRUE(!ec, "Shutdown failed with error: " << ec << ", message: " << ec.message());
+        CHECK_TRUE(!ec, "Closing failed with error: " << ec << ", message: " << ec.message());
     }
 
 private:
     beast::tcp_stream m_stream;
+};
+
+class SecuredSession : public BaseSession
+{
+public:
+    SecuredSession(std::shared_ptr<srv::ITracer> tracer,
+        std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager,
+        tcp::socket&& socket,
+        ssl::context& sslContext)
+        : BaseSession(std::move(tracer), std::move(taskManager), std::move(documentManager))
+        , m_sslStream(std::move(socket), sslContext)
+    {
+    }
+
+    void Run() override
+    {
+        asio::dispatch(m_sslStream.get_executor(),
+            beast::bind_front_handler(&SecuredSession::DoHandshake, std::static_pointer_cast<SecuredSession>(shared_from_this())));
+    }
+
+private:
+    void DoHandshake()
+    {
+        TRACE_DBG << TRACE_HEADER << "Handshaking";
+
+        // Set the timeout.
+        beast::get_lowest_layer(m_sslStream).expires_after(std::chrono::seconds(30));
+
+        // Perform the SSL handshake
+        m_sslStream.async_handshake(ssl::stream_base::server,
+            beast::bind_front_handler(&SecuredSession::OnHandshake, std::static_pointer_cast<SecuredSession>(shared_from_this())));
+    }
+
+    void OnHandshake(beast::error_code ec)
+    {
+        CHECK_TRUE(!ec, "Handshake failed with error: " << ec << ", message: " << ec.message());
+
+        DoRead();
+    }
+
+    void DoRead()
+    {
+        TRACE_DBG << TRACE_HEADER << "Reading secured";
+
+        m_request = {};
+
+        // Set the timeout.
+        beast::get_lowest_layer(m_sslStream).expires_after(std::chrono::seconds(30));
+
+        // Read a request
+        http::async_read(m_sslStream,
+            m_buffer,
+            m_request,
+            beast::bind_front_handler(&SecuredSession::OnRead, std::static_pointer_cast<SecuredSession>(shared_from_this())));
+    }
+
+    void OnRead(boost::system::error_code ec, std::size_t bytesTransferred)
+    {
+        boost::ignore_unused(bytesTransferred);
+
+        // This means they closed the connection
+        if (ec == http::error::end_of_stream)
+            return DoClose();
+        CHECK_TRUE(!ec, "Read failed with error: " << ec << ", message: " << ec.message());
+
+        try
+        {
+            HandleRequest();
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Caught exception while handling request, target: " << m_request.target() << ", body: \""
+                      << std::string(m_request.body()) << "\"";
+            SendResponse(PrepareResponse("Server Error", http::status::internal_server_error));
+            throw;
+        }
+    }
+
+    void SendResponse(http::message_generator&& message) override
+    {
+        bool keepAlive = message.keep_alive();
+
+        // Write the response
+        beast::async_write(m_sslStream,
+            std::move(message),
+            beast::bind_front_handler(&SecuredSession::OnWrite,
+                std::static_pointer_cast<SecuredSession>(shared_from_this()),
+                keepAlive));
+    }
+
+    void OnWrite(bool keepAlive, boost::system::error_code ec, std::size_t bytesTransferred)
+    {
+        boost::ignore_unused(bytesTransferred);
+
+        CHECK_TRUE(!ec, "Write failed with error: " << ec << ", message: " << ec.message());
+
+        if (!keepAlive)
+        {
+            // This means we should close the connection, usually because
+            // the response indicated the "Connection: close" semantic.
+            return DoClose();
+        }
+
+        // Read another request
+        DoRead();
+    }
+
+    void DoClose()
+    {
+        // Set the timeout.
+        beast::get_lowest_layer(m_sslStream).expires_after(std::chrono::seconds(30));
+
+        // Perform the SSL shutdown
+        m_sslStream.async_shutdown(
+            beast::bind_front_handler(&SecuredSession::OnClose, std::static_pointer_cast<SecuredSession>(shared_from_this())));
+    }
+
+    void OnClose(boost::system::error_code ec)
+    {
+        CHECK_TRUE(!ec, "Shutdown failed with error: " << ec << ", message: " << ec.message());
+    }
+
+private:
+    beast::ssl_stream<beast::tcp_stream> m_sslStream;
 };
 
 class PlainSessionFactory : public srv::tracer::TracerProvider, public ISessionFactory
@@ -330,6 +459,31 @@ private:
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
 };
 
+class SecuredSessionFactory : public srv::tracer::TracerProvider, public ISessionFactory
+{
+public:
+    SecuredSessionFactory(std::shared_ptr<srv::ITracer> tracer,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager,
+        std::shared_ptr<taskmgr::ITaskManager> taskManager)
+        : srv::tracer::TracerProvider(std::move(tracer))
+        , m_taskManager(std::move(taskManager))
+        , m_documentManager(std::move(documentManager))
+        , m_sslContext(ssl::context::tlsv12)
+    {
+        LoadServerCertificate(m_sslContext);
+    }
+
+    std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) override
+    {
+        return std::make_shared<SecuredSession>(GetTracer(), m_taskManager, m_documentManager, std::move(socket), m_sslContext);
+    }
+
+private:
+    std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
+    std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+    ssl::context m_sslContext;
+};
+
 }  // namespace
 
 std::unique_ptr<ISessionFactory> ISessionFactory::CreateSessionFactory(std::shared_ptr<srv::ITracer> tracer,
@@ -338,7 +492,7 @@ std::unique_ptr<ISessionFactory> ISessionFactory::CreateSessionFactory(std::shar
     bool isSecured)
 {
     if (isSecured)
-        CHECK_TRUE(false, "Secure connection not yet implemented");
+        return std::make_unique<SecuredSessionFactory>(std::move(tracer), std::move(documentManager), std::move(taskManager));
     else
         return std::make_unique<PlainSessionFactory>(std::move(tracer), std::move(documentManager), std::move(taskManager));
 }
