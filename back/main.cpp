@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 
+#include <authorizer/authorizer.h>
 #include <db_connector/accessor.h>
 #include <environment/environment.h>
 #include <instrumental/common.h>
@@ -40,13 +41,10 @@ int main(int argc, char* argv[])
 
     TRACE_INF << "Services initialized";
 
-    std::shared_ptr<db::IAccessor> accessor;
-
-    std::shared_ptr<taskmgr::ITaskManager> taskManager;
-    CHECK_SUCCESS(taskmgr::ITaskManager::Create(serviceLocator, accessor, taskManager));
-
-    std::shared_ptr<ws::IServer> server;
-    CHECK_SUCCESS(ws::IServer::Create(serviceLocator, taskManager, server));
+    std::shared_ptr<db::IAccessor> accessor = db::IAccessor::Create(serviceLocator);
+    std::shared_ptr<auth::IAuthorizer> authorizer = auth::IAuthorizer::Create(serviceLocator, accessor);
+    std::shared_ptr<taskmgr::ITaskManager> taskManager = taskmgr::ITaskManager::Create(serviceLocator, accessor, authorizer);
+    auto server = ws::IServer::Create(serviceLocator, taskManager, authorizer);
 
     server->Start();
 

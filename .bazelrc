@@ -1,6 +1,8 @@
 build --enable_runfiles
 common --enable_bzlmod
 
+build --noincompatible_sandbox_hermetic_tmp
+
 build --cxxopt="-std=c++17"
 
 # boost configuration

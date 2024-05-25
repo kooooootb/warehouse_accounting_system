@@ -5,6 +5,7 @@
 
 #include <boost/asio.hpp>
 
+#include <authorizer/authorizer.h>
 #include <instrumental/settings_detail.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
@@ -24,10 +25,13 @@ using tcp = boost::asio::ip::tcp;
 namespace ws
 {
 
-Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<taskmgr::ITaskManager> taskManager)
+Server::Server(std::shared_ptr<srv::IServiceLocator> locator,
+    std::shared_ptr<taskmgr::ITaskManager> taskManager,
+    std::shared_ptr<auth::IAuthorizer> authorizer)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_ioContext(std::make_shared<asio::io_context>())
     , m_taskManager(std::move(taskManager))
+    , m_authorizer(std::move(authorizer))
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
     , m_documentManager(docmgr::IDocumentManager::Create(GetTracer()))
 {
@@ -54,12 +58,11 @@ Server::~Server() noexcept
     }
 }
 
-ufa::Result IServer::Create(std::shared_ptr<srv::IServiceLocator> locator,
+std::unique_ptr<IServer> IServer::Create(std::shared_ptr<srv::IServiceLocator> locator,
     std::shared_ptr<taskmgr::ITaskManager> taskManager,
-    std::shared_ptr<IServer>& server)
+    std::shared_ptr<auth::IAuthorizer> authorizer)
 {
-    server = std::make_shared<Server>(std::move(locator), std::move(taskManager));
-    return ufa::Result::SUCCESS;
+    return std::make_unique<Server>(std::move(locator), std::move(taskManager), std::move(authorizer));
 }
 
 void Server::SetSettings(ServerSettings&& settings)
@@ -105,7 +108,8 @@ void Server::SetSettings(ServerSettings&& settings)
     if (settings.documentRoot.has_value())
         m_documentManager->SetRoot(std::move(settings.documentRoot.value()));
 
-    auto sessionFactory = ISessionFactory::CreateSessionFactory(GetTracer(), m_taskManager, m_documentManager, m_savedIsSecured);
+    auto sessionFactory =
+        ISessionFactory::CreateSessionFactory(GetTracer(), m_taskManager, m_authorizer, m_documentManager, m_savedIsSecured);
 
     if (shouldResetListener)
     {

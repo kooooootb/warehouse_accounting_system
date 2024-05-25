@@ -4,6 +4,7 @@
 #include <instrumental/interface.h>
 #include <instrumental/settings.h>
 
+#include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
 
@@ -14,6 +15,7 @@ constexpr int DEFAULT_WORKERS_NUMBER = 4;
 constexpr std::string_view DEFAULT_ADDRESS = "0.0.0.0";
 constexpr int DEFAULT_PORT = 10000;
 constexpr bool DEFAULT_IS_SECURED = true;
+constexpr std::string_view AUTHORIZATION_HEADER = "authorization";
 
 class ServerSettings : public ufa::settings::SettingsBase
 {
@@ -42,12 +44,10 @@ struct IServer : public ufa::IBase
 
     virtual void SetSettings(ServerSettings&& settings) = 0;
 
-    static ufa::Result Create(std::shared_ptr<srv::IServiceLocator> locator,
+    static std::unique_ptr<IServer> Create(std::shared_ptr<srv::IServiceLocator> locator,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
-        std::shared_ptr<IServer>& server);
+        std::shared_ptr<auth::IAuthorizer> authorizer);
 };
-
-std::shared_ptr<IServer> CreateServer(ServerSettings&& settings);
 
 }  // namespace ws
 

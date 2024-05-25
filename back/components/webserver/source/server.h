@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 
+#include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer_provider.h>
@@ -21,7 +22,9 @@ namespace ws
 class Server : public IServer, public srv::tracer::TracerProvider
 {
 public:
-    Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<taskmgr::ITaskManager> taskManager);
+    Server(std::shared_ptr<srv::IServiceLocator> locator,
+        std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer);
 
     ~Server() noexcept override;
 
@@ -47,6 +50,7 @@ private:
     bool m_savedIsSecured{DEFAULT_IS_SECURED};
 
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+    std::shared_ptr<auth::IAuthorizer> m_authorizer;
 };
 
 }  // namespace ws

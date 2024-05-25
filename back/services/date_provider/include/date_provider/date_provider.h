@@ -13,10 +13,12 @@ struct IDateProvider : public srv::IService
 {
     DECLARE_IID(0xEDE6FE29)
 
+    using timestamp_t = uint64_t;
+
     /**
     * @brief get number that goes up as time goes by
     */
-    virtual uint64_t GetTimestamp() const = 0;
+    virtual timestamp_t GetTimestamp() const = 0;
 
     /**
      * @brief get string with format: hh:MM:ss.mmm

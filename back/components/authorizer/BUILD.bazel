@@ -7,11 +7,19 @@ cc_library(
     ]),
     includes = ["./include"],
     deps = [
-        "//back/components/authorizer:iface",
         "//back/components/db_connector:iface",
         "//back/instrumental:include",
-        "//back/services/locator:iface",
-        "@nlohmann_json//:json",
+    ],
+)
+
+cc_library(
+    name = "hash",
+    srcs = ["source/hash.cpp"],
+    hdrs = ["source/hash.h"],
+    includes = ["./include"],
+    deps = [
+        "//back/instrumental:include",
+        "@openssl//:ssl",
     ],
 )
 
@@ -23,6 +31,9 @@ cc_library(
     ]),
     deps = [
         ":iface",
+        "//:jwt",
+        "//back/services/date_provider:iface",
+        "//back/services/locator:iface",
         "//back/services/tracer:iface",
     ],
 )

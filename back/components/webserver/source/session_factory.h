@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 
+#include <authorizer/authorizer.h>
 #include <instrumental/interface.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer.h>
@@ -21,6 +22,7 @@ class ISessionFactory : public ufa::IBase
 public:
     static std::unique_ptr<ISessionFactory> CreateSessionFactory(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager,
         bool isSecured);
 

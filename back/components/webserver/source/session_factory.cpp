@@ -6,6 +6,8 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
 
+#include <authorizer/authorizer.h>
+#include <db_connector/data/user.h>
 #include <instrumental/check.h>
 #include <instrumental/types.h>
 #include <task_manager/task.h>
@@ -28,6 +30,9 @@ namespace ws
 {
 namespace
 {
+
+constexpr std::string_view AUTHORIZATION_TARGET = "/authorization";
+constexpr std::string_view API_TARGET = "/api";
 
 std::string_view GetMimeType(const std::filesystem::path& extension)
 {
@@ -81,9 +86,11 @@ class BaseSession : public srv::tracer::TracerProvider, public ISession, public 
 public:
     BaseSession(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_taskManager(std::move(taskManager))
+        , m_authorizer(std::move(authorizer))
         , m_documentManager(std::move(documentManager))
     {
     }
@@ -104,23 +111,44 @@ protected:
             return SendResponse(PrepareResponse("Invalid target", http::status::bad_request));
         }
 
-        if (target.size() > 5 && target.substr(1, 3) == "api")
+        // check authentication if not authorizing
+        if (!(target.size() == API_TARGET.size() + AUTHORIZATION_TARGET.size() && target.starts_with(API_TARGET) &&
+                target.ends_with(AUTHORIZATION_TARGET)))
         {
-            TRACE_INF << TRACE_HEADER << "Retrieved api request: " << target;
+            // in this branch authentication required
+            db::data::User userData;
+            const auto authenticationResult = Authenticate(userData);
+            if (authenticationResult == ufa::Result::WRONG_FORMAT)
+            {
+                return SendResponse(PrepareResponse("Invalid authentication header", http::status::bad_request));
+            }
+            else if (authenticationResult == ufa::Result::UNAUTHORIZED)
+            {
+                return SendResponse(PrepareResponse("Unauthorized", http::status::unauthorized));
+            }
+            CHECK_SUCCESS(authenticationResult);
+        }
+
+        if (target.size() > API_TARGET.size() + 2 && target.starts_with(API_TARGET))
+        {
+            TRACE_DBG << TRACE_HEADER << "Retrieved api request: " << target;
             return HandleApi();
         }
         else
         {
-            TRACE_INF << TRACE_HEADER << "Retrieved file request: " << target;
+            TRACE_DBG << TRACE_HEADER << "Retrieved file request: " << target;
             return HandleFile();
         }
     }
 
     void HandleApi()
     {
+        auto target = m_request.target();
+        target.remove_prefix(API_TARGET.size() + 1);
+
         std::unique_ptr<taskmgr::ITask> task;
         const auto result = taskmgr::ITask::ParseTask(
-            m_request.target(),
+            target,
             std::move(m_request.body()),
             [this, self = shared_from_this()](std::string&& message)
             {
@@ -208,12 +236,24 @@ protected:
 
     virtual void SendResponse(http::message_generator&& message) = 0;
 
+    ufa::Result Authenticate(db::data::User& userData)
+    {
+        const auto token = m_request[AUTHORIZATION_HEADER];
+        if (token != "")
+        {
+            return ufa::Result::WRONG_FORMAT;
+        }
+
+        return m_authorizer->ValidateToken(token, userData);
+    }
+
 protected:
     http::request<http::string_body> m_request;
     beast::flat_buffer m_buffer;
 
 private:
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+    std::shared_ptr<auth::IAuthorizer> m_authorizer;
     std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
 };
 
@@ -222,9 +262,10 @@ class PlainSession : public BaseSession
 public:
     PlainSession(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager,
         tcp::socket&& socket)
-        : BaseSession(std::move(tracer), std::move(taskManager), std::move(documentManager))
+        : BaseSession(std::move(tracer), std::move(taskManager), std::move(authorizer), std::move(documentManager))
         , m_stream(std::move(socket))
     {
     }
@@ -317,10 +358,11 @@ class SecuredSession : public BaseSession
 public:
     SecuredSession(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager,
         tcp::socket&& socket,
         ssl::context& sslContext)
-        : BaseSession(std::move(tracer), std::move(taskManager), std::move(documentManager))
+        : BaseSession(std::move(tracer), std::move(taskManager), std::move(authorizer), std::move(documentManager))
         , m_sslStream(std::move(socket), sslContext)
     {
     }
@@ -442,21 +484,24 @@ class PlainSessionFactory : public srv::tracer::TracerProvider, public ISessionF
 public:
     PlainSessionFactory(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager,
-        std::shared_ptr<taskmgr::ITaskManager> taskManager)
+        std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer)
         : srv::tracer::TracerProvider(std::move(tracer))
-        , m_taskManager(std::move(taskManager))
         , m_documentManager(std::move(documentManager))
+        , m_taskManager(std::move(taskManager))
+        , m_authorizer(std::move(authorizer))
     {
     }
 
     std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) override
     {
-        return std::make_shared<PlainSession>(GetTracer(), m_taskManager, m_documentManager, std::move(socket));
+        return std::make_shared<PlainSession>(GetTracer(), m_taskManager, m_authorizer, m_documentManager, std::move(socket));
     }
 
 private:
     std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+    std::shared_ptr<auth::IAuthorizer> m_authorizer;
 };
 
 class SecuredSessionFactory : public srv::tracer::TracerProvider, public ISessionFactory
@@ -464,10 +509,12 @@ class SecuredSessionFactory : public srv::tracer::TracerProvider, public ISessio
 public:
     SecuredSessionFactory(std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager,
-        std::shared_ptr<taskmgr::ITaskManager> taskManager)
+        std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<auth::IAuthorizer> authorizer)
         : srv::tracer::TracerProvider(std::move(tracer))
-        , m_taskManager(std::move(taskManager))
         , m_documentManager(std::move(documentManager))
+        , m_taskManager(std::move(taskManager))
+        , m_authorizer(std::move(authorizer))
         , m_sslContext(ssl::context::tlsv12)
     {
         LoadServerCertificate(m_sslContext);
@@ -475,12 +522,18 @@ public:
 
     std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) override
     {
-        return std::make_shared<SecuredSession>(GetTracer(), m_taskManager, m_documentManager, std::move(socket), m_sslContext);
+        return std::make_shared<SecuredSession>(GetTracer(),
+            m_taskManager,
+            m_authorizer,
+            m_documentManager,
+            std::move(socket),
+            m_sslContext);
     }
 
 private:
     std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
     std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
+    std::shared_ptr<auth::IAuthorizer> m_authorizer;
     ssl::context m_sslContext;
 };
 
@@ -488,13 +541,20 @@ private:
 
 std::unique_ptr<ISessionFactory> ISessionFactory::CreateSessionFactory(std::shared_ptr<srv::ITracer> tracer,
     std::shared_ptr<taskmgr::ITaskManager> taskManager,
+    std::shared_ptr<auth::IAuthorizer> authorizer,
     std::shared_ptr<docmgr::IDocumentManager> documentManager,
     bool isSecured)
 {
     if (isSecured)
-        return std::make_unique<SecuredSessionFactory>(std::move(tracer), std::move(documentManager), std::move(taskManager));
+        return std::make_unique<SecuredSessionFactory>(std::move(tracer),
+            std::move(documentManager),
+            std::move(taskManager),
+            std::move(authorizer));
     else
-        return std::make_unique<PlainSessionFactory>(std::move(tracer), std::move(documentManager), std::move(taskManager));
+        return std::make_unique<PlainSessionFactory>(std::move(tracer),
+            std::move(documentManager),
+            std::move(taskManager),
+            std::move(authorizer));
 }
 
 }  // namespace ws

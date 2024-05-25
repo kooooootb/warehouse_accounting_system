@@ -94,6 +94,14 @@ public:
         return *this;
     }
 
+    TraceCollectorProxy& operator<<(std::string_view message)
+    {
+        if (m_traceCollector != nullptr)
+            m_traceCollector->AddMessage(message.data());
+
+        return *this;
+    }
+
 private:
     std::unique_ptr<ITraceCollector> m_traceCollector;
 };
