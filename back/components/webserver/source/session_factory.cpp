@@ -10,7 +10,6 @@
 #include <db_connector/data/user.h>
 #include <instrumental/check.h>
 #include <instrumental/types.h>
-#include <task_manager/task.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer.h>
 #include <tracer/tracer_provider.h>
@@ -147,25 +146,52 @@ protected:
         auto target = m_request.target();
         target.remove_prefix(API_TARGET.size() + 1);
 
-        std::unique_ptr<taskmgr::ITask> task;
-        const auto result = taskmgr::ITask::ParseTask(
-            target,
+        const auto result = m_taskManager->AddTask(target,
             std::move(m_request.body()),
-            [this, self = shared_from_this()](std::string&& message)
+            [this, self = shared_from_this()](std::string&& message, ufa::Result result)
             {
-                SendResponse(PrepareResponse(std::move(message), http::status::ok));
-            },
-            task);
+                if (result != ufa::Result::SUCCESS)
+                {
+                    http::status status = http::status::internal_server_error;
+
+                    switch (result)
+                    {
+                        case ufa::Result::WRONG_FORMAT:
+                            status = http::status::bad_request;
+                            break;
+                        case ufa::Result::NOT_FOUND:
+                            status = http::status::not_found;
+                            break;
+                        case ufa::Result::UNAUTHORIZED:
+                            status = http::status::unauthorized;
+                            break;
+                        default:
+                            status = http::status::internal_server_error;
+                    }
+
+                    TRACE_ERR << TRACE_HEADER << "Task execution failed with error: " << result << ", responding with "
+                              << static_cast<unsigned>(status);
+                    SendResponse(PrepareResponse(std::move(message), status));
+                }
+                else
+                {
+                    SendResponse(PrepareResponse(std::move(message), http::status::ok));
+                }
+            });
 
         if (result == ufa::Result::WRONG_FORMAT)
         {
-            TRACE_ERR << TRACE_HEADER << "Retrived body in wrong format";
+            TRACE_ERR << TRACE_HEADER << "Retrieved body in wrong format";
             return SendResponse(PrepareResponse("Invalid body format", http::status::bad_request));
         }
 
-        CHECK_SUCCESS(result, "Error while parsing body:" << string_converters::ToString(result));
+        if (result == ufa::Result::NOT_FOUND)
+        {
+            TRACE_ERR << TRACE_HEADER << "Targett not found" << target;
+            return SendResponse(PrepareResponse("Invalid target", http::status::not_found));
+        }
 
-        return m_taskManager->AddTask(std::move(task));
+        CHECK_SUCCESS(result, "Error while parsing body:" << string_converters::ToString(result));
     }
 
     void HandleFile()

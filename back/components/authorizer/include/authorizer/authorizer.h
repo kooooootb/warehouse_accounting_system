@@ -9,7 +9,7 @@ namespace auth
 {
 
 constexpr std::string_view USERID_PAYLOAD_KEY = "userId";  // seems to be used only in authorizer
-constexpr std::string_view EXP_PAYLOAD_KEY = "exp";
+constexpr std::string_view EXP_PAYLOAD_KEY = "expiration";
 constexpr std::string_view ISSUER = "rms";
 constexpr std::string_view SECRET = "secret";  // not so secret
 

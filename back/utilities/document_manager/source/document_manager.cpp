@@ -1,8 +1,10 @@
-#include "document_manager.h"
-#include <instrumental/types.h>
-#include <utilities/document_manager.h>
 #include <filesystem>
 #include <memory>
+
+#include <instrumental/common.h>
+#include <utilities/document_manager.h>
+
+#include "document_manager.h"
 
 namespace docmgr
 {

@@ -32,7 +32,9 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, db::data::User& us
 {
     try
     {
-        auto decoded = jwt::decode(token.data());
+        auto verifier = jwt::verify().with_issuer(ISSUER.data()).allow_algorithm(jwt::algorithm::hs256{GetSecretKey()});
+        std::string tokenStr = std::string(token);  // decode takes string
+        auto decoded = jwt::decode(tokenStr);
 
         auto payload = decoded.get_payload_json();
 
@@ -45,8 +47,6 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, db::data::User& us
         }
 
         user.id = string_converters::FromString<uint64_t>(payload[USERID_PAYLOAD_KEY.data()].to_str());
-
-        auto verifier = jwt::verify().with_issuer(ISSUER.data()).allow_algorithm(jwt::algorithm::hs256{GetSecretKey()});
 
         std::error_code ec;
         verifier.verify(decoded, ec);
@@ -82,7 +82,9 @@ ufa::Result Authorizer::GenerateToken(db::data::User& user, std::string& token)
     token = jwt::create()
                 .set_issuer(ISSUER.data())
                 .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(string_converters::ToString(user.id.value())))
-                .set_payload_claim(EXP_PAYLOAD_KEY.data(), jwt::claim(string_converters::ToString(m_dateProvider->GetTimestamp())))
+                .set_payload_claim(EXP_PAYLOAD_KEY.data(),
+                    jwt::claim(string_converters::ToString(
+                        m_dateProvider->GetTimestamp() + 30ull * 60ull * 60ull * 1000ull * 1000ull * 1000ull)))
                 .sign(jwt::algorithm::hs256{GetSecretKey()});
 
     return ufa::Result::SUCCESS;

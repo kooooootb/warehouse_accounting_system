@@ -15,7 +15,7 @@ constexpr int DEFAULT_WORKERS_NUMBER = 4;
 constexpr std::string_view DEFAULT_ADDRESS = "0.0.0.0";
 constexpr int DEFAULT_PORT = 10000;
 constexpr bool DEFAULT_IS_SECURED = true;
-constexpr std::string_view AUTHORIZATION_HEADER = "authorization";
+constexpr std::string_view AUTHORIZATION_HEADER = "Authorization";
 
 class ServerSettings : public ufa::settings::SettingsBase
 {

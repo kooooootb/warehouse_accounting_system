@@ -5,6 +5,9 @@
 #include <task_manager/task_manager.h>
 #include <tracer/tracer_provider.h>
 
+#include "task_handler.h"
+#include "workers_manager.h"
+
 namespace taskmgr
 {
 
@@ -15,9 +18,11 @@ public:
         std::shared_ptr<db::IAccessor> accessor,
         std::shared_ptr<auth::IAuthorizer> authorizer);
 
-    ~TaskManager() noexcept override;
+    ufa::Result AddTask(std::string_view target, std::string&& json, Callback&& callback) override;
 
-    void AddTask(std::unique_ptr<ITask>&& task) override;
+private:
+    std::shared_ptr<TaskHandler> m_taskHandler;
+    std::unique_ptr<WorkersManager> m_workersManager;
 };
 
 }  // namespace taskmgr

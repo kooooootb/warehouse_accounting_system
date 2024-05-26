@@ -17,7 +17,8 @@ std::unique_ptr<IAccessor> IAccessor::Create(std::shared_ptr<srv::IServiceLocato
 
 ufa::Result Accessor::FillUser(data::User& user)
 {
-    return ufa::Result::NOT_IMPLEMENTED;
+    user.id = 123;
+    return ufa::Result::SUCCESS;
 }
 
 }  // namespace db

@@ -1,8 +1,8 @@
-#include "hash.h"
+#include <hash/hash.h>
 
-namespace ws
+namespace util
 {
-namespace auth
+namespace hash
 {
 
 std::string HashString(std::string_view input)
@@ -21,6 +21,6 @@ std::string HashString(std::string_view input)
     return output;
 }
 
-}  // namespace auth
+}  // namespace hash
 
-}  // namespace ws
+}  // namespace util
