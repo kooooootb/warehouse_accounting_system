@@ -15,6 +15,8 @@ struct Specification
     std::optional<uint64_t> id;
     std::optional<std::string> name;
     std::optional<uint64_t> analitycId;
+    std::optional<std::string> status;
+    std::optional<uint64_t> projectId;
 };
 
 }  // namespace data

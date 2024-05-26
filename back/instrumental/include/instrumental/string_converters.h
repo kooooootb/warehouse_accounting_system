@@ -86,6 +86,12 @@ inline unsigned long FromString(const std::string& from)
 }
 
 template <>
+inline unsigned int FromString(const std::string& from)
+{
+    return std::stoul(from);
+}
+
+template <>
 inline long long FromString(const std::string& from)
 {
     return std::stoll(from);

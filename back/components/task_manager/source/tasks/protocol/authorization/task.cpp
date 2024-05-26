@@ -38,7 +38,8 @@ ufa::Result Authorization::ExecuteInternal(const deps::IDependencyManager& depMa
 void Authorization::ParseInternal(json&& json)
 {
     m_username = json.at(USERNAME_KEY).get<std::string>();
-    m_hashPassword = util::hash::HashString(json.at(PASSWORD_KEY).get<std::string>());
+    // m_hashPassword = util::hash::HashString(json.at(PASSWORD_KEY).get<std::string>());
+    m_hashPassword = json.at(PASSWORD_KEY).get<std::string>();
 }
 
 }  // namespace tasks

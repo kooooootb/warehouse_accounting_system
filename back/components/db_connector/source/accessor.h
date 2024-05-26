@@ -14,6 +14,17 @@ public:
     Accessor(std::shared_ptr<srv::IServiceLocator> locator);
 
     ufa::Result FillUser(data::User& user) override;
+
+private:
+    void FillDefaultSettings(AccessorSettings& settings);
+    void AcceptSettings(AccessorSettings&& settings);
+
+    bool DBNeedsReinitializing();
+    void InitializeDB();
+    std::string JoinFilters(const std::vector<std::string>& filters);
+
+private:
+    std::string m_connOptions;
 };
 
 }  // namespace db

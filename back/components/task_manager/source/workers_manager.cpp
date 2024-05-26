@@ -56,7 +56,18 @@ void WorkersManager::Run()
             m_queue.pop();
             lock.unlock();
 
-            m_taskHandler->HandleTask(*task);
+            try
+            {
+                m_taskHandler->HandleTask(*task);
+            }
+            catch (const std::exception& ex)
+            {
+                TRACE_ERR << TRACE_HEADER << "Caught exception with message: " << ex.what();
+            }
+            catch (...)
+            {
+                TRACE_ERR << TRACE_HEADER << "Caught unkown exception";
+            }
         }
     }
 }

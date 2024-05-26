@@ -34,7 +34,6 @@ cmake(
         "-lpq",
         "-lm",
     ],
-    out_headers_only = True,
     tags = ["requires-network"],
     visibility = ["//visibility:public"],
 )

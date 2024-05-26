@@ -36,6 +36,8 @@ cc_library(
     ]),
     deps = [
         ":iface",
+        "//:libpqxx",
+        "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
     ],
 )
