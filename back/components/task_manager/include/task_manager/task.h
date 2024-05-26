@@ -1,8 +1,6 @@
 #ifndef H_B84D8523_CB61_488B_ABB8_B9564FCEB263
 #define H_B84D8523_CB61_488B_ABB8_B9564FCEB263
 
-#include <nlohmann/json.hpp>
-
 #include <instrumental/interface.h>
 
 #include <db_connector/accessor.h>

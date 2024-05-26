@@ -11,7 +11,6 @@ cc_library(
         "//back/components/db_connector:iface",
         "//back/instrumental:include",
         "//back/services/locator:iface",
-        "@nlohmann_json//:json",
     ],
 )
 
@@ -24,5 +23,6 @@ cc_library(
     deps = [
         ":iface",
         "//back/services/tracer:iface",
+        "@nlohmann_json//:json",
     ],
 )

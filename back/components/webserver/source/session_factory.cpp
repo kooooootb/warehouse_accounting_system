@@ -240,7 +240,7 @@ protected:
     ufa::Result Authenticate(db::data::User& userData)
     {
         const auto token = m_request[AUTHORIZATION_HEADER];
-        if (token != "")
+        if (token.empty())
         {
             return ufa::Result::WRONG_FORMAT;
         }
