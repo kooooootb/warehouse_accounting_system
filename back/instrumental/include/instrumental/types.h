@@ -18,7 +18,8 @@ enum class Result : int32_t
     NO_STRING_CONVERTER = 0x8000,     // specifically for converter at the bottom
     WRONG_FORMAT = 0x16000,           // met wrong input format
     DUPLICATE = 0x32000,              // something duplicated
-    UNAUTHORIZED = 0x48000            // unauthorized access
+    UNAUTHORIZED = 0x48000,           // unauthorized access
+    NOT_IMPLEMENTED = 0x64000         // some interface do'nt have implementation yet
 };
 
 }  // namespace ufa
@@ -49,6 +50,8 @@ inline std::string ToString(::ufa::Result result)
             return "DUPLICATE";
         case ::ufa::Result::UNAUTHORIZED:
             return "UNAUTHORIZED";
+        case ::ufa::Result::NOT_IMPLEMENTED:
+            return "NOT_IMPLEMENTED";
         default:
             return std::to_string(static_cast<int32_t>(result));
     }
@@ -73,6 +76,8 @@ inline ::ufa::Result FromString(const std::string& string)
         return ::ufa::Result::DUPLICATE;
     if (string == "UNAUTHORIZED")
         return ::ufa::Result::UNAUTHORIZED;
+    if (string == "NOT_IMPLEMENTED")
+        return ::ufa::Result::NOT_IMPLEMENTED;
 
     return ::ufa::Result::NO_STRING_CONVERTER;
 }

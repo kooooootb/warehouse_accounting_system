@@ -111,7 +111,7 @@ protected:
             return SendResponse(PrepareResponse("Invalid target", http::status::bad_request));
         }
 
-        // check authentication if not authorizing
+        // check authentication only when /api and not when authorizing
         if (!(target.size() == API_TARGET.size() + AUTHORIZATION_TARGET.size() && target.starts_with(API_TARGET) &&
                 target.ends_with(AUTHORIZATION_TARGET)))
         {

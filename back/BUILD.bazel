@@ -8,7 +8,6 @@ cc_binary(
         "//back/components/db_connector:lib",
         "//back/components/task_manager:lib",
         "//back/components/webserver:lib",
-        "//back/services/locator:iface",
         "//back/services/locator:lib",
         "//back/services/tracer:iface",
     ],

@@ -9,17 +9,18 @@
 namespace taskmgr
 {
 
-TaskManager::TaskManager(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<db::IAccessor> accessor)
+TaskManager::TaskManager(std::shared_ptr<srv::IServiceLocator> locator,
+    std::shared_ptr<db::IAccessor> accessor,
+    std::shared_ptr<auth::IAuthorizer> authorizer)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
 {
 }
 
-ufa::Result ITaskManager::Create(std::shared_ptr<srv::IServiceLocator> locator,
+std::unique_ptr<ITaskManager> ITaskManager::Create(std::shared_ptr<srv::IServiceLocator> locator,
     std::shared_ptr<db::IAccessor> accessor,
-    std::shared_ptr<ITaskManager>& taskManager)
+    std::shared_ptr<auth::IAuthorizer> authorizer)
 {
-    taskManager = std::make_shared<TaskManager>(std::move(locator), std::move(accessor));
-    return ufa::Result::SUCCESS;
+    return std::make_unique<TaskManager>(std::move(locator), std::move(accessor), std::move(authorizer));
 }
 
 TaskManager::~TaskManager() noexcept {}

@@ -22,6 +22,12 @@ Authorizer::Authorizer(std::shared_ptr<srv::IServiceLocator> locator, std::share
 {
 }
 
+std::unique_ptr<IAuthorizer> IAuthorizer::Create(std::shared_ptr<srv::IServiceLocator> locator,
+    std::shared_ptr<db::IAccessor> accessor)
+{
+    return std::make_unique<Authorizer>(std::move(locator), std::move(accessor));
+}
+
 ufa::Result Authorizer::ValidateToken(std::string_view token, db::data::User& user)
 {
     try
