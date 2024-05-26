@@ -32,6 +32,7 @@ protected:
 private:
     static constexpr std::string_view USERNAME_KEY = "login";
     static constexpr std::string_view PASSWORD_KEY = "per_password";
+    static constexpr std::string_view TOKEN_KEY = "token";
 
 private:
     std::string m_username;

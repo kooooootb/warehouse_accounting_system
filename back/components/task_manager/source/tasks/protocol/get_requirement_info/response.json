@@ -6,7 +6,8 @@
       "type": "object",
       "properties": {
         "type_id": {
-          "type": "string"
+          "type": "string",
+          "description": "available values: functional, nonfunctional"
         },
         "in_specification": {
           "type": "integer"
@@ -15,7 +16,8 @@
           "type": "string"
         },
         "status_req": {
-          "type": "string"
+          "type": "string",
+          "description": "available values: new, inspecification, negotiation, approved, developed, supported, deleted"
         },
         "release": {
           "type": "string"

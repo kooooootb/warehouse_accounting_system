@@ -47,3 +47,12 @@ http_archive(
     strip_prefix = "jwt-cpp-0.7.0",
     url = "https://github.com/Thalhammer/jwt-cpp/archive/refs/tags/v0.7.0.tar.gz",
 )
+
+### libpqxx
+http_archive(
+    name = "jtv_libpqxx",
+    build_file_content = _ALL_CONTENT,
+    sha256 = "a1fafd5f6455f6c66241fca1f35f5cb603251580b99f9a0cf1b5d0a586006f16",
+    strip_prefix = "libpqxx-7.9.0",
+    url = "https://github.com/jtv/libpqxx/archive/refs/tags/7.9.0.tar.gz",
+)

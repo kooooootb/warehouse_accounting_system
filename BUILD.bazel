@@ -26,3 +26,15 @@ cmake(
     tags = ["requires-network"],
     visibility = ["//visibility:public"],
 )
+
+cmake(
+    name = "libpqxx",
+    lib_source = "@jtv_libpqxx//:all_srcs",
+    linkopts = [
+        "-lpq",
+        "-lm",
+    ],
+    out_headers_only = True,
+    tags = ["requires-network"],
+    visibility = ["//visibility:public"],
+)

@@ -20,15 +20,25 @@ ufa::Result Authorization::ExecuteInternal(const deps::IDependencyManager& depMa
     db::data::User userData;
     userData.name = m_username;
     userData.hashPassword = m_hashPassword;
+    json jsonResult;
 
+    std::string token;
     auto authorizer = depManager.GetAuthorizer();
-    return authorizer->GenerateToken(userData, result);
+    const auto authResult = authorizer->GenerateToken(userData, token);
+
+    if (authResult == ufa::Result::SUCCESS)
+    {
+        jsonResult[TOKEN_KEY.data()] = token;
+        result = jsonResult.dump();
+    }
+
+    return authResult;
 }
 
 void Authorization::ParseInternal(json&& json)
 {
-    m_username = json[USERNAME_KEY].get<std::string>();
-    m_hashPassword = util::hash::HashString(json[PASSWORD_KEY].get<std::string>());
+    m_username = json.at(USERNAME_KEY).get<std::string>();
+    m_hashPassword = util::hash::HashString(json.at(PASSWORD_KEY).get<std::string>());
 }
 
 }  // namespace tasks
