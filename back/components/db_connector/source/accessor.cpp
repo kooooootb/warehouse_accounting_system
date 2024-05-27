@@ -135,6 +135,35 @@ ufa::Result Accessor::FillUser(data::User& user)
     }
 }
 
+ufa::Result Accessor::CreateRequirement(data::Requirement& req)
+{
+    try
+    {
+        CHECK_TRUE(req.status.has_value() || req.projectId.has_value() || req.specificationId.has_value() || req.type.has_value() ||
+                   req.description.has_value());
+        pqxx::connection conn(m_connOptions);
+        pqxx::work work(conn);
+
+        std::stringstream query;
+        query << "INSERT INTO requirement (type_id, in_specification, description, status_req, project) VALUES (";
+
+        query << req.type.value() << ", " << req.specificationId.value() << ", '" << req.description.value() << "', "
+              << 1 /*status*/ << ", " << req.projectId.value();
+
+        query << ")";
+
+        auto res = work.exec(query.str());
+        work.commit();
+
+        return ufa::Result::SUCCESS;
+    }
+    catch (const std::exception& ex)
+    {
+        TRACE_ERR << TRACE_HEADER << "Caught exception while querying, message " << ex.what();
+        return ufa::Result::ERROR;
+    }
+}
+
 std::string Accessor::JoinFilters(const std::vector<std::string>& filters)
 {
     std::stringstream result;

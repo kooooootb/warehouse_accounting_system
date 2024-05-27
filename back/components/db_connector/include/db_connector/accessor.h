@@ -1,6 +1,7 @@
 #ifndef H_867F46FF_9C68_4498_BE3C_C4F5DF2520C8
 #define H_867F46FF_9C68_4498_BE3C_C4F5DF2520C8
 
+#include <db_connector/data/requirement.h>
 #include <db_connector/data/user.h>
 #include <instrumental/interface.h>
 #include <instrumental/settings.h>
@@ -35,6 +36,7 @@ public:
 struct IAccessor : public ufa::IBase
 {
     virtual ufa::Result FillUser(data::User& user) = 0;
+    virtual ufa::Result CreateRequirement(data::Requirement& req) = 0;
 
     static std::unique_ptr<IAccessor> Create(std::shared_ptr<srv::IServiceLocator> locator);
 };
