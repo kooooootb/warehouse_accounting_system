@@ -4,13 +4,14 @@
 #include <tuple>
 
 #include "authorization/task.h"
+#include "create_requirement/task.h"
 
 namespace taskmgr
 {
 namespace tasks
 {
 
-using TasksList = std::tuple<Authorization>;
+using TasksList = std::tuple<Authorization, CreateRequirement>;
 
 }  // namespace tasks
 }  // namespace taskmgr

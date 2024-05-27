@@ -14,6 +14,7 @@ public:
     Accessor(std::shared_ptr<srv::IServiceLocator> locator);
 
     ufa::Result FillUser(data::User& user) override;
+    ufa::Result CreateRequirement(data::Requirement& req) override;
 
 private:
     void FillDefaultSettings(AccessorSettings& settings);

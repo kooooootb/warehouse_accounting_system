@@ -31,7 +31,7 @@ struct Requirement
 
     std::optional<uint64_t> id;
     std::optional<std::string> status;
-    std::optional<std::string> type;
+    std::optional<uint64_t> type;
     std::optional<std::string> name;
     std::optional<std::string> description;
     std::optional<uint64_t> specificationId;
