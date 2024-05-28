@@ -11,8 +11,9 @@
             "requirement_id": {
               "type": "integer"
             },
-            "rel_type": {
-              "type": "string"
+            "dependancy_type": {
+              "type": "string",
+               "description": "available values: horizontal, vertical, copied"
             }
           },
           "required": [
