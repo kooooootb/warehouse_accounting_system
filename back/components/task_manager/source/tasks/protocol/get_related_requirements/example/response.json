@@ -1,7 +1,8 @@
 {
-  "requirement_ids": [
-    1,
-    2,
-    3
+  "related_requirements": [
+    {
+      "requirement_id": 1,
+      "rel_type": "vertical"
+    }
   ]
 }
