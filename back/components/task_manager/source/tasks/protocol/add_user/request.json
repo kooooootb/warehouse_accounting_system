@@ -2,13 +2,10 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "first name": {
+    "first_name": {
       "type": "string"
     },
-    "last name": {
-      "type": "string"
-    },
-    "birthday": {
+    "last_name": {
       "type": "string"
     },
     "login": {
@@ -22,9 +19,8 @@
     }
   },
   "required": [
-    "first name",
-    "last name",
-    "birthday",
+    "first_name",
+    "last_name",
     "login",
     "per_password",
     "per_role"

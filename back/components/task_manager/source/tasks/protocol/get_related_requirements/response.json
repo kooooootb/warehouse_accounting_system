@@ -13,7 +13,7 @@
             },
             "dependancy_type": {
               "type": "string",
-               "description": "available values: horizontal, vertical, copied"
+              "description": "available values: horizontal, vertical, copied"
             }
           },
           "required": [

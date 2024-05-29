@@ -25,9 +25,10 @@ namespace tasks
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, Callback&& callback)
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, db::data::User user, Callback&& callback)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_callback(std::move(callback))
+        , m_initiativeUser(std::move(user))
     {
     }
 
@@ -65,6 +66,9 @@ public:
 protected:
     virtual ufa::Result ExecuteInternal(const deps::IDependencyManager& depManager, std::string& result) = 0;
     virtual void ParseInternal(json&& json) = 0;
+
+protected:
+    db::data::User m_initiativeUser;
 
 private:
     Callback m_callback;

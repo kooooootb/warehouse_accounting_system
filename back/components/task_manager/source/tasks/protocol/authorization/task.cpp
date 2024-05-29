@@ -1,5 +1,4 @@
 #include <db_connector/data/user.h>
-#include <hash/hash.h>
 #include <instrumental/types.h>
 #include <tracer/tracer.h>
 
@@ -10,8 +9,8 @@ namespace taskmgr
 namespace tasks
 {
 
-Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, Callback&& callback)
-    : BaseTask(std::move(tracer), std::move(callback))
+Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, db::data::User user, Callback&& callback)
+    : BaseTask(std::move(tracer), std::move(user), std::move(callback))
 {
 }
 

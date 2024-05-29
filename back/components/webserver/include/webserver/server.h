@@ -7,6 +7,7 @@
 #include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
+#include <utilities/document_manager.h>
 
 namespace ws
 {
@@ -46,7 +47,8 @@ struct IServer : public ufa::IBase
 
     static std::unique_ptr<IServer> Create(std::shared_ptr<srv::IServiceLocator> locator,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
-        std::shared_ptr<auth::IAuthorizer> authorizer);
+        std::shared_ptr<auth::IAuthorizer> authorizer,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager);
 };
 
 }  // namespace ws

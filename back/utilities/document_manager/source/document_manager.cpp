@@ -2,6 +2,8 @@
 #include <memory>
 
 #include <instrumental/common.h>
+#include <instrumental/string_converters.h>
+#include <instrumental/types.h>
 #include <utilities/document_manager.h>
 
 #include "document_manager.h"
@@ -19,7 +21,7 @@ std::unique_ptr<IDocumentManager> IDocumentManager::Create(std::shared_ptr<srv::
     return std::make_unique<DocumentManager>(std::move(tracer));
 }
 
-ufa::Result DocumentManager::RestoreDocument(std::filesystem::path& relPath)
+ufa::Result DocumentManager::RestoreDocument(std::filesystem::path& relPath, bool checkExistance)
 {
     if (relPath.empty())
     {
@@ -36,7 +38,7 @@ ufa::Result DocumentManager::RestoreDocument(std::filesystem::path& relPath)
 
     relPath = m_rootPath / relPath;
 
-    if (!std::filesystem::exists(relPath))
+    if (checkExistance && !std::filesystem::exists(relPath))
     {
         TRACE_ERR << TRACE_HEADER << "Requested file not exists: " << relPath.c_str() << "\"";
         return ufa::Result::NOT_FOUND;

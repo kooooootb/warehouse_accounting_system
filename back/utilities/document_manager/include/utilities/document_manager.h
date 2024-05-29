@@ -20,7 +20,7 @@ struct IDocumentManager : public ufa::IBase
      * @param relPath resulting path, containing relative to root path
      * @return ufa::Result: WRONG_FORMAT if normaled path is above root (contains ..), NOT_FOUND if file not exists
      */
-    virtual ufa::Result RestoreDocument(std::filesystem::path& relPath) = 0;
+    virtual ufa::Result RestoreDocument(std::filesystem::path& relPath, bool checkExistance = false) = 0;
 
     virtual void SetRoot(std::filesystem::path&& rootPath) = 0;
 

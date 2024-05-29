@@ -13,6 +13,7 @@ namespace data
 struct Project
 {
     std::optional<uint64_t> id;
+    std::optional<std::string> name;
     std::optional<std::vector<uint64_t>> requirementIds;
     std::optional<std::vector<uint64_t>> specificationIds;
     std::optional<std::string> date;

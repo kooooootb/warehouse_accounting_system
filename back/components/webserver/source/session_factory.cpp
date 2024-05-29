@@ -113,14 +113,14 @@ protected:
         if (target.size() > API_TARGET.size() + 2 && target.starts_with(API_TARGET))
         {
             TRACE_DBG << TRACE_HEADER << "Retrieved api request: " << target;
+            db::data::User initiativeUser;
 
             // check authentication only when /api and not when authorizing
             if (!(target.size() == API_TARGET.size() + AUTHORIZATION_TARGET.size() && target.starts_with(API_TARGET) &&
                     target.ends_with(AUTHORIZATION_TARGET)))
             {
                 // in this branch authentication required
-                db::data::User userData;
-                const auto authenticationResult = Authenticate(userData);
+                const auto authenticationResult = Authenticate(initiativeUser);
                 if (authenticationResult == ufa::Result::WRONG_FORMAT)
                 {
                     return SendResponse(PrepareResponse("Invalid authentication header", http::status::bad_request));
@@ -132,7 +132,7 @@ protected:
                 CHECK_SUCCESS(authenticationResult);
             }
 
-            return HandleApi();
+            return HandleApi(std::move(initiativeUser));
         }
         else
         {
@@ -141,12 +141,13 @@ protected:
         }
     }
 
-    void HandleApi()
+    void HandleApi(db::data::User initiativeUser)
     {
         auto target = m_request.target();
         target.remove_prefix(API_TARGET.size() + 1);
 
-        const auto result = m_taskManager->AddTask(target,
+        const auto result = m_taskManager->AddTask(std::move(initiativeUser),
+            target,
             std::move(m_request.body()),
             [this, self = shared_from_this()](std::string&& message, ufa::Result result)
             {

@@ -3,6 +3,7 @@
 
 #include <dependency_manager/dependency_manager.h>
 #include <tracer/tracer_provider.h>
+#include <utilities/document_manager.h>
 
 namespace taskmgr
 {
@@ -14,14 +15,17 @@ class DependencyManager : public srv::tracer::TracerProvider, public IDependency
 public:
     DependencyManager(std::shared_ptr<srv::IServiceLocator> locator,
         std::shared_ptr<db::IAccessor> accessor,
-        std::shared_ptr<auth::IAuthorizer> authorizer);
+        std::shared_ptr<auth::IAuthorizer> authorizer,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager);
 
     std::shared_ptr<db::IAccessor> GetAccessor() const override;
     std::shared_ptr<auth::IAuthorizer> GetAuthorizer() const override;
+    std::shared_ptr<docmgr::IDocumentManager> GetDocumentManager() const override;
 
 private:
     std::shared_ptr<db::IAccessor> m_accessor;
     std::shared_ptr<auth::IAuthorizer> m_authorizer;
+    std::shared_ptr<docmgr::IDocumentManager> m_documentManager;
 };
 
 }  // namespace deps

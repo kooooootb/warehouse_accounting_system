@@ -12,7 +12,6 @@
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
 #include <tracer/tracer_provider.h>
-#include <utilities/document_manager.h>
 #include <webserver/server.h>
 
 #include "listener.h"
@@ -27,13 +26,14 @@ namespace ws
 
 Server::Server(std::shared_ptr<srv::IServiceLocator> locator,
     std::shared_ptr<taskmgr::ITaskManager> taskManager,
-    std::shared_ptr<auth::IAuthorizer> authorizer)
+    std::shared_ptr<auth::IAuthorizer> authorizer,
+    std::shared_ptr<docmgr::IDocumentManager> documentManager)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_ioContext(std::make_shared<asio::io_context>())
     , m_taskManager(std::move(taskManager))
     , m_authorizer(std::move(authorizer))
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
-    , m_documentManager(docmgr::IDocumentManager::Create(GetTracer()))
+    , m_documentManager(std::move(documentManager))
 {
     TRACE_INF << TRACE_HEADER << "Creating Server";
 
@@ -60,9 +60,10 @@ Server::~Server() noexcept
 
 std::unique_ptr<IServer> IServer::Create(std::shared_ptr<srv::IServiceLocator> locator,
     std::shared_ptr<taskmgr::ITaskManager> taskManager,
-    std::shared_ptr<auth::IAuthorizer> authorizer)
+    std::shared_ptr<auth::IAuthorizer> authorizer,
+    std::shared_ptr<docmgr::IDocumentManager> documentManager)
 {
-    return std::make_unique<Server>(std::move(locator), std::move(taskManager), std::move(authorizer));
+    return std::make_unique<Server>(std::move(locator), std::move(taskManager), std::move(authorizer), std::move(documentManager));
 }
 
 void Server::SetSettings(ServerSettings&& settings)

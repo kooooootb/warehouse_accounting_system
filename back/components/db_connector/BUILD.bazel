@@ -39,5 +39,6 @@ cc_library(
         "//:libpqxx",
         "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
+        "@fmt",
     ],
 )
