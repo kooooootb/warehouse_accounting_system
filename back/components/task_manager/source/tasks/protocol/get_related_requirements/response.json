@@ -2,8 +2,19 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "requirement_ids": {
-      "type": "integer"
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requirement_id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "integer"
+          }
+        }
+      }
     }
   },
   "required": [

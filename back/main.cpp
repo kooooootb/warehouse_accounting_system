@@ -10,6 +10,7 @@
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer.h>
+#include <utilities/document_manager.h>
 #include <webserver/server.h>
 
 int main(int argc, char* argv[])
@@ -41,10 +42,13 @@ int main(int argc, char* argv[])
 
     TRACE_INF << "Services initialized";
 
+    std::shared_ptr<docmgr::IDocumentManager> documentManager = docmgr::IDocumentManager::Create(tracer);
+
     std::shared_ptr<db::IAccessor> accessor = db::IAccessor::Create(serviceLocator);
     std::shared_ptr<auth::IAuthorizer> authorizer = auth::IAuthorizer::Create(serviceLocator, accessor);
-    std::shared_ptr<taskmgr::ITaskManager> taskManager = taskmgr::ITaskManager::Create(serviceLocator, accessor, authorizer);
-    auto server = ws::IServer::Create(serviceLocator, taskManager, authorizer);
+    std::shared_ptr<taskmgr::ITaskManager> taskManager =
+        taskmgr::ITaskManager::Create(serviceLocator, accessor, authorizer, documentManager);
+    auto server = ws::IServer::Create(serviceLocator, taskManager, authorizer, documentManager);
 
     server->Start();
 

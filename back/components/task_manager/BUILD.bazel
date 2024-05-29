@@ -10,6 +10,7 @@ cc_library(
     includes = ["./include"],
     deps = [
         "//back/instrumental:include",
+        "//back/utilities/document_manager:iface",
     ],
 )
 

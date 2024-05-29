@@ -24,7 +24,8 @@ class Server : public IServer, public srv::tracer::TracerProvider
 public:
     Server(std::shared_ptr<srv::IServiceLocator> locator,
         std::shared_ptr<taskmgr::ITaskManager> taskManager,
-        std::shared_ptr<auth::IAuthorizer> authorizer);
+        std::shared_ptr<auth::IAuthorizer> authorizer,
+        std::shared_ptr<docmgr::IDocumentManager> documentManager);
 
     ~Server() noexcept override;
 

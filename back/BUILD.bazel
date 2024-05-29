@@ -10,5 +10,6 @@ cc_binary(
         "//back/components/webserver:lib",
         "//back/services/locator:lib",
         "//back/services/tracer:iface",
+        "//back/utilities/document_manager:lib",
     ],
 )

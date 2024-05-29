@@ -7,6 +7,27 @@
     },
     "specification_id": {
       "type": "integer"
+    },
+    "section": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "sec_num_in_spec": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "req_num_in_sec": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "req_num_in_sec"
+      ],
+      "note": "either id or (name and sec_num_in_spec) should be specified"
     }
   },
   "required": [

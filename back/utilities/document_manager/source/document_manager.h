@@ -13,7 +13,7 @@ class DocumentManager : public srv::tracer::TracerProvider, public IDocumentMana
 public:
     DocumentManager(std::shared_ptr<srv::ITracer> tracer);
 
-    ufa::Result RestoreDocument(std::filesystem::path& relPath) override;
+    ufa::Result RestoreDocument(std::filesystem::path& relPath, bool checkExistance = false) override;
     void SetRoot(std::filesystem::path&& rootPath) override;
 
 private:

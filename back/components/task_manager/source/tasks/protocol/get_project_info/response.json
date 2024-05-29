@@ -13,14 +13,11 @@
       "items": {
         "type": "integer"
       }
-    },
-    "date": {
-      "type": "string"
     }
   },
   "required": [
+    "name",
     "requirement_ids",
-    "specification_ids",
-    "date"
+    "specification_ids"
   ]
 }

@@ -5,7 +5,7 @@
     "requirement_id": {
       "type": "integer"
     },
-    "dependent_ids": {
+    "dependencies_ids": {
       "type": "array",
       "items": [
         {
@@ -21,7 +21,7 @@
           },
           "required": [
             "requirement_id",
-            "dependent_id"
+            "dependency_type"
           ]
         }
       ]
@@ -29,6 +29,6 @@
   },
   "required": [
     "requirement_id",
-    "dependent_id"
+    "dependencies_ids"
   ]
 }

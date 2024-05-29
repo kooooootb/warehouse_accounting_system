@@ -3,6 +3,7 @@
 
 #include <string_view>
 
+#include <db_connector/data/user.h>
 #include <instrumental/common.h>
 #include <locator/service_locator.h>
 #include <tasks/base_task.h>
@@ -18,7 +19,7 @@ namespace tasks
 class Authorization : public BaseTask
 {
 public:
-    Authorization(std::shared_ptr<srv::ITracer> tracer, Callback&& callback);
+    Authorization(std::shared_ptr<srv::ITracer> tracer, db::data::User user, Callback&& callback);
 
     constexpr static std::string_view GetTarget()
     {

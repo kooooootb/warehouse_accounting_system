@@ -2,12 +2,9 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "type_id": {
-      "type": "string",
+    "type": {
+      "type": "integer",
       "description": "available values: functional, nonfunctional"
-    },
-    "in_specification": {
-      "type": "integer"
     },
     "description": {
       "type": "string"
@@ -17,8 +14,7 @@
     }
   },
   "required": [
-    "type_id",
-    "in_specification",
+    "type",
     "description",
     "project_id"
   ]

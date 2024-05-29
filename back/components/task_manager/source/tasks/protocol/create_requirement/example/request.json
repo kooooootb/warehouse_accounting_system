@@ -1,6 +1,5 @@
 {
   "type_id": 2,
-  "in_specification": 3,
   "description": "A must be greater than B",
   "project_id": 4
 }

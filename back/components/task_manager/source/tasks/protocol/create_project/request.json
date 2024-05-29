@@ -2,14 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "specification_id": {
-      "type": "integer"
-    },
-    "comment": {
+    "project_name": {
       "type": "string"
     }
   },
   "required": [
-    "specification_id"
+    "project_name"
   ]
 }

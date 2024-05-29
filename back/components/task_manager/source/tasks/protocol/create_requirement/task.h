@@ -1,5 +1,5 @@
-#ifndef H_75E59473_AE65_4ED5_978B_AFA352268551
-#define H_75E59473_AE65_4ED5_978B_AFA352268551
+#ifndef H_D35C2F16_1F4C_4016_9FE1_69CD7163ECEA
+#define H_D35C2F16_1F4C_4016_9FE1_69CD7163ECEA
 
 #include <string_view>
 
@@ -18,7 +18,7 @@ namespace tasks
 class CreateRequirement : public BaseTask
 {
 public:
-    CreateRequirement(std::shared_ptr<srv::ITracer> tracer, Callback&& callback);
+    CreateRequirement(std::shared_ptr<srv::ITracer> tracer, db::data::User user, Callback&& callback);
 
     constexpr static std::string_view GetTarget()
     {
@@ -31,18 +31,15 @@ protected:
 
 private:
     static constexpr std::string_view DESCRIPTION_KEY = "description";
-    static constexpr std::string_view TYPE_KEY = "type_id";
-    static constexpr std::string_view SPECIFICATION_ID_KEY = "in_specification";
+    static constexpr std::string_view TYPE_KEY = "type";
     static constexpr std::string_view PROJECT_ID_KEY = "project_id";
+    static constexpr std::string_view ID_KEY = "requirement_id";
 
 private:
-    std::string m_description;
-    uint64_t m_type;
-    uint64_t m_specificationId;
-    uint64_t m_projectId;
+    db::data::Requirement m_req;
 };
 
 }  // namespace tasks
 }  // namespace taskmgr
 
-#endif  // H_75E59473_AE65_4ED5_978B_AFA352268551
+#endif  // H_D35C2F16_1F4C_4016_9FE1_69CD7163ECEA

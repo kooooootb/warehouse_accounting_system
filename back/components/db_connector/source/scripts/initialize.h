@@ -113,7 +113,7 @@ create table if not exists Approve (
 );
 
 create table if not exists Comment (
-	decision_id int NOT NULL PRIMARY KEY,
+	decision_id serial NOT NULL PRIMARY KEY,
 	to_approve_id int,
 	date_com date,
 	decision_name text,
@@ -152,6 +152,9 @@ INSERT INTO Roles (role_id, role_name) VALUES
 (1, 'admin'),
 (2, 'analytic'),
 (3, 'reviewer');
+
+INSERT INTO Person (first_name, last_name, login, per_password, per_role) VALUES
+('admin', 'admin', 'admin', 'admin', 1);
 )";
 
 }  // namespace db
