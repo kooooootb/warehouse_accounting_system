@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <openssl/ssl.h>
-
 #include <instrumental/common.h>
 
 namespace util
@@ -12,7 +10,8 @@ namespace util
 namespace hash
 {
 
-std::string HashString(std::string_view input);
+std::vector<uint8_t> Hash(std::string_view input);
+std::string HashToBase64(std::string_view input);
 
 }  // namespace hash
 
