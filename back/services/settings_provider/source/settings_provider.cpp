@@ -1,6 +1,9 @@
 #include <environment/environment.h>
 #include <instrumental/common.h>
+#include <instrumental/types.h>
+
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 
 #include "config_reader.h"
@@ -12,41 +15,98 @@ namespace srv
 namespace settings_provider
 {
 
-SettingsProvider::SettingsProvider(IServiceLocator* locator)
+namespace
 {
-    std::string configPathStr;
-    std::shared_ptr<srv::IEnvironment> environment;
-    if (!(locator->GetInterface(environment) == ufa::Result::SUCCESS && environment->GetValue(SETTINGS_DIR_ENV, configPathStr) == ufa::Result::SUCCESS))
+
+constexpr std::string_view EnvironmentKeyPrefix = "RMS";
+constexpr std::string_view EnvironmentKeySeparator = "_";
+
+std::string ConvertToEnvironmentKey(std::string_view sectionName, std::string_view key)
+{
+    std::string result;
+    result.reserve(sectionName.size() + key.size() + EnvironmentKeyPrefix.size() + 2 * EnvironmentKeySeparator.size());
+
+    result.append(EnvironmentKeyPrefix);
+    result.append(EnvironmentKeySeparator);
+
+    for (auto ch : sectionName)
     {
-        configPathStr = std::filesystem::current_path();
+        result.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(ch))));
     }
 
-    std::filesystem::path configPath(std::move(configPathStr));
-    configPath /= SETTINGS_FILENAME;
+    result.append(EnvironmentKeySeparator);
+
+    for (auto ch : key)
+    {
+        result.push_back(static_cast<char>(std::toupper(static_cast<unsigned char>(ch))));
+    }
+
+    return result;
+}
+
+}  // namespace
+
+SettingsProvider::SettingsProvider(IServiceLocator* locator)
+{
+    std::filesystem::path configPath;
+
+    if (locator->GetInterface(m_environment) == ufa::Result::SUCCESS)
+    {
+        std::string configPathStr;
+        if (m_environment->GetValue(SETTINGS_FILE_ENV, configPathStr) == ufa::Result::SUCCESS)
+        {
+            configPath = std::move(configPathStr);
+        }
+    }
+
+    if (configPath.empty())
+    {
+        configPath = std::filesystem::current_path() / SETTINGS_FILENAME;
+    }
 
     m_configReader = std::make_unique<ConfigReader>(std::move(configPath));
+}
+
+bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const
+{
+    if (m_environment != nullptr)
+    {
+        if (m_environment->GetValue(ConvertToEnvironmentKey(settingsName, name), value) == ufa::Result::SUCCESS)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase* settings) const
 {
     const auto fields = settings->GetFields();
+    const auto settingsName = settings->GetSettingsName();
+
     std::map<ufa::settings::SettingsBase::Name, ufa::settings::SettingsBase::Value> settingsMap;
     ufa::Result result = ufa::Result::SUCCESS;
 
-    std::for_each(std::cbegin(fields), std::cend(fields),
-        [&settingsMap, &result, this](const auto& field)
+    for (const auto& field : fields)
+    {
+        std::string value;
+        auto curResult = ufa::Result::SUCCESS;
+
+        if (!this->TryFromEnvironment(settingsName, field, value))
         {
-            std::string value;
-            const auto curResult = m_configReader->ReadValue(field, value);
-            if (curResult != ufa::Result::SUCCESS)
-            {
-                result = curResult;
-            }
-            else
-            {
-                settingsMap.insert(std::make_pair(std::move(field), std::move(value)));
-            }
-        });
+            curResult = m_configReader->ReadValue(field, value);
+        }
+
+        if (curResult != ufa::Result::SUCCESS)
+        {
+            result = curResult;
+        }
+        else
+        {
+            settingsMap.insert(std::make_pair(std::move(field), std::move(value)));
+        }
+    }
 
     settings->FillSettings(settingsMap);
 

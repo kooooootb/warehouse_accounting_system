@@ -51,11 +51,11 @@
 
 #define SETTINGS_INIT_FIELD(...) SETTINGS_INIT_FIELD_SWITCHER(__VA_ARGS__)(__VA_ARGS__);
 
-#define SETTINGS_INIT(_settingsName)   \
-    std::string_view GetSettingsName() \
-    {                                  \
-        return #_settingsName;         \
-    }                                  \
+#define SETTINGS_INIT(_settingsName)                  \
+    std::string_view GetSettingsName() const override \
+    {                                                 \
+        return #_settingsName;                        \
+    }                                                 \
     _settingsName()
 
 namespace string_converters

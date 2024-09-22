@@ -23,9 +23,10 @@ namespace db
 {
 
 constexpr std::string_view ADDRESS_CONN = "host";
-constexpr std::string_view PORT_CONN = "port";
 constexpr std::string_view DBNAME_CONN = "dbname";
+constexpr std::string_view PORT_CONN = "port";
 constexpr std::string_view USER_CONN = "user";
+constexpr std::string_view PASSWORD_CONN = "password";
 
 Accessor::Accessor(std::shared_ptr<srv::IServiceLocator> locator) : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
 {
@@ -52,12 +53,14 @@ void Accessor::FillDefaultSettings(AccessorSettings& settings)
 {
     if (!settings.dbmsAddress.has_value())
         settings.dbmsAddress = DEFAULT_DBMS_ADDRESS;
+    if (!settings.dbmsDbname.has_value())
+        settings.dbmsDbname = DEFAULT_DBMS_DBNAME;
     if (!settings.dbmsPort.has_value())
         settings.dbmsPort = DEFAULT_DBMS_PORT;
     if (!settings.dbmsUser.has_value())
         settings.dbmsUser = DEFAULT_DBMS_USER;
-    if (!settings.dbmsDbname.has_value())
-        settings.dbmsDbname = DEFAULT_DBMS_DBNAME;
+    if (!settings.dbmsPassword.has_value())
+        settings.dbmsPassword = DEFAULT_DBMS_PASSWORD;
 }
 
 void Accessor::AcceptSettings(AccessorSettings&& settings)
@@ -66,13 +69,15 @@ void Accessor::AcceptSettings(AccessorSettings&& settings)
     CHECK_TRUE(settings.dbmsDbname.has_value());
     CHECK_TRUE(settings.dbmsPort.has_value());
     CHECK_TRUE(settings.dbmsUser.has_value());
+    CHECK_TRUE(settings.dbmsPassword.has_value());
 
     std::stringstream connString;
 
     connString << ADDRESS_CONN << '=' << std::move(settings.dbmsAddress.value()) << ' ';
-    connString << PORT_CONN << '=' << std::move(settings.dbmsPort.value()) << ' ';
     connString << DBNAME_CONN << '=' << std::move(settings.dbmsDbname.value()) << ' ';
+    connString << PORT_CONN << '=' << std::move(settings.dbmsPort.value()) << ' ';
     connString << USER_CONN << '=' << std::move(settings.dbmsUser.value());
+    connString << PASSWORD_CONN << '=' << std::move(settings.dbmsPassword.value());
 
     m_connOptions = connString.str();
 }

@@ -17,7 +17,7 @@ struct IEnvironment : public srv::IService
      * @param toValue where to put variable's value
      * @return ufa::Result NOT_FOUND if variable with specified key cant be found, SUCCESS otherwise
      */
-    virtual ufa::Result GetValue(const char* key, std::string& toValue) const = 0;
+    virtual ufa::Result GetValue(std::string_view key, std::string& toValue) const = 0;
 
     /**
      * @brief handle argc and argv user parameters

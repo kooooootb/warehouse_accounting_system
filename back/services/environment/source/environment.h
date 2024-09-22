@@ -14,7 +14,7 @@ class Environment : public IEnvironment
 public:
     Environment(IServiceLocator*);
 
-    ufa::Result GetValue(const char* key, std::string& toValue) const override;
+    ufa::Result GetValue(std::string_view key, std::string& toValue) const override;
     ufa::Result HandleCommandLine(int argc, char* argv[]) override;
 
 private:
