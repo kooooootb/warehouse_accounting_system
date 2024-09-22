@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <environment/environment.h>
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
 
@@ -21,6 +22,10 @@ public:
     ufa::Result FillSettings(ufa::settings::SettingsBase* settings) const override;
 
 private:
+    bool TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const;
+
+private:
+    std::shared_ptr<srv::IEnvironment> m_environment;
     std::unique_ptr<ConfigReader> m_configReader;
 };
 

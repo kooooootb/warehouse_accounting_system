@@ -7,6 +7,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -24,6 +25,8 @@ public:
     using Filler = std::function<bool(Name, Value)>;
     using Getter = std::function<Value()>;
 
+    virtual std::string_view GetSettingsName() const = 0;
+
     const std::vector<Name>& GetFields() const
     {
         return m_fieldNames;
@@ -31,7 +34,8 @@ public:
 
     void FillSettings(const std::map<Name, Value>& values)
     {
-        std::for_each(std::cbegin(values), std::cend(values),
+        std::for_each(std::cbegin(values),
+            std::cend(values),
             [this](const auto& field)
             {
                 for (const Filler& filler : m_fillers)

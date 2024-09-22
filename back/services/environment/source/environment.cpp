@@ -12,12 +12,11 @@ namespace environment
 
 Environment::Environment(IServiceLocator*) {}
 
-ufa::Result Environment::GetValue(const char* key, std::string& toValue) const
+ufa::Result Environment::GetValue(std::string_view key, std::string& toValue) const
 {
-    std::string_view keyView(key);
-    if (GetValueFromArguments(keyView, toValue) != ufa::Result::SUCCESS)
+    if (GetValueFromArguments(key, toValue) != ufa::Result::SUCCESS)
     {
-        if (const auto res = GetValueFromArguments(keyView, toValue); res != ufa::Result::SUCCESS)
+        if (const auto res = GetValueFromArguments(key, toValue); res != ufa::Result::SUCCESS)
         {
             return res;
         }

@@ -2,8 +2,9 @@ services:
   database:
     image: postgres:16.4
     environment:
-      - POSTGRES_PASSWORD=${RMS_DB_PASSWD:-defaultpassword}
-      - POSTGRES_DB=${RMS_DB_NAME:-postgres}
+      - POSTGRES_DB=${RMS_ACCESSORSETTINGS_DBMSDBNAME:-postgres}
+      - POSTGRES_USER=${RMS_ACCESSORSETTINGS_DBMSUSER:-postgres}
+      - POSTGRES_PASSWORD=${RMS_ACCESSORSETTINGS_DBMSPASSWORD:-defaultpassword}
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -11,7 +12,8 @@ services:
   rms_backend:
     build: .
     environment:
-      - RMS_DB_ADRESS=postgres://database
-      - RMS_DB_PORT=5432
-      - RMS_DB_NAME=${RMS_DB_NAME:-postgres}
-      - RMS_DB_PASSWD=${RMS_DB_PASSWD:-defaultpassword}
+      - RMS_ACCESSORSETTINGS_DBMSADDRESS=postgres://database
+      - RMS_ACCESSORSETTINGS_DBMSPORT=5432
+      - RMS_ACCESSORSETTINGS_DBMSDBNAME=${RMS_ACCESSORSETTINGS_DBMSDBNAME:-postgres}
+      - RMS_ACCESSORSETTINGS_DBMSUSER=${RMS_ACCESSORSETTINGS_DBMSUSER:-postgres}
+      - RMS_ACCESSORSETTINGS_DBMSPASSWORD=${RMS_ACCESSORSETTINGS_DBMSPASSWORD:-defaultpassword}
