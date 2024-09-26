@@ -16,7 +16,7 @@ ufa::Result Environment::GetValue(std::string_view key, std::string& toValue) co
 {
     if (GetValueFromArguments(key, toValue) != ufa::Result::SUCCESS)
     {
-        if (const auto res = GetValueFromArguments(key, toValue); res != ufa::Result::SUCCESS)
+        if (const auto res = GetValueFromEnvironment(key, toValue); res != ufa::Result::SUCCESS)
         {
             return res;
         }
