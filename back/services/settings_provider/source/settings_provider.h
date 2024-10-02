@@ -25,7 +25,7 @@ private:
 
 private:
     std::shared_ptr<srv::IEnvironment> m_environment;
-    std::unique_ptr<srv::IConfigReader> m_configReader;
+    std::shared_ptr<srv::IConfigReader> m_configReader;
 };
 
 }  // namespace settings_provider
