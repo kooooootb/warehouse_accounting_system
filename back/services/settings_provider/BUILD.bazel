@@ -19,6 +19,7 @@ cc_library(
     ]),
     deps = [
         ":iface",
+        "//back/services/config_reader:iface",
         "//back/services/environment:iface",
         "//back/services/locator:iface",
     ],

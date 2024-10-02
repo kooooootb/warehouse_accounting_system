@@ -1,4 +1,5 @@
 #include <environment/environment.h>
+#include <instrumental/check.h>
 #include <instrumental/common.h>
 #include <instrumental/types.h>
 
@@ -6,7 +7,6 @@
 #include <cctype>
 #include <filesystem>
 
-#include "config_reader.h"
 #include "settings_provider.h"
 
 namespace srv
@@ -48,23 +48,7 @@ std::string ConvertToEnvironmentKey(std::string_view sectionName, std::string_vi
 
 SettingsProvider::SettingsProvider(IServiceLocator* locator)
 {
-    std::filesystem::path configPath;
-
-    if (locator->GetInterface(m_environment) == ufa::Result::SUCCESS)
-    {
-        std::string configPathStr;
-        if (m_environment->GetValue(SETTINGS_FILE_ENV, configPathStr) == ufa::Result::SUCCESS)
-        {
-            configPath = std::move(configPathStr);
-        }
-    }
-
-    if (configPath.empty())
-    {
-        configPath = std::filesystem::current_path() / SETTINGS_FILENAME;
-    }
-
-    m_configReader = std::make_unique<ConfigReader>(std::move(configPath));
+    CHECK_SUCCESS(locator->GetInterface(m_configReader));
 }
 
 bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const
@@ -95,7 +79,7 @@ ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase* settings
 
         if (!this->TryFromEnvironment(settingsName, field, value))
         {
-            curResult = m_configReader->ReadValue(field, value);
+            curResult = m_configReader->ReadValue({settingsName, field}, value);
         }
 
         if (curResult != ufa::Result::SUCCESS)

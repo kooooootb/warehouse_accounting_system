@@ -12,6 +12,7 @@ namespace config_reader
 {
 
 constexpr char SPLITTER = '=';
+constexpr char COMBINER = '_';
 
 class BasicConfigReader : public srv::IConfigReader
 {

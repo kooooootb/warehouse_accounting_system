@@ -1,12 +1,13 @@
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
+#include <environment/environment.h>
 #include <instrumental/check.h>
 #include <instrumental/common.h>
 
-#include "back/services/config_reader/include/settings_provider/config_reader.h"
 #include "basic_config_reader.h"
 
 namespace srv
@@ -14,31 +15,71 @@ namespace srv
 namespace config_reader
 {
 
+namespace
+{
+
+std::string CombineKeys(const std::vector<std::string_view>& keys)
+{
+    std::string result;
+
+    size_t resultSize = keys.size() - 1;
+    for (const auto& key : keys)
+    {
+        resultSize += key.size();
+    }
+
+    result.reserve(resultSize);
+
+    for (size_t i = 0; i < keys.size() - 1; ++i)
+    {
+        result.append(keys[i]);
+        result.push_back(COMBINER);
+    }
+    result.append(keys.back());
+
+    return result;
+}
+
+}  // namespace
+
 BasicConfigReader::BasicConfigReader(IServiceLocator* locator)
 {
-    const std::shared_ptr<srv::IEnvironment> environment;
+    std::shared_ptr<srv::IEnvironment> environment;
     CHECK_SUCCESS(locator->GetInterface(environment));
 
-    const auto configFound = environment->GetValue(CONFIG_ENV_KEY, m_configPath);
+    std::string configPathStr;
+    const auto configFound = environment->GetValue(CONFIG_ENV_KEY, configPathStr);
 
     if (configFound != ufa::Result::SUCCESS)
     {
         m_configPath = std::filesystem::current_path() / CONFIG_DEFAULT_FILE;
     }
+    else
+    {
+        m_configPath = std::move(configPathStr);
+    }
 }
 
-ufa::Result BasicConfigReader::ReadValue(std::string_view key, std::string& value)
+ufa::Result BasicConfigReader::ReadValue(std::vector<std::string_view> keys, std::string& value)
 {
     std::ifstream fs(m_configPath);
+    const std::string key = CombineKeys(keys);
 
     std::string line;
     while (std::getline(fs, line))
     {
-        const auto [curKey, curValue] = SplitLine(line);
-        if (curKey == key)
+        try
         {
-            value = curValue;
-            return ufa::Result::SUCCESS;
+            const auto [curKey, curValue] = SplitLine(line);
+            if (curKey == key)
+            {
+                value = curValue;
+                return ufa::Result::SUCCESS;
+            }
+        }
+        catch (const std::exception& ex)
+        {
+            std::cout << ex.what() << std::endl;
         }
     }
 
