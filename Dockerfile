@@ -1,4 +1,4 @@
-FROM debian:12 as base_image
+FROM debian:12 AS base_image
 
 WORKDIR /
 
@@ -26,18 +26,21 @@ RUN groupadd -r builder && useradd -m -r -g builder builder && \
     chown -R builder:builder /rms_sources 
 # Switch to him
 USER builder
-
-### Prepare sources
-COPY --chown=builder .bazelrc BUILD.bazel MODULE.bazel WORKSPACE /rms_sources
-COPY --chown=builder back /rms_sources/back
 WORKDIR /rms_sources
+
+### Prepare dependencies and build them (prevent often rebuild while changing main targets)
+COPY --chown=builder .bazelrc BUILD.bazel MODULE.bazel WORKSPACE /rms_sources
+RUN bazel --output_base=/rms_output build //:libpqxx --config dbg
+RUN bazel --output_base=/rms_output build //:jwt --config dbg
+
+### Prepare project sources
+COPY --chown=builder back /rms_sources/back
 
 ### Build project
 RUN bazel --output_base=/rms_output build //back:rms314 --config dbg
 
 ### Run generated bin by hand
-# WORKDIR /rms_output/bazel-bin/back/rms314.runfiles/ ### this is where final bin is stored
-# CMD ["./_main/back/rms314"]
+CMD /rms_sources/bazel-bin/back/rms314.runfiles/_main/back/rms314
 
 ### Run with bazel run
-CMD exec bazel --output_base=/rms_output run //back:rms314 --config dbg
+# CMD bazel --output_base=/rms_output run //back:rms314 --config dbg

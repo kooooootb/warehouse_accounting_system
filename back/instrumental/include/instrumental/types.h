@@ -10,16 +10,17 @@ namespace ufa
 
 enum class Result : int32_t
 {
-    SUCCESS = 0,                      // no error
-    ERROR = 1,                        // general error, dont use if more suitable error exists
-    NO_INTERFACE = 0x800,             // if no such interface available
-    REREGISTERING_INTERFACE = 0x801,  // if trying to reregister interface
-    NOT_FOUND = 0x1600,               // not found
-    NO_STRING_CONVERTER = 0x8000,     // specifically for converter at the bottom
-    WRONG_FORMAT = 0x16000,           // met wrong input format
-    DUPLICATE = 0x32000,              // something duplicated
-    UNAUTHORIZED = 0x48000,           // unauthorized access
-    NOT_IMPLEMENTED = 0x64000         // some interface do'nt have implementation yet
+    SUCCESS = 0,                  // no error
+    ERROR = 1,                    // general error, dont use if more suitable error exists
+    NO_INTERFACE = 2,             // if no such interface available
+    REREGISTERING_INTERFACE = 3,  // if trying to reregister interface
+    NOT_FOUND = 4,                // not found
+    NO_STRING_CONVERTER = 5,      // specifically for converter at the bottom
+    WRONG_FORMAT = 6,             // met wrong input format
+    DUPLICATE = 7,                // something duplicated
+    UNAUTHORIZED = 8,             // unauthorized access
+    NOT_IMPLEMENTED = 9,          // some interface do'nt have implementation yet
+    NO_CONNECTION = 10,           // couldn't create connection
 };
 
 }  // namespace ufa
@@ -52,6 +53,8 @@ inline std::string ToString(::ufa::Result result)
             return "UNAUTHORIZED";
         case ::ufa::Result::NOT_IMPLEMENTED:
             return "NOT_IMPLEMENTED";
+        case ::ufa::Result::NO_CONNECTION:
+            return "NO_CONNECTION";
         default:
             return std::to_string(static_cast<int32_t>(result));
     }
@@ -78,6 +81,8 @@ inline ::ufa::Result FromString(const std::string& string)
         return ::ufa::Result::UNAUTHORIZED;
     if (string == "NOT_IMPLEMENTED")
         return ::ufa::Result::NOT_IMPLEMENTED;
+    if (string == "NO_CONNECTION")
+        return ::ufa::Result::NO_CONNECTION;
 
     return ::ufa::Result::NO_STRING_CONVERTER;
 }

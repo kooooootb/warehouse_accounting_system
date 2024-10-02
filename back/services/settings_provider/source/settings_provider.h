@@ -3,11 +3,10 @@
 
 #include <memory>
 
+#include <config_reader/config_reader.h>
 #include <environment/environment.h>
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
-
-#include "config_reader.h"
 
 namespace srv
 {
@@ -26,7 +25,7 @@ private:
 
 private:
     std::shared_ptr<srv::IEnvironment> m_environment;
-    std::unique_ptr<ConfigReader> m_configReader;
+    std::unique_ptr<srv::IConfigReader> m_configReader;
 };
 
 }  // namespace settings_provider

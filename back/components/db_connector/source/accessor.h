@@ -57,6 +57,7 @@ private:
 
     bool DBNeedsReinitializing();
     void InitializeDB();
+    pqxx::connection CreateConnection();
 
     std::string JoinFilters(const std::vector<std::string>& filters);
     db::data::User::Role GetRoleById(uint64_t id, pqxx::work& work);

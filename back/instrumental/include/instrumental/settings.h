@@ -58,6 +58,18 @@
     }                                                 \
     _settingsName()
 
+template <typename T>
+inline bool TryExtractFromOptional(std::optional<T> from, T& to)
+{
+    if (from.has_value())
+    {
+        to = std::move(from.value());
+        return true;
+    }
+
+    return false;
+}
+
 namespace string_converters
 {
 

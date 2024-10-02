@@ -1,47 +1,51 @@
-#include "trace_writer.h"
 #include <chrono>
 #include <filesystem>
+#include <iostream>
 #include <mutex>
 #include <thread>
+
+#include <instrumental/settings.h>
+
+#include "trace_writer.h"
 
 namespace srv
 {
 namespace tracer
 {
 
-TraceWriter::TraceWriter(std::filesystem::path traceFolder, std::shared_ptr<IDateProvider> dateProvider)
+TraceWriter::TraceWriter(const TracerSettings& settings, std::shared_ptr<IDateProvider> dateProvider)
     : m_writer(&TraceWriter::Run, this)
     , m_dateProvider(std::move(dateProvider))
 {
-    SetFolder(traceFolder);
+    SetSettings(settings);
 }
 
 TraceWriter::~TraceWriter() noexcept
 {
-    // Stopping writer
+    // Stop writer
     m_stop = true;
     m_writerCv.notify_all();
     m_writer.join();
+}
 
-    // Closing file
+void TraceWriter::SetSettings(const TracerSettings& settings)
+{
+    std::lock_guard lock(m_settingsMutex);
+
+    TryExtractFromOptional(settings.maxTraceLevelForConsole, m_maxLevelForConsole);
+    TryExtractFromOptional(settings.minMessagesToProcess, m_minMessagesToProcess);
+    TryExtractFromOptional(settings.processTimeoutMs, m_processTimeoutMs);
+
+    if (settings.traceFolder.has_value())
     {
-        // all operation should be stopped as writer gone but nevertheless
-        std::lock_guard lock(m_fileMutex);
-        m_fileStream.close();
+        SetFolder(settings.traceFolder.value());
     }
 }
 
 void TraceWriter::SetFolder(std::filesystem::path traceFolder)
 {
     m_traceFile = traceFolder / GetFilename();
-
-    std::ofstream ofStream(m_traceFile);
-    PrintHeader(ofStream);
-
-    {
-        std::lock_guard lock(m_fileMutex);
-        m_fileStream = std::move(ofStream);
-    }
+    PrepareFile();
 }
 
 void TraceWriter::Queue(std::unique_ptr<ITraceMessage> traceMessage)
@@ -59,43 +63,84 @@ void TraceWriter::Run()
     {
         std::unique_lock lock(m_messagesMutex);
 
-        m_writerCv.wait(lock,
-            [this]() -> bool
+        uint32_t processTimeoutMs;
+        uint32_t minMessagesToProcess;
+        {
+            std::lock_guard lock(m_settingsMutex);
+            processTimeoutMs = m_processTimeoutMs;
+            minMessagesToProcess = m_minMessagesToProcess;
+        }
+
+        const auto beginTime = std::chrono::steady_clock::now();
+        m_writerCv.wait_for(lock,
+            std::chrono::milliseconds(processTimeoutMs),
+            [this, minMessagesToProcess]() -> bool
             {
-                return !m_messagesQueue.empty() || m_stop;
+                return m_messagesQueue.size() >= minMessagesToProcess || m_stop;
             });
 
-        if (!m_messagesQueue.empty())
+        if (m_messagesQueue.size() >= minMessagesToProcess ||
+            std::chrono::steady_clock::now() > beginTime + std::chrono::milliseconds(processTimeoutMs))
         {
-            auto message = std::move(m_messagesQueue.front());
-            m_messagesQueue.pop();
+            auto messageQueue = std::move(m_messagesQueue);
             lock.unlock();
 
-            WriteToFile(std::move(message));
+            ProcessMessages(std::move(messageQueue));
         }
     }
 }
 
-void TraceWriter::WriteToFile(std::unique_ptr<ITraceMessage> traceMessage)
+void TraceWriter::ProcessMessages(std::queue<std::unique_ptr<ITraceMessage>> messages)
 {
-    std::lock_guard fileLock(m_fileMutex);
+    std::ofstream fileStream;
 
-    if (m_fileStream.bad())
     {
-        m_fileStream.open(m_traceFile, std::ios::app);
-        if (m_fileStream.bad())
+        std::lock_guard lock(m_settingsMutex);
+        fileStream.open(m_traceFile, std::ios::app);
+
+        if (fileStream.bad())
         {
-            SetFolder(std::filesystem::current_path());
+            PrepareFile();
+            fileStream.open(m_traceFile, std::ios::app);
         }
     }
 
-    m_fileStream << traceMessage->ToString();
-    m_fileStream.flush();
+    while (!messages.empty())
+    {
+        auto messagePtr = std::move(messages.front());
+        messages.pop();
+
+        WriteToStream(*messagePtr, fileStream);
+
+        if (messagePtr->GetTraceLevel() <= m_maxLevelForConsole)
+        {
+            WriteToStream(*messagePtr, std::cout);
+        }
+    }
+}
+
+void TraceWriter::WriteToStream(const ITraceMessage& message, std::ostream& stream)
+{
+    stream << message.ToString() << std::endl;
 }
 
 void TraceWriter::PrintHeader(std::ostream& stream) const
 {
     stream << "Trace file begin" << std::endl;
+}
+
+void TraceWriter::PrepareFile()
+{
+    std::ofstream fileStream;
+    fileStream.open(m_traceFile, std::ios::app | std::ios::trunc);
+
+    if (fileStream.bad())
+    {
+        m_traceFile.clear();
+        fileStream.open(m_traceFile, std::ios::app | std::ios::trunc);
+    }
+
+    PrintHeader(fileStream);
 }
 
 std::string TraceWriter::GetFilename() const
