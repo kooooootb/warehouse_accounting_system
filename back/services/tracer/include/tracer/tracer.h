@@ -32,10 +32,16 @@ public:
     {
         SETTINGS_INIT_FIELD(traceLevel);
         SETTINGS_INIT_FIELD(traceFolder);
+        SETTINGS_INIT_FIELD(maxTraceLevelForConsole);
+        SETTINGS_INIT_FIELD(minMessagesToProcess);
+        SETTINGS_INIT_FIELD(processTimeoutMs);
     }
 
     SETTINGS_FIELD(traceLevel, TraceLevel);
     SETTINGS_FIELD(traceFolder, std::string);
+    SETTINGS_FIELD(maxTraceLevelForConsole, TraceLevel);
+    SETTINGS_FIELD(minMessagesToProcess, uint32_t);
+    SETTINGS_FIELD(processTimeoutMs, uint32_t);
 };
 
 using index_t = uint32_t;
@@ -54,6 +60,10 @@ struct ITraceMessage : public ufa::IBase
      * @brief stringize
      */
     virtual std::string ToString() const = 0;
+    /**
+     * @brief Get the Trace Level
+     */
+    virtual TraceLevel GetTraceLevel() const = 0;
 };
 
 struct ITraceCollector : public ufa::IBase

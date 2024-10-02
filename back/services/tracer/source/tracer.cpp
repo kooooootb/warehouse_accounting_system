@@ -54,7 +54,7 @@ void Tracer::SetSettings(TracerSettings&& settings)
 
         if (m_traceWriter != nullptr)
         {
-            m_traceWriter->SetFolder(std::move(m_traceFolder));
+            m_traceWriter->SetSettings(settings);
         }
     }
 
@@ -73,7 +73,7 @@ void Tracer::SetSettings(TracerSettings&& settings)
     else if (oldLevel == srv::tracer::TraceLevel::DISABLED && m_maxTraceLevel != srv::tracer::TraceLevel::DISABLED)
     {
         // we turn on tracer and run new tracewriter
-        m_traceWriter = std::make_unique<TraceWriter>(m_traceFolder, m_dateProvider);
+        m_traceWriter = std::make_unique<TraceWriter>(settings, m_dateProvider);
     }
 }
 

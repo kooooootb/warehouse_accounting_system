@@ -1,4 +1,7 @@
+#include <chrono>
+#include <exception>
 #include <sstream>
+#include <thread>
 
 #include <db_connector/data/project.h>
 #include <db_connector/data/requirement.h>
@@ -8,10 +11,12 @@
 
 #include <db_connector/accessor.h>
 #include <db_connector/data/dependency.h>
+#include <instrumental/check.h>
 #include <instrumental/common.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
 #include <settings_provider/settings_provider.h>
+#include <tracer/trace_macros.h>
 #include <tracer/tracer_provider.h>
 
 #include "accessor.h"
@@ -84,7 +89,8 @@ void Accessor::AcceptSettings(AccessorSettings&& settings)
 
 bool Accessor::DBNeedsReinitializing()
 {
-    pqxx::connection conn(m_connOptions);
+    auto conn = CreateConnection();
+
     pqxx::work work(conn);
 
     auto [count] = work.query1<int>(CHECK_VALID.data());
@@ -98,11 +104,35 @@ bool Accessor::DBNeedsReinitializing()
 
 void Accessor::InitializeDB()
 {
-    pqxx::connection conn(m_connOptions);
+    auto conn = CreateConnection();
     pqxx::work work(conn);
 
     work.exec(INITIALIZE_DB);
     work.commit();
+}
+
+pqxx::connection Accessor::CreateConnection()
+{
+    constexpr uint32_t AttemptsCount = 50;
+    constexpr std::chrono::duration Timeout = std::chrono::seconds(2);
+
+    uint32_t attempt = 0;
+
+    do
+    {
+        try
+        {
+            return pqxx::connection(m_connOptions);
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_WRN << TRACE_HEADER << "Failed connecting to db, attempt: " << attempt;
+            std::this_thread::sleep_for(Timeout);
+        }
+    } while (++attempt <= AttemptsCount);
+
+    CHECK_SUCCESS(ufa::Result::NO_CONNECTION,
+        "Connection to db failed after " << attempt << " retries, connection string: " << m_connOptions);
 }
 
 db::data::User::Role Accessor::GetRoleById(uint64_t id, pqxx::work& work)
@@ -116,7 +146,7 @@ ufa::Result Accessor::FillUser(data::User& user)
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         std::stringstream query;
@@ -155,7 +185,7 @@ ufa::Result Accessor::CreateRequirement(const db::data::User& initiativeUser, da
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Analytic);
@@ -186,7 +216,7 @@ ufa::Result Accessor::CreateSpecification(const db::data::User& initiativeUser, 
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Analytic);
@@ -218,7 +248,7 @@ ufa::Result Accessor::CreateDependency(const db::data::User& initiativeUser, con
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Analytic);
@@ -244,7 +274,7 @@ ufa::Result Accessor::CreateProject(const db::data::User& initiativeUser, data::
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Analytic);
@@ -273,7 +303,7 @@ ufa::Result Accessor::AddReqInSpec(const db::data::User& initiativeUser,
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Analytic);
@@ -319,7 +349,7 @@ ufa::Result Accessor::AddUser(const db::data::User& initiativeUser, const data::
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Admin);
@@ -352,7 +382,7 @@ ufa::Result Accessor::GetProjectInfo(const db::data::User& initiativeUser,
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         const auto query = fmt::format("SELECT project_name FROM Project WHERE project_id={};", proj.id.value());
@@ -389,7 +419,7 @@ ufa::Result Accessor::GetProjects(const db::data::User& initiativeUser, std::vec
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         const auto query = fmt::format("SELECT project_id FROM Project");
@@ -416,7 +446,7 @@ ufa::Result Accessor::GetDependencies(const db::data::User& initiativeUser,
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Analytic);
@@ -445,7 +475,7 @@ ufa::Result Accessor::GetRequirementsBySpecification(const db::data::User& initi
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         const auto specQuery =
@@ -487,7 +517,7 @@ ufa::Result Accessor::EditRequirement(const db::data::User& initiativeUser,
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         const auto query = fmt::format("UPDATE Requirement SET description='{}' WHERE requirement_id={}",
@@ -520,7 +550,7 @@ ufa::Result Accessor::SendToApprove(const data::User& initiativeUser, const db::
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         const auto query = fmt::format(
@@ -546,7 +576,7 @@ ufa::Result Accessor::ApproveSpecification(const data::User& initiativeUser, con
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Reviewer);
@@ -600,7 +630,7 @@ ufa::Result Accessor::RejectSpecification(const data::User& initiativeUser, cons
 {
     try
     {
-        pqxx::connection conn(m_connOptions);
+        auto conn = CreateConnection();
         pqxx::work work(conn);
 
         CHECK_TRUE(GetRoleById(initiativeUser.id.value(), work) == db::data::User::Role::Reviewer);

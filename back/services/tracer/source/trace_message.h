@@ -20,12 +20,14 @@ public:
     void AddToBack(std::string data) override;
     void AddToFront(std::string data) override;
     std::string ToString() const override;
+    TraceLevel GetTraceLevel() const override;
 
 private:
     inline size_t GetMessageSize() const;
 
 private:
     std::list<std::string> m_message;
+    TraceLevel m_traceLevel;
 };
 
 }  // namespace tracer

@@ -10,6 +10,7 @@
 #include <thread>
 
 #include <date_provider/date_provider.h>
+#include <tracer/trace_level.h>
 #include <tracer/tracer.h>
 
 namespace srv
@@ -18,28 +19,34 @@ namespace tracer
 {
 
 /**
- * @brief only write string to file, no trace logic
+ * @brief only write string to file or stdout
  */
 class TraceWriter
 {
 public:
-    TraceWriter(std::filesystem::path traceFolder, std::shared_ptr<IDateProvider> dateProvider);
+    TraceWriter(const TracerSettings& settings, std::shared_ptr<IDateProvider> dateProvider);
 
     ~TraceWriter() noexcept;
 
-    void SetFolder(std::filesystem::path traceFolder);
+    void SetSettings(const TracerSettings& settings);
+
     void Queue(std::unique_ptr<ITraceMessage> traceMessage);
 
     void Stop();
 
 private:
     // decorations
-    void PrintHeader(std::ostream& stream) const;
+    void PrintHeader(std::ostream& ostream) const;
+    void PrepareFile();  // called under m_settingsMutex
     std::string GetFilename() const;
+
+    // settings
+    void SetFolder(std::filesystem::path traceFolder);  // called under m_settingsMutex
 
     // worker jobs
     void Run();
-    void WriteToFile(std::unique_ptr<ITraceMessage> traceMessage);
+    void ProcessMessages(std::queue<std::unique_ptr<ITraceMessage>> message);
+    void WriteToStream(const ITraceMessage& message, std::ostream& ostream);
 
 private:
     // writer
@@ -51,12 +58,14 @@ private:
     std::queue<std::unique_ptr<ITraceMessage>> m_messagesQueue;
     std::mutex m_messagesMutex;
 
-    // files
+    // trace settings
+    std::mutex m_settingsMutex;
     std::filesystem::path m_traceFile;
-    std::mutex m_fileMutex;
-    std::ofstream m_fileStream;
+    TraceLevel m_maxLevelForConsole = TraceLevel::ERROR;
+    uint32_t m_minMessagesToProcess = 5;
+    uint32_t m_processTimeoutMs = 10000;
 
-    // dependecies
+    // dependencies
     std::shared_ptr<IDateProvider> m_dateProvider;
 };
 

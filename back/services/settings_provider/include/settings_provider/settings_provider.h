@@ -7,20 +7,8 @@
 namespace srv
 {
 
-namespace settings_provider
-{
-
-constexpr char SETTINGS_FILE_ENV[] = "RMS_SETTINGS_FILE";
-
 /**
- * @brief If settings folder wasn't specified will try open this from pwd
- */
-constexpr char SETTINGS_FILENAME[] = "rms_settings.cfg";
-
-}  // namespace settings_provider
-
-/**
- * @brief provide default (initial) settings using keys in settings object
+ * @brief provide settings using keys in settings object
  * 
  */
 struct ISettingsProvider : public srv::IService
