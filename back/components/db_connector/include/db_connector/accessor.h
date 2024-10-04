@@ -34,6 +34,7 @@ public:
         SETTINGS_INIT_FIELD(dbmsPort);
         SETTINGS_INIT_FIELD(dbmsUser);
         SETTINGS_INIT_FIELD(dbmsPassword);
+        SETTINGS_INIT_FIELD(connectAttempts);
     }
 
     SETTINGS_FIELD(dbmsAddress, std::string);
@@ -41,6 +42,7 @@ public:
     SETTINGS_FIELD(dbmsPort, uint32_t);
     SETTINGS_FIELD(dbmsUser, std::string);
     SETTINGS_FIELD(dbmsPassword, std::string);
+    SETTINGS_FIELD(connectAttempts, uint32_t);
 };
 
 struct IAccessor : public ufa::IBase

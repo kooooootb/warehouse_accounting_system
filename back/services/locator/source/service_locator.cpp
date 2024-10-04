@@ -1,3 +1,4 @@
+#include <config_reader/config_reader.h>
 #include <date_provider/date_provider.h>
 #include <environment/environment.h>
 #include <settings_provider/settings_provider.h>
@@ -23,10 +24,11 @@ void ServiceLocator::RegisterDefaults()
 
 void ServiceLocator::Setup()
 {
-    TryRegisterDefaultInterface<srv::IEnvironment>();
-    TryRegisterDefaultInterface<srv::IDateProvider>();
-    TryRegisterDefaultInterface<srv::ISettingsProvider>();
-    TryRegisterDefaultInterface<srv::ITracer>();
+    // CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IEnvironment>()); // should be already registered
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IConfigReader>());
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IDateProvider>());
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::ISettingsProvider>());
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::ITracer>());
 }
 
 std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid)

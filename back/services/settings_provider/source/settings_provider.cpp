@@ -49,6 +49,7 @@ std::string ConvertToEnvironmentKey(std::string_view sectionName, std::string_vi
 SettingsProvider::SettingsProvider(IServiceLocator* locator)
 {
     CHECK_SUCCESS(locator->GetInterface(m_configReader));
+    CHECK_SUCCESS(locator->GetInterface(m_environment));
 }
 
 bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const

@@ -32,7 +32,7 @@ private:
     std::filesystem::path m_traceFolder;
     std::mutex m_settingsMutex;
 
-    std::atomic<uint64_t> m_index;
+    std::atomic<uint64_t> m_index = 0;
     std::shared_ptr<IDateProvider> m_dateProvider;
 };
 

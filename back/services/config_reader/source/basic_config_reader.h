@@ -14,12 +14,15 @@ namespace config_reader
 constexpr char SPLITTER = '=';
 constexpr char COMBINER = '_';
 
+/**
+ * @brief Reads values in format: <key1>_<key2>=<value>
+ */
 class BasicConfigReader : public srv::IConfigReader
 {
 public:
     BasicConfigReader(IServiceLocator* locator);
 
-    ufa::Result ReadValue(std::vector<std::string_view> keys, std::string& value) override;
+    ufa::Result ReadValue(const std::vector<std::string_view>& keys, std::string& value) override;
 
 private:
     std::pair<std::string_view, std::string_view> SplitLine(std::string_view);

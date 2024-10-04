@@ -60,7 +60,7 @@ BasicConfigReader::BasicConfigReader(IServiceLocator* locator)
     }
 }
 
-ufa::Result BasicConfigReader::ReadValue(std::vector<std::string_view> keys, std::string& value)
+ufa::Result BasicConfigReader::ReadValue(const std::vector<std::string_view>& keys, std::string& value)
 {
     std::ifstream fs(m_configPath);
     const std::string key = CombineKeys(keys);
@@ -102,3 +102,5 @@ std::pair<std::string_view, std::string_view> BasicConfigReader::SplitLine(std::
 
 }  // namespace config_reader
 }  // namespace srv
+
+// DECLARE_DEFAULT_INTERFACE(srv::IConfigReader, srv::config_reader::BasicConfigReader);

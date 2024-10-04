@@ -30,10 +30,10 @@ Server::Server(std::shared_ptr<srv::IServiceLocator> locator,
     std::shared_ptr<docmgr::IDocumentManager> documentManager)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_ioContext(std::make_shared<asio::io_context>())
-    , m_taskManager(std::move(taskManager))
-    , m_authorizer(std::move(authorizer))
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
     , m_documentManager(std::move(documentManager))
+    , m_taskManager(std::move(taskManager))
+    , m_authorizer(std::move(authorizer))
 {
     TRACE_INF << TRACE_HEADER << "Creating Server";
 

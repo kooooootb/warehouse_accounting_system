@@ -64,6 +64,7 @@ private:
 
 private:
     std::string m_connOptions;
+    uint32_t m_connectAttempts = 50;
 };
 
 }  // namespace db

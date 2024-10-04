@@ -98,7 +98,7 @@ void TraceWriter::ProcessMessages(std::queue<std::unique_ptr<ITraceMessage>> mes
         std::lock_guard lock(m_settingsMutex);
         fileStream.open(m_traceFile, std::ios::app);
 
-        if (fileStream.bad())
+        if (!fileStream.good())
         {
             PrepareFile();
             fileStream.open(m_traceFile, std::ios::app);
@@ -134,7 +134,7 @@ void TraceWriter::PrepareFile()
     std::ofstream fileStream;
     fileStream.open(m_traceFile, std::ios::app | std::ios::trunc);
 
-    if (fileStream.bad())
+    if (!fileStream.good())
     {
         m_traceFile.clear();
         fileStream.open(m_traceFile, std::ios::app | std::ios::trunc);
