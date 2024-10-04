@@ -17,8 +17,8 @@ namespace auth
 
 Authorizer::Authorizer(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<db::IAccessor> accessor)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
-    , m_dateProvider(locator->GetInterface<srv::IDateProvider>())
     , m_accessor(std::move(accessor))
+    , m_dateProvider(locator->GetInterface<srv::IDateProvider>())
 {
 }
 

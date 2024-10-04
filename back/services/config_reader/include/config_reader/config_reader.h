@@ -21,14 +21,14 @@ constexpr std::string_view CONFIG_DEFAULT_FILE = "rms_settings.cfg";
 
 struct IConfigReader : public srv::IService
 {
-    DECLARE_IID(0XB2A6A4FB);
+    DECLARE_IID(0XAA0EF280);
 
     /**
      * @brief reads value identified with series of keys
      * @param keys path to required value
      * @return ufa::Result NOT_FOUND or SUCCESS
      */
-    virtual ufa::Result ReadValue(std::vector<std::string_view> keys, std::string& value) = 0;
+    virtual ufa::Result ReadValue(const std::vector<std::string_view>& keys, std::string& value) = 0;
 };
 
 }  // namespace srv

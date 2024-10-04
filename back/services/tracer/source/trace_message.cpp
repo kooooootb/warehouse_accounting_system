@@ -1,4 +1,5 @@
 #include <numeric>
+#include <thread>
 
 #include <instrumental/string_converters.h>
 
@@ -12,9 +13,11 @@ namespace tracer
 TraceMessage::TraceMessage(index_t index, TraceLevel traceLevel, std::shared_ptr<IDateProvider> dateProvider)
     : m_traceLevel(traceLevel)
 {
-    AddToBack(std::to_string(index));
+    AddToBack(string_converters::ToString(index));
     AddToBack("\t");
     AddToBack(dateProvider->GetTimeString());
+    AddToBack("\t");
+    AddToBack(string_converters::ToString(std::hash<std::thread::id>()(std::this_thread::get_id())));
     AddToBack("\t");
     AddToBack(string_converters::ToString(m_traceLevel));
     AddToBack("\t");
@@ -44,13 +47,12 @@ size_t TraceMessage::GetMessageSize() const
 std::string TraceMessage::ToString() const
 {
     std::string result;
-    result.reserve(GetMessageSize() + 1);  // 1 for \n
+    result.reserve(GetMessageSize());
 
     for (const auto& string : m_message)
     {
         result.append(string);
     }
-    result.append("\n");
 
     return result;
 }

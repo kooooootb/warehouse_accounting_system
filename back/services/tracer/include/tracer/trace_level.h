@@ -56,19 +56,19 @@ inline std::string ToString(::srv::tracer::TraceLevel traceLevel)
 template <>
 inline ::srv::tracer::TraceLevel FromString(const std::string& string)
 {
-    if (string == "DIS")
+    if (string == "DIS" || string == "DISABLED")
         return ::srv::tracer::TraceLevel::DISABLED;
-    if (string == "ALW")
+    if (string == "ALW" || string == "ALWAYS")
         return ::srv::tracer::TraceLevel::ALWAYS;
-    if (string == "CRT")
+    if (string == "CRT" || string == "CRITICAL")
         return ::srv::tracer::TraceLevel::CRITICAL;
-    if (string == "ERR")
+    if (string == "ERR" || string == "ERROR")
         return ::srv::tracer::TraceLevel::ERROR;
-    if (string == "WRN")
+    if (string == "WRN" || string == "WARNING")
         return ::srv::tracer::TraceLevel::WARNING;
-    if (string == "INF")
+    if (string == "INF" || string == "INFO")
         return ::srv::tracer::TraceLevel::INFO;
-    if (string == "DBG")
+    if (string == "DBG" || string == "DEBUG")
         return ::srv::tracer::TraceLevel::DEBUG;
 
     return ::srv::tracer::TraceLevel::DEBUG;

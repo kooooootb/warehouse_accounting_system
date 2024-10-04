@@ -1,0 +1,24 @@
+{
+    "AccessorSettings": {
+        "dbmsAddress": "127.0.0.1",
+        "dbmsDbname": "rms",
+        "dbmsPort": 5432,
+        "dbmsUser": "postgres",
+        "dbmsPassword": "defaultpassword",
+        "connectAttempts": 10
+    },
+    "ServerSettings": {
+        "port": 10000,
+        "address": "0.0.0.0",
+        "workers": 4,
+        "isSecured": true,
+        "documentRoot": "."
+    },
+    "TracerSettings": {
+        "traceLevel": "DEBUG",
+        "traceFolder": ".",
+        "maxTraceLevelForConsole": "DEBUG",
+        "minMessagesToProcess": 1,
+        "processTimeoutMs": 10000
+    }
+}

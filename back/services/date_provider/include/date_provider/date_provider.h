@@ -21,7 +21,7 @@ struct IDateProvider : public srv::IService
     virtual timestamp_t GetTimestamp() const = 0;
 
     /**
-     * @brief get string with format: hh:MM:ss.mmm
+     * @brief get string with format: hh:MM:ss.mmmmmm
      */
     virtual std::string GetTimeString() const = 0;
 };

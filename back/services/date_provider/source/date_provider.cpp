@@ -14,7 +14,7 @@ DateProvider::DateProvider(IServiceLocator* serviceLocator)
     const auto currentTimeFromEpoch = chrono::system_clock::now().time_since_epoch();
     const auto currentTimeHighresolution = chrono::high_resolution_clock::now().time_since_epoch();
 
-    m_epochOffset = currentTimeHighresolution - currentTimeFromEpoch;
+    m_epochOffset = currentTimeFromEpoch - currentTimeHighresolution;
 }
 
 std::chrono::high_resolution_clock::duration DateProvider::GetDuration() const
@@ -32,25 +32,26 @@ std::string DateProvider::GetTimeString() const
     // TODO: strftime
     const auto duration = GetDuration();
 
-    std::string result(12, '0');
+    std::string result;
+    result.reserve(12);
 
     auto hours = std::to_string(chrono::duration_cast<chrono::hours>(duration).count() % 24);
     auto minutes = std::to_string(chrono::duration_cast<chrono::minutes>(duration).count() % 60);
     auto seconds = std::to_string(chrono::duration_cast<chrono::seconds>(duration).count() % 60);
-    auto milliseconds = std::to_string(chrono::duration_cast<chrono::milliseconds>(duration).count() % 1000);
+    auto microseconds = std::to_string(chrono::duration_cast<chrono::microseconds>(duration).count() % 1000000);
 
     hours.resize(2, '0');
     minutes.resize(2, '0');
     seconds.resize(2, '0');
-    milliseconds.resize(3, '0');
+    microseconds.resize(6, '0');
 
     result.insert(0, hours.c_str(), 2);
-    result[2] = ':';
+    result.push_back(':');
     result.insert(3, minutes.c_str(), 2);
-    result[5] = ':';
+    result.push_back(':');
     result.insert(6, seconds.c_str(), 2);
-    result[8] = '.';
-    result.insert(9, milliseconds.c_str(), 3);
+    result.push_back('.');
+    result.insert(9, microseconds.c_str(), 6);
 
     return result;
 }

@@ -85,6 +85,11 @@ void Accessor::AcceptSettings(AccessorSettings&& settings)
     connString << PASSWORD_CONN << '=' << std::move(settings.dbmsPassword.value());
 
     m_connOptions = connString.str();
+
+    if (settings.connectAttempts.has_value())
+    {
+        m_connectAttempts = settings.connectAttempts.value();
+    }
 }
 
 bool Accessor::DBNeedsReinitializing()
@@ -113,7 +118,6 @@ void Accessor::InitializeDB()
 
 pqxx::connection Accessor::CreateConnection()
 {
-    constexpr uint32_t AttemptsCount = 50;
     constexpr std::chrono::duration Timeout = std::chrono::seconds(2);
 
     uint32_t attempt = 0;
@@ -129,7 +133,7 @@ pqxx::connection Accessor::CreateConnection()
             TRACE_WRN << TRACE_HEADER << "Failed connecting to db, attempt: " << attempt;
             std::this_thread::sleep_for(Timeout);
         }
-    } while (++attempt <= AttemptsCount);
+    } while (++attempt <= m_connectAttempts);
 
     CHECK_SUCCESS(ufa::Result::NO_CONNECTION,
         "Connection to db failed after " << attempt << " retries, connection string: " << m_connOptions);

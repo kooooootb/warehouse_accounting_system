@@ -40,21 +40,28 @@ int main(int argc, char* argv[])
     CHECK_SUCCESS(serviceLocator->GetInterface(tracer));
     LOCAL_TRACER(tracer);
 
-    TRACE_INF << "Services initialized";
+    TRACE_INF << TRACE_HEADER << "Services initialized";
 
-    std::shared_ptr<docmgr::IDocumentManager> documentManager = docmgr::IDocumentManager::Create(tracer);
+    try
+    {
+        std::shared_ptr<docmgr::IDocumentManager> documentManager = docmgr::IDocumentManager::Create(tracer);
 
-    std::shared_ptr<db::IAccessor> accessor = db::IAccessor::Create(serviceLocator);
-    std::shared_ptr<auth::IAuthorizer> authorizer = auth::IAuthorizer::Create(serviceLocator, accessor);
-    std::shared_ptr<taskmgr::ITaskManager> taskManager =
-        taskmgr::ITaskManager::Create(serviceLocator, accessor, authorizer, documentManager);
-    auto server = ws::IServer::Create(serviceLocator, taskManager, authorizer, documentManager);
+        std::shared_ptr<db::IAccessor> accessor = db::IAccessor::Create(serviceLocator);
+        std::shared_ptr<auth::IAuthorizer> authorizer = auth::IAuthorizer::Create(serviceLocator, accessor);
+        std::shared_ptr<taskmgr::ITaskManager> taskManager =
+            taskmgr::ITaskManager::Create(serviceLocator, accessor, authorizer, documentManager);
+        auto server = ws::IServer::Create(serviceLocator, taskManager, authorizer, documentManager);
 
-    server->Start();
+        server->Start();
 
-    int a;
-    std::cin >> a;
+        int a;
+        std::cin >> a;
+    }
+    catch (const std::exception& ex)
+    {
+        TRACE_ERR << TRACE_HEADER << "Caught exception from main: " << ex.what();
+    }
 
-    TRACE_INF << "Exiting main";
+    TRACE_INF << TRACE_HEADER << "Exiting main";
     return EXIT_SUCCESS;
 }

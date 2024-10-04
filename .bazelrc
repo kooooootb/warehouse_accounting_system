@@ -10,5 +10,6 @@ build --@boost//:beast_use_std_string_view
 
 # debugging
 build:dbg --copt="-g"
+build:dbg --copt="-O0"
 build:dbg --strip=never
 build:dbg --copt="-fno-limit-debug-info"

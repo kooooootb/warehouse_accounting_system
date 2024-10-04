@@ -21,5 +21,6 @@ cc_library(
         ":iface",
         "//back/services/environment:iface",
         "//back/services/locator:iface",
+        "@nlohmann_json//:json",
     ],
 )
