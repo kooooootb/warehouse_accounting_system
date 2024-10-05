@@ -21,5 +21,6 @@ cc_library(
     deps = [
         ":iface",
         "//back/services/locator:iface",
+        "//back/services/tracer:lazy_provider_iface",
     ],
 )

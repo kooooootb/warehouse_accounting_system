@@ -112,6 +112,19 @@ public:
         return *this;
     }
 
+    /**
+     * @brief check if we should really collect message, depends on current level and maybe other conditions
+     */
+    bool IsTracing()
+    {
+        if (m_traceCollector != nullptr)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
 private:
     std::unique_ptr<ITraceCollector> m_traceCollector;
 };

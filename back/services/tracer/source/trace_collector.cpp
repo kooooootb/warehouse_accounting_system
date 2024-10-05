@@ -9,7 +9,8 @@ namespace tracer
 {
 
 TraceCollector::TraceCollector(std::shared_ptr<ITracer> tracer, std::unique_ptr<ITraceMessage> traceMessage)
-    : m_tracer(tracer), m_traceMessage(std::move(traceMessage))
+    : m_tracer(tracer)
+    , m_traceMessage(std::move(traceMessage))
 {
 }
 

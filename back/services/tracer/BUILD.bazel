@@ -2,11 +2,25 @@ package(default_visibility = ["//back:__subpackages__"])
 
 cc_library(
     name = "iface",
-    hdrs = glob([
-        "include/**/*.h",
-    ]),
+    hdrs = glob(
+        [
+            "include/**/*.h",
+        ],
+        exclude = ["include/tracer/tracer_lazy_provider.h"],
+    ),
     includes = ["./include"],
     deps = [
+        "//back/services/locator:iface",
+    ],
+)
+
+cc_library(
+    name = "lazy_provider_iface",
+    hdrs = ["include/tracer/tracer_lazy_provider.h"],
+    includes = ["./include"],
+    visibility = ["//back/services:__subpackages__"],
+    deps = [
+        ":iface",
         "//back/services/locator:iface",
     ],
 )

@@ -5,6 +5,7 @@
 
 #include <config_reader/config_reader.h>
 #include <locator/service_locator.h>
+#include <tracer/tracer_lazy_provider.h>
 
 namespace srv
 {
@@ -17,10 +18,10 @@ constexpr char COMBINER = '_';
 /**
  * @brief Reads values in format: <key1>_<key2>=<value>
  */
-class BasicConfigReader : public srv::IConfigReader
+class BasicConfigReader : public srv::tracer::TracerLazyProvider, public srv::IConfigReader
 {
 public:
-    BasicConfigReader(IServiceLocator* locator);
+    BasicConfigReader(const std::shared_ptr<IServiceLocator>& locator);
 
     ufa::Result ReadValue(const std::vector<std::string_view>& keys, std::string& value) override;
 

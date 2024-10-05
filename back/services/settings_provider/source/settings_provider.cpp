@@ -46,18 +46,22 @@ std::string ConvertToEnvironmentKey(std::string_view sectionName, std::string_vi
 
 }  // namespace
 
-SettingsProvider::SettingsProvider(IServiceLocator* locator)
+SettingsProvider::SettingsProvider(const std::shared_ptr<IServiceLocator>& locator) : srv::tracer::TracerLazyProvider(locator)
 {
+    TRACE_INF << TRACE_HEADER;
+
     CHECK_SUCCESS(locator->GetInterface(m_configReader));
     CHECK_SUCCESS(locator->GetInterface(m_environment));
 }
 
 bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const
 {
+    TRACE_INF << TRACE_HEADER << "Settings name: " << settingsName << ", setting: " << name;
     if (m_environment != nullptr)
     {
         if (m_environment->GetValue(ConvertToEnvironmentKey(settingsName, name), value) == ufa::Result::SUCCESS)
         {
+            TRACE_INF << TRACE_HEADER << "Received: " << value;
             return true;
         }
     }

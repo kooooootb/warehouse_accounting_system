@@ -21,6 +21,7 @@ cc_library(
         ":iface",
         "//back/services/environment:iface",
         "//back/services/locator:iface",
+        "//back/services/tracer:lazy_provider_iface",
         "@nlohmann_json//:json",
     ],
 )

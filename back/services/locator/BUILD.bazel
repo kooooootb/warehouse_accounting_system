@@ -23,6 +23,7 @@ cc_library(
         "//back/services/date_provider:lib",
         "//back/services/environment:lib",
         "//back/services/settings_provider:lib",
+        "//back/services/tracer:lazy_provider_iface",
         "//back/services/tracer:lib",
     ],
 )

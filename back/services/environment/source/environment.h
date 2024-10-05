@@ -3,16 +3,17 @@
 
 #include <environment/environment.h>
 #include <locator/service_locator.h>
+#include <tracer/tracer_lazy_provider.h>
 
 namespace srv
 {
 namespace environment
 {
 
-class Environment : public IEnvironment
+class Environment : public srv::tracer::TracerLazyProvider, public IEnvironment
 {
 public:
-    Environment(IServiceLocator*);
+    Environment(const std::shared_ptr<IServiceLocator>& locator);
 
     ufa::Result GetValue(std::string_view key, std::string& toValue) const override;
     ufa::Result HandleCommandLine(int argc, char* argv[]) override;

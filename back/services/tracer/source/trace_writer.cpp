@@ -131,13 +131,26 @@ void TraceWriter::PrintHeader(std::ostream& stream) const
 
 void TraceWriter::PrepareFile()
 {
+    // firstly try to create file
     std::ofstream fileStream;
     fileStream.open(m_traceFile, std::ios::app | std::ios::trunc);
+    fileStream.close();
+
+    // check if it was successful
+    fileStream.open(m_traceFile, std::ios::app);
 
     if (!fileStream.good())
     {
-        m_traceFile.clear();
+        fileStream.close();
+
+        // if not - reset to current folder
+        std::error_code error;
+        m_traceFile = std::filesystem::current_path(error) / m_traceFile.filename();
+
         fileStream.open(m_traceFile, std::ios::app | std::ios::trunc);
+        fileStream.close();
+
+        fileStream.open(m_traceFile, std::ios::app);
     }
 
     PrintHeader(fileStream);
@@ -148,7 +161,7 @@ std::string TraceWriter::GetFilename() const
     std::string timestamp = m_dateProvider->GetTimeString();
     std::replace(std::begin(timestamp), std::end(timestamp), ':', '.');
 
-    const std::string fileSuffix = "_rms_logfile.log";
+    const std::string fileSuffix = "_rms.log";
     return timestamp + fileSuffix;
 }
 

@@ -44,6 +44,7 @@ public:
 protected:
     virtual std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) = 0;
     virtual ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) = 0;
+    virtual std::shared_ptr<IServiceLocator> GetSharedFromThis() = 0;
 };
 
 template <class T>
@@ -75,7 +76,7 @@ ufa::Result IServiceLocator::RegisterInterface(std::shared_ptr<T> object)
     template <>                                                                            \
     std::shared_ptr<IfaceType> srv::IServiceLocator::RegisterDefaultInterface<IfaceType>() \
     {                                                                                      \
-        auto _impl = std::make_shared<ImplType>(this);                                     \
+        auto _impl = std::make_shared<ImplType>(GetSharedFromThis());                      \
                                                                                            \
         srv::IServiceLocator::RegisterInterface(_impl);                                    \
         return std::move(_impl);                                                           \

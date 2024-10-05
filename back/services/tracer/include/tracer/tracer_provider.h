@@ -14,7 +14,9 @@ public:
     TracerProvider(std::shared_ptr<ITracer> tracer) : m_tracer(std::move(tracer)) {}
 
 protected:
-    std::shared_ptr<ITracer> GetTracer()
+    // return ref to shared pointer as provider owns it already
+    // but users can pass tracer to other objects
+    const std::shared_ptr<ITracer>& GetTracer()
     {
         return m_tracer;
     }

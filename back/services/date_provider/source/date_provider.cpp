@@ -9,7 +9,7 @@ namespace date
 
 namespace chrono = std::chrono;
 
-DateProvider::DateProvider(IServiceLocator* serviceLocator)
+DateProvider::DateProvider(const std::shared_ptr<IServiceLocator>& locator)
 {
     const auto currentTimeFromEpoch = chrono::system_clock::now().time_since_epoch();
     const auto currentTimeHighresolution = chrono::high_resolution_clock::now().time_since_epoch();

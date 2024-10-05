@@ -17,7 +17,7 @@ namespace tracer
 class Tracer : public ITracer, public std::enable_shared_from_this<ITracer>
 {
 public:
-    Tracer(IServiceLocator* serviceLocator);
+    Tracer(const std::shared_ptr<IServiceLocator>& locator);
 
     TraceCollectorProxy StartCollecting(TraceLevel traceLevel) override;
     void SetSettings(TracerSettings&& settings) override;
@@ -29,7 +29,6 @@ private:
 private:
     std::unique_ptr<TraceWriter> m_traceWriter;
     TraceLevel m_maxTraceLevel = TraceLevel::DISABLED;
-    std::filesystem::path m_traceFolder;
     std::mutex m_settingsMutex;
 
     std::atomic<uint64_t> m_index = 0;

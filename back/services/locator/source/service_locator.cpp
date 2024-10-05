@@ -1,30 +1,40 @@
 #include <config_reader/config_reader.h>
 #include <date_provider/date_provider.h>
 #include <environment/environment.h>
+#include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
 #include <tracer/tracer.h>
+#include <tracer/tracer_lazy_provider.h>
+#include <memory>
 
 #include "service_locator.h"
 
 namespace srv
 {
 
-ServiceLocator::ServiceLocator() {}
+ServiceLocator::ServiceLocator() : srv::tracer::TracerLazyProvider(weak_from_this())
+{
+    TRACE_INF << TRACE_HEADER;  // doesn't have much sense
+}
 
 ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& object)
 {
-    object = std::make_unique<ServiceLocator>();
+    object = std::make_shared<ServiceLocator>();
     return ufa::Result::SUCCESS;
 }
 
 void ServiceLocator::RegisterDefaults()
 {
+    TRACE_INF << TRACE_HEADER;
+
     Setup();
 }
 
 void ServiceLocator::Setup()
 {
-    // CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IEnvironment>()); // should be already registered
+    TRACE_INF << TRACE_HEADER;
+
+    TryRegisterDefaultInterface<srv::IEnvironment>();  // should be already registered
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IConfigReader>());
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IDateProvider>());
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::ISettingsProvider>());
@@ -35,14 +45,33 @@ std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid)
 {
     const auto ifaceIt = m_ifaceStorage.find(iid);
 
-    return ifaceIt == m_ifaceStorage.cend() ? nullptr : ifaceIt->second;
+    if (ifaceIt != m_ifaceStorage.cend())
+    {
+        TRACE_INF << TRACE_HEADER << "Returning interface with iid: " << iid;
+        return ifaceIt->second;
+    }
+
+    TRACE_WRN << TRACE_HEADER << "Couldn't find interface with iid: " << iid;
+    return nullptr;
 }
 
 ufa::Result ServiceLocator::RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid)
 {
     const auto pair = m_ifaceStorage.insert(std::make_pair(iid, std::move(object)));
 
-    return pair.second ? ufa::Result::SUCCESS : ufa::Result::REREGISTERING_INTERFACE;
+    if (pair.second)
+    {
+        TRACE_INF << TRACE_HEADER << "Registered interface with iid: " << iid;
+        return ufa::Result::SUCCESS;
+    }
+
+    TRACE_WRN << TRACE_HEADER << "Already registered interface with iid: " << iid;
+    return ufa::Result::REREGISTERING_INTERFACE;
+}
+
+std::shared_ptr<IServiceLocator> ServiceLocator::GetSharedFromThis()
+{
+    return std::static_pointer_cast<IServiceLocator>(shared_from_this());
 }
 
 }  // namespace srv
