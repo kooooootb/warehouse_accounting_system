@@ -81,7 +81,7 @@ void Accessor::AcceptSettings(AccessorSettings&& settings)
     connString << ADDRESS_CONN << '=' << std::move(settings.dbmsAddress.value()) << ' ';
     connString << DBNAME_CONN << '=' << std::move(settings.dbmsDbname.value()) << ' ';
     connString << PORT_CONN << '=' << std::move(settings.dbmsPort.value()) << ' ';
-    connString << USER_CONN << '=' << std::move(settings.dbmsUser.value());
+    connString << USER_CONN << '=' << std::move(settings.dbmsUser.value()) << ' ';
     connString << PASSWORD_CONN << '=' << std::move(settings.dbmsPassword.value());
 
     m_connOptions = connString.str();
