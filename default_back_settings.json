@@ -5,14 +5,14 @@
         "dbmsPort": 5432,
         "dbmsUser": "postgres",
         "dbmsPassword": "defaultpassword",
-        "connectAttempts": 10
+        "connectAttempts": 5
     },
     "ServerSettings": {
         "port": 10000,
         "address": "0.0.0.0",
         "workers": 4,
         "isSecured": true,
-        "documentRoot": "."
+        "documentRoot": "./docRoot"
     },
     "TracerSettings": {
         "traceLevel": "DEBUG",
