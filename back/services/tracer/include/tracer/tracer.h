@@ -107,7 +107,7 @@ public:
     TraceCollectorProxy& operator<<(std::string_view message)
     {
         if (m_traceCollector != nullptr)
-            m_traceCollector->AddMessage(message.data());
+            m_traceCollector->AddMessage(std::string(message));
 
         return *this;
     }

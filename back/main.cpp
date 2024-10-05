@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception& ex)
     {
-        TRACE_ERR << TRACE_HEADER << "Caught exception from main: " << ex.what();
+        TRACE_ERR << TRACE_HEADER << "Caught exception in main: " << ex.what();
     }
 
     TRACE_INF << TRACE_HEADER << "Exiting main";
