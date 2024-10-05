@@ -4,3 +4,5 @@ bazel-*
 compile_commands.json
 .cache
 external
+*.log
+logs/
