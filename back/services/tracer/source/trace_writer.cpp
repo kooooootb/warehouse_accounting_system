@@ -71,7 +71,6 @@ void TraceWriter::Run()
             minMessagesToProcess = m_minMessagesToProcess;
         }
 
-        const auto beginTime = std::chrono::steady_clock::now();
         m_writerCv.wait_for(lock,
             std::chrono::milliseconds(processTimeoutMs),
             [this, minMessagesToProcess]() -> bool
@@ -79,8 +78,7 @@ void TraceWriter::Run()
                 return m_messagesQueue.size() >= minMessagesToProcess || m_stop;
             });
 
-        if (m_messagesQueue.size() >= minMessagesToProcess ||
-            std::chrono::steady_clock::now() > beginTime + std::chrono::milliseconds(processTimeoutMs))
+        if (!m_messagesQueue.empty())
         {
             auto messageQueue = std::move(m_messagesQueue);
             lock.unlock();

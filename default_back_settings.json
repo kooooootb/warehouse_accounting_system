@@ -18,7 +18,7 @@
         "traceLevel": "DEBUG",
         "traceFolder": "./logs",
         "maxTraceLevelForConsole": "DEBUG",
-        "minMessagesToProcess": 1,
-        "processTimeoutMs": 10000
+        "minMessagesToProcess": 10,
+        "processTimeoutMs": 2000
     }
 }
