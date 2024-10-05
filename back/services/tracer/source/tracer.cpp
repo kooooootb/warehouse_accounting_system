@@ -13,12 +13,12 @@ namespace srv
 namespace tracer
 {
 
-Tracer::Tracer(IServiceLocator* serviceLocator)
+Tracer::Tracer(const std::shared_ptr<IServiceLocator>& locator)
 {
-    CHECK_SUCCESS(serviceLocator->GetInterface(m_dateProvider));
+    CHECK_SUCCESS(locator->GetInterface(m_dateProvider));
 
     std::shared_ptr<srv::ISettingsProvider> settingsProvider;
-    CHECK_SUCCESS(serviceLocator->GetInterface(settingsProvider));
+    CHECK_SUCCESS(locator->GetInterface(settingsProvider));
 
     TracerSettings tracerSettings;
     settingsProvider->FillSettings(&tracerSettings);
@@ -47,30 +47,22 @@ void Tracer::SetSettings(TracerSettings&& settings)
 {
     std::lock_guard lock(m_settingsMutex);
 
-    // Set trace folder
-    if (settings.traceFolder.has_value())
+    // Set trace writer settings
+    if (m_traceWriter != nullptr)
     {
-        m_traceFolder = std::move(settings.traceFolder.value());
-
-        if (m_traceWriter != nullptr)
-        {
-            m_traceWriter->SetSettings(settings);
-        }
+        m_traceWriter->SetSettings(settings);
     }
 
     // Set trace level
     const auto oldLevel = m_maxTraceLevel;
-    if (settings.traceLevel.has_value())
-    {
-        m_maxTraceLevel = settings.traceLevel.value();
-    }
+    TryExtractFromOptional(settings.traceLevel, m_maxTraceLevel);
 
-    if (m_maxTraceLevel == srv::tracer::TraceLevel::DISABLED)
+    if (!IsTracing())
     {
         // turn off tracing
         m_traceWriter = nullptr;
     }
-    else if (oldLevel == srv::tracer::TraceLevel::DISABLED && m_maxTraceLevel != srv::tracer::TraceLevel::DISABLED)
+    else if (oldLevel == srv::tracer::TraceLevel::DISABLED)
     {
         // we turn on tracer and run new tracewriter
         m_traceWriter = std::make_unique<TraceWriter>(settings, m_dateProvider);

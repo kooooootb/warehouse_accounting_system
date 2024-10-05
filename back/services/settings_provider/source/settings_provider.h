@@ -7,16 +7,17 @@
 #include <environment/environment.h>
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
+#include <tracer/tracer_lazy_provider.h>
 
 namespace srv
 {
 namespace settings_provider
 {
 
-class SettingsProvider : public ISettingsProvider
+class SettingsProvider : public srv::tracer::TracerLazyProvider, public ISettingsProvider
 {
 public:
-    SettingsProvider(IServiceLocator* locator);
+    SettingsProvider(const std::shared_ptr<IServiceLocator>& locator);
 
     ufa::Result FillSettings(ufa::settings::SettingsBase* settings) const override;
 

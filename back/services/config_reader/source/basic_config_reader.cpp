@@ -7,6 +7,7 @@
 #include <environment/environment.h>
 #include <instrumental/check.h>
 #include <instrumental/common.h>
+#include <tracer/tracer_lazy_provider.h>
 
 #include "basic_config_reader.h"
 
@@ -40,10 +41,51 @@ std::string CombineKeys(const std::vector<std::string_view>& keys)
     return result;
 }
 
+/**
+ * @brief pretty print vector for informational purposes
+ */
+inline std::string ToString(const std::vector<std::string_view>& from)
+{
+    if (from.empty())
+    {
+        return {};
+    }
+
+    const int resultSize = std::accumulate(std::cbegin(from),
+                               std::cend(from),
+                               0,
+                               [](size_t res, const auto& str) -> size_t
+                               {
+                                   return res + str.size();
+                               }) +
+                           (from.size() - 1) * 2 + 2;
+
+    std::string result;
+    result.push_back('{');
+    result.reserve(resultSize);
+
+    std::for_each(std::cbegin(from),
+        std::prev(std::cend(from)),
+        [&result](const auto& str) mutable -> void
+        {
+            constexpr std::string_view Separator = ", ";
+
+            result.append(str);
+            result.append(Separator);
+        });
+
+    result.append(from.back());
+    result.push_back('}');
+
+    return result;
+}
+
 }  // namespace
 
-BasicConfigReader::BasicConfigReader(IServiceLocator* locator)
+BasicConfigReader::BasicConfigReader(const std::shared_ptr<IServiceLocator>& locator) : srv::tracer::TracerLazyProvider(locator)
 {
+    TRACE_INF << TRACE_HEADER;
+
     std::shared_ptr<srv::IEnvironment> environment;
     CHECK_SUCCESS(locator->GetInterface(environment));
 
@@ -62,6 +104,8 @@ BasicConfigReader::BasicConfigReader(IServiceLocator* locator)
 
 ufa::Result BasicConfigReader::ReadValue(const std::vector<std::string_view>& keys, std::string& value)
 {
+    TRACE_INF << TRACE_HEADER << ToString(keys);
+
     std::ifstream fs(m_configPath);
     const std::string key = CombineKeys(keys);
 
@@ -74,20 +118,25 @@ ufa::Result BasicConfigReader::ReadValue(const std::vector<std::string_view>& ke
             if (curKey == key)
             {
                 value = curValue;
+
+                TRACE_INF << TRACE_HEADER << "Found value: " << value;
                 return ufa::Result::SUCCESS;
             }
         }
         catch (const std::exception& ex)
         {
-            std::cout << ex.what() << std::endl;
+            TRACE_WRN << TRACE_HEADER << "Config format error: " << ex.what();
         }
     }
 
+    TRACE_WRN << TRACE_HEADER << "Couldn't find value";
     return ufa::Result::NOT_FOUND;
 }
 
 std::pair<std::string_view, std::string_view> BasicConfigReader::SplitLine(std::string_view line)
 {
+    TRACE_INF << TRACE_HEADER << line;
+
     const auto splitterPos = line.find(SPLITTER);
 
     if (splitterPos == line.npos)

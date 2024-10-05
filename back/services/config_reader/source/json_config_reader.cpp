@@ -16,8 +16,54 @@ namespace srv
 namespace config_reader
 {
 
-JsonConfigReader::JsonConfigReader(IServiceLocator* locator)
+namespace
 {
+
+/**
+ * @brief pretty print vector for informational purposes
+ */
+inline std::string ToString(const std::vector<std::string_view>& from)
+{
+    if (from.empty())
+    {
+        return {};
+    }
+
+    const int resultSize = std::accumulate(std::cbegin(from),
+                               std::cend(from),
+                               0,
+                               [](size_t res, const auto& str) -> size_t
+                               {
+                                   return res + str.size();
+                               }) +
+                           (from.size() - 1) * 2 + 2;
+
+    std::string result;
+    result.push_back('{');
+    result.reserve(resultSize);
+
+    std::for_each(std::cbegin(from),
+        std::prev(std::cend(from)),
+        [&result](const auto& str) mutable -> void
+        {
+            constexpr std::string_view Separator = ", ";
+
+            result.append(str);
+            result.append(Separator);
+        });
+
+    result.append(from.back());
+    result.push_back('}');
+
+    return result;
+}
+
+}  // namespace
+
+JsonConfigReader::JsonConfigReader(const std::shared_ptr<IServiceLocator>& locator) : srv::tracer::TracerLazyProvider(locator)
+{
+    TRACE_INF << TRACE_HEADER;
+
     std::shared_ptr<srv::IEnvironment> environment;
     CHECK_SUCCESS(locator->GetInterface(environment));
 
@@ -39,18 +85,31 @@ JsonConfigReader::JsonConfigReader(IServiceLocator* locator)
 
     if (ifs.good())
     {
-        m_settingMap = json::json::parse(ifs);
+        try
+        {
+            m_settingMap = json::json::parse(ifs);
+            CHECK_TRUE(!m_settingMap.is_discarded());
+            TRACE_DBG << TRACE_HEADER << "Read json config: " << m_settingMap.dump();
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Couldn't read json config, path: " << configPath.string();
+        }
     }
     else
     {
+        TRACE_ERR << TRACE_HEADER << "Config file couldn't be opened, path: " << configPath.string();
         m_settingMap.clear();
     }
 }
 
 ufa::Result JsonConfigReader::ReadValue(const std::vector<std::string_view>& keys, std::string& value)
 {
+    TRACE_INF << TRACE_HEADER << ToString(keys);
+
     if (m_settingMap.empty())
     {
+        TRACE_WRN << TRACE_HEADER << "Json map not initialized";
         return ufa::Result::NOT_FOUND;
     }
 
@@ -74,12 +133,14 @@ ufa::Result JsonConfigReader::ReadValue(const std::vector<std::string_view>& key
             value = it->dump();
         }
 
+        TRACE_WRN << TRACE_HEADER << "Read value: " << value;
         return ufa::Result::SUCCESS;
     }
     catch (const std::exception& ex)
     {
     }
 
+    TRACE_WRN << TRACE_HEADER << "Not found";
     return ufa::Result::NOT_FOUND;
 }
 

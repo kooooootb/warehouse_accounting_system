@@ -7,11 +7,15 @@
 #include <instrumental/interface.h>
 #include <instrumental/types.h>
 #include <locator/service_locator.h>
+#include <tracer/tracer_lazy_provider.h>
 
 namespace srv
 {
 
-class ServiceLocator : public IServiceLocator
+class ServiceLocator : public std::enable_shared_from_this<ServiceLocator>,
+                       public srv::tracer::TracerLazyProvider,
+                       public IServiceLocator
+
 {
 public:
     ServiceLocator();
@@ -21,6 +25,7 @@ public:
 protected:
     std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) override;
     ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) override;
+    std::shared_ptr<IServiceLocator> GetSharedFromThis() override;
 
 private:
     /**

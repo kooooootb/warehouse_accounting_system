@@ -1,6 +1,8 @@
 #ifndef H_6850FD1E_2620_4732_9663_03B50CD70AE4
 #define H_6850FD1E_2620_4732_9663_03B50CD70AE4
 
+#include <algorithm>
+#include <numeric>
 #include <string>
 #include <type_traits>
 
