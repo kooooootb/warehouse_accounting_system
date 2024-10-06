@@ -1,5 +1,6 @@
 #include <chrono>
 #include <exception>
+#include <shared_mutex>
 #include <sstream>
 #include <thread>
 
@@ -13,6 +14,7 @@
 #include <db_connector/data/dependency.h>
 #include <instrumental/check.h>
 #include <instrumental/common.h>
+#include <instrumental/settings.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
 #include <settings_provider/settings_provider.h>
@@ -27,21 +29,74 @@
 namespace db
 {
 
-constexpr std::string_view ADDRESS_CONN = "host";
-constexpr std::string_view DBNAME_CONN = "dbname";
-constexpr std::string_view PORT_CONN = "port";
-constexpr std::string_view USER_CONN = "user";
-constexpr std::string_view PASSWORD_CONN = "password";
+constexpr std::string_view DEFAULT_ADDRESS = "127.0.0.1";
+constexpr uint32_t DEFAULT_PORT = 5432;
+constexpr std::string_view DEFAULT_DBNAME = "postgres";
+constexpr std::string_view DEFAULT_USER = "postgres";
+constexpr std::string_view DEFAULT_PASSWORD = "defaultpassword";  // doesn't make much sense
+constexpr uint32_t DEFAULT_CONNECTION_ATTEMPTS = 50;
 
-Accessor::Accessor(std::shared_ptr<srv::IServiceLocator> locator) : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
+ConnectionOptions::ConnectionOptions(std::shared_ptr<srv::ITracer> tracer)
+    : srv::tracer::TracerProvider(std::move(tracer))
+    , m_address(DEFAULT_ADDRESS)
+    , m_port(DEFAULT_PORT)
+    , m_dbname(DEFAULT_DBNAME)
+    , m_user(DEFAULT_USER)
+    , m_password(DEFAULT_PASSWORD)
 {
+}
+
+void ConnectionOptions::SetSettings(const AccessorSettings& settings)
+{
+    std::unique_lock lock(m_optionsMutex);
+
+    ufa::TryExtractFromOptional(settings.dbmsAddress, m_address);
+    ufa::TryExtractFromOptional(settings.dbmsPort, m_port);
+    ufa::TryExtractFromOptional(settings.dbmsDbname, m_dbname);
+    ufa::TryExtractFromOptional(settings.dbmsUser, m_user);
+    ufa::TryExtractFromOptional(settings.dbmsPassword, m_password);
+
+    m_cachedString.clear();
+}
+
+const std::string& ConnectionOptions::GetConnectionString() const
+{
+    std::shared_lock readLock(m_optionsMutex);
+
+    if (m_cachedString.empty())
+    {
+        readLock.unlock();
+        std::unique_lock writeLock(m_optionsMutex);
+
+        std::stringstream connString;
+        connString << ADDRESS_CONN << '=' << std::move(m_address) << ' ';
+        connString << DBNAME_CONN << '=' << std::move(m_dbname) << ' ';
+        connString << PORT_CONN << '=' << std::move(m_port) << ' ';
+        connString << USER_CONN << '=' << std::move(m_user) << ' ';
+        connString << PASSWORD_CONN << '=' << std::move(m_password);
+
+        m_cachedString = connString.str();
+
+        // lock dies here so return in this block
+        return m_cachedString;
+    }
+
+    return m_cachedString;
+}
+
+Accessor::Accessor(std::shared_ptr<srv::IServiceLocator> locator)
+    : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
+    , m_connectionOptions(GetTracer())
+{
+    TRACE_INF << TRACE_HEADER;
+
     std::shared_ptr<srv::ISettingsProvider> settingsProvider;
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));
 
     AccessorSettings settings;
     settingsProvider->FillSettings(&settings);
-    FillDefaultSettings(settings);
-    AcceptSettings(std::move(settings));
+
+    SetSettings(std::move(settings));
 
     if (DBNeedsReinitializing())
     {
@@ -54,48 +109,29 @@ std::unique_ptr<IAccessor> IAccessor::Create(std::shared_ptr<srv::IServiceLocato
     return std::make_unique<Accessor>(std::move(locator));
 }
 
-void Accessor::FillDefaultSettings(AccessorSettings& settings)
+void Accessor::SetSettings(const AccessorSettings& settings)
 {
-    if (!settings.dbmsAddress.has_value())
-        settings.dbmsAddress = DEFAULT_DBMS_ADDRESS;
-    if (!settings.dbmsDbname.has_value())
-        settings.dbmsDbname = DEFAULT_DBMS_DBNAME;
-    if (!settings.dbmsPort.has_value())
-        settings.dbmsPort = DEFAULT_DBMS_PORT;
-    if (!settings.dbmsUser.has_value())
-        settings.dbmsUser = DEFAULT_DBMS_USER;
-    if (!settings.dbmsPassword.has_value())
-        settings.dbmsPassword = DEFAULT_DBMS_PASSWORD;
-}
+    m_connectionOptions.SetSettings(settings);
 
-void Accessor::AcceptSettings(AccessorSettings&& settings)
-{
-    CHECK_TRUE(settings.dbmsAddress.has_value());
-    CHECK_TRUE(settings.dbmsDbname.has_value());
-    CHECK_TRUE(settings.dbmsPort.has_value());
-    CHECK_TRUE(settings.dbmsUser.has_value());
-    CHECK_TRUE(settings.dbmsPassword.has_value());
-
-    std::stringstream connString;
-
-    connString << ADDRESS_CONN << '=' << std::move(settings.dbmsAddress.value()) << ' ';
-    connString << DBNAME_CONN << '=' << std::move(settings.dbmsDbname.value()) << ' ';
-    connString << PORT_CONN << '=' << std::move(settings.dbmsPort.value()) << ' ';
-    connString << USER_CONN << '=' << std::move(settings.dbmsUser.value()) << ' ';
-    connString << PASSWORD_CONN << '=' << std::move(settings.dbmsPassword.value());
-
-    m_connOptions = connString.str();
-
-    if (settings.connectAttempts.has_value())
     {
-        m_connectAttempts = settings.connectAttempts.value();
+        std::shared_lock lock(m_optionsMutex);
+
+        ufa::TryExtractFromOptional(settings.connectAttempts, m_connectAttempts);
+        ufa::TryExtractFromOptional(settings.alwaysReinitialize, m_alwaysReinitialize);
     }
 }
 
 bool Accessor::DBNeedsReinitializing()
 {
-    auto conn = CreateConnection();
+    {
+        std::shared_lock lock(m_optionsMutex);
+        if (m_alwaysReinitialize)
+        {
+            return true;
+        }
+    }
 
+    auto conn = CreateConnection();
     pqxx::work work(conn);
 
     auto [count] = work.query1<int>(CHECK_VALID.data());
@@ -126,7 +162,7 @@ pqxx::connection Accessor::CreateConnection()
     {
         try
         {
-            return pqxx::connection(m_connOptions);
+            return pqxx::connection(m_connectionOptions.GetConnectionString());
         }
         catch (const std::exception& ex)
         {
@@ -136,7 +172,7 @@ pqxx::connection Accessor::CreateConnection()
     } while (++attempt <= m_connectAttempts);
 
     CHECK_SUCCESS(ufa::Result::NO_CONNECTION,
-        "Connection to db failed after " << attempt << " retries, connection string: " << m_connOptions);
+        "Connection to db failed after " << attempt << " retries, connection string: " << m_connectionOptions.GetConnectionString());
 }
 
 db::data::User::Role Accessor::GetRoleById(uint64_t id, pqxx::work& work)

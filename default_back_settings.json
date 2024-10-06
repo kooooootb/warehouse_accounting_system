@@ -5,7 +5,8 @@
         "dbmsPort": 5432,
         "dbmsUser": "postgres",
         "dbmsPassword": "defaultpassword",
-        "connectAttempts": 5
+        "connectAttempts": 5,
+        "alwaysReinitialize": true
     },
     "ServerSettings": {
         "port": 10000,

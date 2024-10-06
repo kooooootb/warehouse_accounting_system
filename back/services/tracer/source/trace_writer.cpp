@@ -32,9 +32,9 @@ void TraceWriter::SetSettings(const TracerSettings& settings)
 {
     std::lock_guard lock(m_settingsMutex);
 
-    TryExtractFromOptional(settings.maxTraceLevelForConsole, m_maxLevelForConsole);
-    TryExtractFromOptional(settings.minMessagesToProcess, m_minMessagesToProcess);
-    TryExtractFromOptional(settings.processTimeoutMs, m_processTimeoutMs);
+    ufa::TryExtractFromOptional(settings.maxTraceLevelForConsole, m_maxLevelForConsole);
+    ufa::TryExtractFromOptional(settings.minMessagesToProcess, m_minMessagesToProcess);
+    ufa::TryExtractFromOptional(settings.processTimeoutMs, m_processTimeoutMs);
 
     if (settings.traceFolder.has_value())
     {

@@ -55,7 +55,7 @@ void Tracer::SetSettings(TracerSettings&& settings)
 
     // Set trace level
     const auto oldLevel = m_maxTraceLevel;
-    TryExtractFromOptional(settings.traceLevel, m_maxTraceLevel);
+    ufa::TryExtractFromOptional(settings.traceLevel, m_maxTraceLevel);
 
     if (!IsTracing())
     {

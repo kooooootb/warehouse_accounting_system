@@ -58,6 +58,9 @@
     }                                                 \
     _settingsName()
 
+namespace ufa
+{
+
 template <typename T>
 inline bool TryExtractFromOptional(std::optional<T> from, T& to)
 {
@@ -69,6 +72,8 @@ inline bool TryExtractFromOptional(std::optional<T> from, T& to)
 
     return false;
 }
+
+}  // namespace ufa
 
 namespace string_converters
 {
