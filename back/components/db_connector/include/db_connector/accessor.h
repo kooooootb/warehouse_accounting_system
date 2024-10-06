@@ -18,31 +18,27 @@
 namespace db
 {
 
-constexpr std::string_view DEFAULT_DBMS_ADDRESS = "127.0.0.1";
-constexpr std::string_view DEFAULT_DBMS_DBNAME = "rms";
-constexpr int DEFAULT_DBMS_PORT = 5432;
-constexpr std::string_view DEFAULT_DBMS_USER = "rms_postgres";
-constexpr std::string_view DEFAULT_DBMS_PASSWORD = "rms_defaultpassword";  // doesn't make much sense
-
 class AccessorSettings : public ufa::settings::SettingsBase
 {
 public:
     SETTINGS_INIT(AccessorSettings)
     {
         SETTINGS_INIT_FIELD(dbmsAddress);
-        SETTINGS_INIT_FIELD(dbmsDbname);
         SETTINGS_INIT_FIELD(dbmsPort);
+        SETTINGS_INIT_FIELD(dbmsDbname);
         SETTINGS_INIT_FIELD(dbmsUser);
         SETTINGS_INIT_FIELD(dbmsPassword);
         SETTINGS_INIT_FIELD(connectAttempts);
+        SETTINGS_INIT_FIELD(alwaysReinitialize);
     }
 
     SETTINGS_FIELD(dbmsAddress, std::string);
-    SETTINGS_FIELD(dbmsDbname, std::string);
     SETTINGS_FIELD(dbmsPort, uint32_t);
+    SETTINGS_FIELD(dbmsDbname, std::string);
     SETTINGS_FIELD(dbmsUser, std::string);
     SETTINGS_FIELD(dbmsPassword, std::string);
     SETTINGS_FIELD(connectAttempts, uint32_t);
+    SETTINGS_FIELD(alwaysReinitialize, bool);
 };
 
 struct IAccessor : public ufa::IBase

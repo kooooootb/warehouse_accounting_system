@@ -99,6 +99,8 @@ ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase* settings
 
     settings->FillSettings(settingsMap);
 
+    TRACE_DBG << TRACE_HEADER << settings;
+
     return result;
 }
 
