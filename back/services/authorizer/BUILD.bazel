@@ -7,8 +7,6 @@ cc_library(
     ]),
     includes = ["./include"],
     deps = [
-        "//back/components/task_manager:iface",
-        "//back/instrumental:include",
         "//back/services/locator:iface",
     ],
 )
@@ -21,12 +19,10 @@ cc_library(
     ]),
     deps = [
         ":iface",
-        "//back/components/task_manager:lib",  # parse tasks
-        "//back/services/document_manager:iface",
+        "//:jwt",
+        "//back/services/date_provider:iface",
+        "//back/services/db_connector:iface",
         "//back/services/locator:iface",
-        "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
-        "@boost//:asio_ssl",
-        "@boost//:beast",
     ],
 )

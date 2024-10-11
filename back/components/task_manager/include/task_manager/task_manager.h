@@ -17,12 +17,12 @@ struct ITaskManager : public ufa::IBase
 {
     /**
      * @brief parse task from json string and pass it to queue for execution
-     * @param user user who started conversation, empty for authorization
+     * @param userId initiative user's id for future tasks' needs
      * @param target task identificator
-     * @param callback will call it after gettings result
+     * @param callback will call it after getting results
      * @return ufa::Result 
      */
-    virtual ufa::Result AddTask(db::data::User user, std::string_view target, std::string&& json, Callback&& callback) = 0;
+    virtual ufa::Result AddTask(auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) = 0;
 
     static std::unique_ptr<ITaskManager> Create(std::shared_ptr<srv::IServiceLocator> locator,
         std::shared_ptr<db::IAccessor> accessor,

@@ -3,6 +3,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <authorizer/authorizer.h>
 #include <dependency_manager/dependency_manager.h>
 #include <instrumental/types.h>
 #include <locator/service_locator.h>
@@ -20,16 +21,16 @@ namespace tasks
 
 /**
  * @brief task will store values from string for later execution
- * each implementation will provide HandleTask specialization for executing
  */
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, db::data::User user, Callback&& callback)
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, auth::userid_t userId, Callback&& callback)
         : srv::tracer::TracerProvider(std::move(tracer))
+        , m_initiativeUserId(std::move(userId))
         , m_callback(std::move(callback))
-        , m_initiativeUser(std::move(user))
     {
+        TRACE_INF << TRACE_HEADER;
     }
 
     /**
@@ -38,7 +39,7 @@ public:
      */
     ufa::Result Parse(std::string&& jsonStr)
     {
-        TRACE_DBG << TRACE_HEADER << "Parsing task: " << jsonStr;  // will leak sensitive
+        TRACE_DBG << TRACE_HEADER << "Parsing task: " << jsonStr;  // will leak sensitive, todo
 
         try
         {
@@ -56,6 +57,8 @@ public:
 
     void Execute(const deps::IDependencyManager& depManager)
     {
+        TRACE_INF << TRACE_HEADER;
+
         std::string response;
         const auto result = ExecuteInternal(depManager, response);
 
@@ -68,7 +71,7 @@ protected:
     virtual void ParseInternal(json&& json) = 0;
 
 protected:
-    db::data::User m_initiativeUser;
+    auth::userid_t m_initiativeUserId;
 
 private:
     Callback m_callback;

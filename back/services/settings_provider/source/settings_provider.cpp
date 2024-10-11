@@ -1,3 +1,4 @@
+#include <config_reader/config_reader.h>
 #include <environment/environment.h>
 #include <instrumental/check.h>
 #include <instrumental/common.h>
@@ -46,12 +47,12 @@ std::string ConvertToEnvironmentKey(std::string_view sectionName, std::string_vi
 
 }  // namespace
 
-SettingsProvider::SettingsProvider(const std::shared_ptr<IServiceLocator>& locator) : srv::tracer::TracerLazyProvider(locator)
+SettingsProvider::SettingsProvider(const std::shared_ptr<IServiceLocator>& locator)
+    : srv::tracer::TracerLazyProvider(locator)
+    , m_environment(locator->GetInterface<srv::IEnvironment>())
+    , m_configReader(locator->GetInterface<srv::IConfigReader>())
 {
     TRACE_INF << TRACE_HEADER;
-
-    CHECK_SUCCESS(locator->GetInterface(m_configReader));
-    CHECK_SUCCESS(locator->GetInterface(m_environment));
 }
 
 bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const

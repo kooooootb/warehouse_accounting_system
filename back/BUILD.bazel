@@ -4,12 +4,9 @@ cc_binary(
         "main.cpp",
     ],
     deps = [
-        "//back/components/authorizer:lib",
-        "//back/components/db_connector:lib",
         "//back/components/task_manager:lib",
         "//back/components/webserver:lib",
         "//back/services/locator:lib",
         "//back/services/tracer:iface",
-        "//back/utilities/document_manager:lib",
     ],
 )

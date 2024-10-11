@@ -1,11 +1,15 @@
+#include <memory>
+
+#include <authorizer/authorizer.h>
 #include <config_reader/config_reader.h>
 #include <date_provider/date_provider.h>
+#include <db_connector/accessor.h>
+#include <document_manager/document_manager.h>
 #include <environment/environment.h>
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
 #include <tracer/tracer.h>
 #include <tracer/tracer_lazy_provider.h>
-#include <memory>
 
 #include "service_locator.h"
 
@@ -34,11 +38,16 @@ void ServiceLocator::Setup()
 {
     TRACE_INF << TRACE_HEADER;
 
+    // order is pretty much important because services depend on each other
+    // can resolve it through dependency graph but it is too time-cost
     TryRegisterDefaultInterface<srv::IEnvironment>();  // should be already registered
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IConfigReader>());
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IDateProvider>());
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::ISettingsProvider>());
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::ITracer>());
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IAccessor>());
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IAuthorizer>());
+    CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IDocumentManager>());
 }
 
 std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid)
