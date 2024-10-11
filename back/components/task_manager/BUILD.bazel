@@ -10,7 +10,6 @@ cc_library(
     includes = ["./include"],
     deps = [
         "//back/instrumental:include",
-        "//back/utilities/document_manager:iface",
     ],
 )
 
@@ -25,8 +24,6 @@ cc_library(
     includes = ["./include"],
     deps = [
         ":callback",
-        "//back/components/authorizer:iface",
-        "//back/components/db_connector:iface",
         "//back/instrumental:include",
         "//back/services/locator:iface",
     ],
@@ -40,8 +37,10 @@ cc_library(
     ]),
     deps = [
         ":iface",
-        "//back/components/task_manager/source/dependency_manager:lib",
         "//back/components/task_manager/source/tasks:task_list",
+        "//back/services/authorizer:iface",
+        "//back/services/db_connector:iface",
+        "//back/services/document_manager:iface",
         "//back/services/tracer:iface",
         "@nlohmann_json//:json",
     ],

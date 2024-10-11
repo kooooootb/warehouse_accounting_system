@@ -1,13 +1,14 @@
-#include <db_connector/accessor.h>
 #include <instrumental/types.h>
 #include <locator/service_locator.h>
-#include <task_manager/task_manager.h>
-#include <tasks/base_task.h>
 #include <tracer/tracer.h>
 #include <tracer/tracer_provider.h>
 
+#include <db_connector/accessor.h>
+#include <task_manager/task_manager.h>
+
 #include <dependency_manager/dependency_manager.h>
 #include <protocol/tasks_list.h>
+#include <tasks/base_task.h>
 
 #include "task_manager.h"
 #include "workers_manager.h"

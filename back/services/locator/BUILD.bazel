@@ -19,8 +19,11 @@ cc_library(
     ]),
     deps = [
         ":iface",
+        "//back/services/authorizer:lib",
         "//back/services/config_reader:lib",
         "//back/services/date_provider:lib",
+        "//back/services/db_connector:lib",
+        "//back/services/document_manager:lib",
         "//back/services/environment:lib",
         "//back/services/settings_provider:lib",
         "//back/services/tracer:lazy_provider_iface",

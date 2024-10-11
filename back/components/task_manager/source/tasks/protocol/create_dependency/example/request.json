@@ -1,9 +1,0 @@
-{
-  "requirement_id": 2,
-  "dependencies_ids": [
-    {
-      "requirement_id": 123,
-      "dependency_type": "horizontal"
-    }
-  ]
-}

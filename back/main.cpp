@@ -2,8 +2,6 @@
 #include <iostream>
 #include <memory>
 
-#include <authorizer/authorizer.h>
-#include <db_connector/accessor.h>
 #include <environment/environment.h>
 #include <instrumental/common.h>
 #include <instrumental/types.h>
@@ -44,13 +42,8 @@ int main(int argc, char* argv[])
 
     try
     {
-        std::shared_ptr<docmgr::IDocumentManager> documentManager = docmgr::IDocumentManager::Create(tracer);
-
-        std::shared_ptr<db::IAccessor> accessor = db::IAccessor::Create(serviceLocator);
-        std::shared_ptr<auth::IAuthorizer> authorizer = auth::IAuthorizer::Create(serviceLocator, accessor);
-        std::shared_ptr<taskmgr::ITaskManager> taskManager =
-            taskmgr::ITaskManager::Create(serviceLocator, accessor, authorizer, documentManager);
-        auto server = ws::IServer::Create(serviceLocator, taskManager, authorizer, documentManager);
+        auto taskManager = taskmgr::ITaskManager::Create(serviceLocator);
+        auto server = ws::IServer::Create(serviceLocator, taskManager);
 
         server->Start();
 

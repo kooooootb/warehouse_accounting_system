@@ -1,6 +1,6 @@
-#include <db_connector/data/user.h>
 #include <hash/hash.h>
-#include <instrumental/types.h>
+
+#include <authorizer/authorizer.h>
 #include <tracer/tracer.h>
 
 #include "task.h"
@@ -10,14 +10,14 @@ namespace taskmgr
 namespace tasks
 {
 
-Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, db::data::User user, Callback&& callback)
-    : BaseTask(std::move(tracer), std::move(user), std::move(callback))
+Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, auth::userid_t userId, Callback&& callback)
+    : BaseTask(std::move(tracer), std::move(userId), std::move(callback))
 {
 }
 
 ufa::Result Authorization::ExecuteInternal(const deps::IDependencyManager& depManager, std::string& result)
 {
-    db::data::User userData;
+
     userData.name = m_username;
     userData.hashPassword = m_hashPassword;
     json jsonResult;

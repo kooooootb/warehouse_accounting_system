@@ -2,7 +2,6 @@
 #define H_528C9648_F7EE_46C5_85B7_E6C04E6A4D6E
 
 #include <authorizer/authorizer.h>
-#include <db_connector/data/user.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer_provider.h>
 
@@ -20,7 +19,7 @@ public:
         std::shared_ptr<auth::IAuthorizer> authorizer,
         std::shared_ptr<docmgr::IDocumentManager> documentManager);
 
-    ufa::Result AddTask(db::data::User user, std::string_view target, std::string&& json, Callback&& callback) override;
+    ufa::Result AddTask(auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) override;
 
 private:
     std::shared_ptr<TaskHandler> m_taskHandler;
