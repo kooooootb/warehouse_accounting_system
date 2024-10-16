@@ -14,12 +14,9 @@ namespace taskmgr
 class TaskManager : public srv::tracer::TracerProvider, public ITaskManager
 {
 public:
-    TaskManager(std::shared_ptr<srv::IServiceLocator> locator,
-        std::shared_ptr<db::IAccessor> accessor,
-        std::shared_ptr<auth::IAuthorizer> authorizer,
-        std::shared_ptr<docmgr::IDocumentManager> documentManager);
+    TaskManager(std::shared_ptr<srv::IServiceLocator> locator);
 
-    ufa::Result AddTask(auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) override;
+    ufa::Result AddTask(srv::auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) override;
 
 private:
     std::shared_ptr<TaskHandler> m_taskHandler;

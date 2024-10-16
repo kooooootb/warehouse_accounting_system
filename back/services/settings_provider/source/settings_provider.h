@@ -19,7 +19,7 @@ class SettingsProvider : public srv::tracer::TracerLazyProvider, public ISetting
 public:
     SettingsProvider(const std::shared_ptr<IServiceLocator>& locator);
 
-    ufa::Result FillSettings(ufa::settings::SettingsBase* settings) const override;
+    ufa::Result FillSettings(ufa::settings::SettingsBase& settings) const override;
 
 private:
     bool TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const;

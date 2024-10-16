@@ -11,6 +11,8 @@ WorkersManager::WorkersManager(std::shared_ptr<srv::IServiceLocator> locator, st
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_taskHandler(std::move(taskHandler))
 {
+    TRACE_INF << TRACE_HEADER;
+
     for (int i = 0; i < DEFAULT_NUM_WORKERS; ++i)
     {
         m_workers.emplace_back(&WorkersManager::Run, this);
@@ -20,6 +22,7 @@ WorkersManager::WorkersManager(std::shared_ptr<srv::IServiceLocator> locator, st
 WorkersManager::~WorkersManager() noexcept
 {
     TRACE_INF << TRACE_HEADER << "Stopping";
+
     m_stop = true;
     m_queueCv.notify_all();
 
@@ -31,6 +34,8 @@ WorkersManager::~WorkersManager() noexcept
 
 void WorkersManager::AddTask(std::unique_ptr<tasks::BaseTask>&& task)
 {
+    TRACE_INF << TRACE_HEADER;
+
     {
         std::lock_guard lock(m_queueMtx);
         m_queue.emplace(std::move(task));
@@ -40,6 +45,8 @@ void WorkersManager::AddTask(std::unique_ptr<tasks::BaseTask>&& task)
 
 void WorkersManager::Run()
 {
+    TRACE_INF << TRACE_HEADER;
+
     while (!m_stop)
     {
         std::unique_lock lock(m_queueMtx);

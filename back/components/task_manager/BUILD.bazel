@@ -25,6 +25,7 @@ cc_library(
     deps = [
         ":callback",
         "//back/instrumental:include",
+        "//back/services/authorizer:iface",
         "//back/services/locator:iface",
     ],
 )

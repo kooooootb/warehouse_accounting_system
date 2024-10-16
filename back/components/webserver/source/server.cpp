@@ -1,22 +1,23 @@
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <stdexcept>
 #include <utility>
 
 #include <boost/asio.hpp>
 
-#include <authorizer/authorizer.h>
-#include <instrumental/settings_detail.h>
+#include <instrumental/settings.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
+
 #include <locator/service_locator.h>
 #include <settings_provider/settings_provider.h>
 #include <tracer/tracer_provider.h>
-#include <webserver/server.h>
+
+#include <session/session_factory.h>
 
 #include "listener.h"
 #include "server.h"
-#include "session_factory.h"
 
 namespace asio = boost::asio;
 using tcp = boost::asio::ip::tcp;
@@ -24,32 +25,29 @@ using tcp = boost::asio::ip::tcp;
 namespace ws
 {
 
-Server::Server(std::shared_ptr<srv::IServiceLocator> locator,
-    std::shared_ptr<taskmgr::ITaskManager> taskManager,
-    std::shared_ptr<auth::IAuthorizer> authorizer,
-    std::shared_ptr<docmgr::IDocumentManager> documentManager)
+constexpr int DEFAULT_WORKERS_NUMBER = 4;
+
+Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<taskmgr::ITaskManager> taskManager)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_ioContext(std::make_shared<asio::io_context>())
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
-    , m_documentManager(std::move(documentManager))
     , m_taskManager(std::move(taskManager))
-    , m_authorizer(std::move(authorizer))
 {
-    TRACE_INF << TRACE_HEADER << "Creating Server";
+    TRACE_INF << TRACE_HEADER;
 
     std::shared_ptr<srv::ISettingsProvider> settingsProvider;
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));
 
     ServerSettings settings;
-    settingsProvider->FillSettings(&settings);
-    TRACE_DBG << TRACE_HEADER << "Input settings: " << settings;
-    FillEmptySettings(settings);
+    settingsProvider->FillSettings(settings);
 
     SetSettings(std::move(settings));
 }
 
 Server::~Server() noexcept
 {
+    TRACE_INF << TRACE_HEADER;
+
     Stop();
 
     for (auto& worker : m_workers)
@@ -59,14 +57,12 @@ Server::~Server() noexcept
 }
 
 std::unique_ptr<IServer> IServer::Create(std::shared_ptr<srv::IServiceLocator> locator,
-    std::shared_ptr<taskmgr::ITaskManager> taskManager,
-    std::shared_ptr<auth::IAuthorizer> authorizer,
-    std::shared_ptr<docmgr::IDocumentManager> documentManager)
+    std::shared_ptr<taskmgr::ITaskManager> taskManager)
 {
-    return std::make_unique<Server>(std::move(locator), std::move(taskManager), std::move(authorizer), std::move(documentManager));
+    return std::make_unique<Server>(std::move(locator), std::move(taskManager));
 }
 
-void Server::SetSettings(ServerSettings&& settings)
+void Server::SetSettings(const ServerSettings& settings)
 {
     TRACE_INF << TRACE_HEADER << "Settings: " << settings;
 
@@ -74,68 +70,13 @@ void Server::SetSettings(ServerSettings&& settings)
     if (settings.workers.has_value())
         SetWorkers(settings.workers.value());
 
-    // Set listener
-    int port = 0;
-    asio::ip::address address;
-    bool shouldResetListener = false;
-
-    // port
-    if (settings.port.has_value())
-    {
-        port = settings.port.value();
-        shouldResetListener = true;
-    }
-    else
-    {
-        CHECK_TRUE(m_listener != nullptr);
-        port = m_listener->GetPort();
-    }
-
-    // address
-    if (settings.address.has_value())
-    {
-        address = asio::ip::make_address(std::move(settings.address.value()));
-        shouldResetListener |= 1;
-    }
-    else
-    {
-        CHECK_TRUE(m_listener != nullptr);
-        address = m_listener->GetAddress();
-    }
-
-    if (settings.isSecured.has_value())
-        m_savedIsSecured = settings.isSecured.value();
-
-    if (settings.documentRoot.has_value())
-        m_documentManager->SetRoot(std::move(settings.documentRoot.value()));
-
-    auto sessionFactory =
-        ISessionFactory::CreateSessionFactory(GetTracer(), m_taskManager, m_authorizer, m_documentManager, m_savedIsSecured);
-
-    if (shouldResetListener)
-    {
-        // Set new listener
-        tcp::endpoint endpoint(std::move(address), port);
-
-        try
-        {
-            m_listener = std::make_shared<Listener>(GetTracer(), m_ioContext, std::move(endpoint), std::move(sessionFactory));
-        }
-        catch (const std::runtime_error& ex)
-        {
-            TRACE_ERR << TRACE_HEADER << "Setting Listener failed with exception: " << ex.what();
-            m_listener = nullptr;
-        }
-    }
-    else if (settings.isSecured.has_value())
-    {
-        // Change session factory on current listener
-        m_listener->SetSessionFactory(std::move(sessionFactory));
-    }
+    m_listener->SetSettings(settings);
 }
 
 ufa::Result Server::Start()
 {
+    TRACE_INF << TRACE_HEADER;
+
     try
     {
         m_listener->Start();
@@ -159,6 +100,8 @@ ufa::Result Server::Start()
 
 ufa::Result Server::Stop()
 {
+    TRACE_INF << TRACE_HEADER;
+
     try
     {
         m_listener->Stop();
@@ -182,8 +125,13 @@ ufa::Result Server::Stop()
 
 void Server::SetWorkers(int numWorkers)
 {
-    CHECK_TRUE(m_ioContext != nullptr);
+    std::lock_guard lock(m_workersMutex);
+
     TRACE_INF << TRACE_HEADER << "Changing server workers number to:" << numWorkers;
+
+    CHECK_TRUE(m_ioContext != nullptr);
+
+    RemoveJoinedWorkers();
 
     if (numWorkers >= m_workers.size())
     {
@@ -195,31 +143,14 @@ void Server::SetWorkers(int numWorkers)
     }
     else
     {
-        // reduce by restarting
-        // stop threads
-        m_ioContext->stop();
-        for (auto& worker : m_workers)
-        {
-            worker->join();
-        }
-
-        // reset stopped flag
-        m_ioContext->restart();
-
-        // reset std::thread vector
-        m_workers.clear();
-        for (int i = 0; i < numWorkers; ++i)
-        {
-            m_workers.emplace_back(std::make_unique<std::thread>(std::bind(&Server::RunWorker, this)));
-        }
-
-        // start polling
-        m_ioContext->poll();
+        m_listener->Stop();
     }
 }
 
 void Server::RunWorker()
 {
+    TRACE_INF << TRACE_HEADER;
+
     while (true)
     {
         try
@@ -240,19 +171,15 @@ void Server::RunWorker()
     }
 }
 
-void Server::FillEmptySettings(ServerSettings& settings)
+void Server::RemoveJoinedWorkers()
 {
-    if (!settings.workers.has_value())
-        settings.workers = DEFAULT_WORKERS_NUMBER;
-
-    if (!settings.address.has_value())
-        settings.address = DEFAULT_ADDRESS;
-
-    if (!settings.port.has_value())
-        settings.port = DEFAULT_PORT;
-
-    if (!settings.isSecured.has_value())
-        settings.isSecured = DEFAULT_IS_SECURED;
+    m_workers.erase(std::remove_if(std::begin(m_workers),
+                        std::end(m_workers),
+                        [](const auto& worker) -> bool
+                        {
+                            return worker.IsFinished();
+                        }),
+        std::end(m_workers));
 }
 
 }  // namespace ws

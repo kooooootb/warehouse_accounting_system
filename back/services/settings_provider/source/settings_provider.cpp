@@ -70,10 +70,10 @@ bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::st
     return false;
 }
 
-ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase* settings) const
+ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase& settings) const
 {
-    const auto fields = settings->GetFields();
-    const auto settingsName = settings->GetSettingsName();
+    const auto fields = settings.GetFields();
+    const auto settingsName = settings.GetSettingsName();
 
     std::map<ufa::settings::SettingsBase::Name, ufa::settings::SettingsBase::Value> settingsMap;
     ufa::Result result = ufa::Result::SUCCESS;
@@ -98,7 +98,7 @@ ufa::Result SettingsProvider::FillSettings(ufa::settings::SettingsBase* settings
         }
     }
 
-    settings->FillSettings(settingsMap);
+    settings.FillSettings(settingsMap);
 
     TRACE_DBG << TRACE_HEADER << settings;
 

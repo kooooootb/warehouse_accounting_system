@@ -94,7 +94,7 @@ Accessor::Accessor(const std::shared_ptr<srv::IServiceLocator>& locator)
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));
 
     AccessorSettings settings;
-    settingsProvider->FillSettings(&settings);
+    settingsProvider->FillSettings(settings);
 
     SetSettings(std::move(settings));
 

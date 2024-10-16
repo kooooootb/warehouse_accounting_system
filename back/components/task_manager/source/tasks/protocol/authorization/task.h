@@ -19,7 +19,7 @@ namespace tasks
 class Authorization : public BaseTask
 {
 public:
-    Authorization(std::shared_ptr<srv::ITracer> tracer, auth::userid_t userId, Callback&& callback);
+    Authorization(std::shared_ptr<srv::ITracer> tracer, srv::auth::userid_t userId, Callback&& callback);
 
     constexpr static std::string_view GetTarget()
     {
@@ -27,16 +27,16 @@ public:
     }
 
 protected:
-    ufa::Result ExecuteInternal(const deps::IDependencyManager& depManager, std::string& result) override;
+    ufa::Result ExecuteInternal(const srv::IServiceLocator& locator, std::string& result) override;
     void ParseInternal(json&& json) override;
 
 private:
     static constexpr std::string_view USERNAME_KEY = "login";
-    static constexpr std::string_view PASSWORD_KEY = "per_password";
+    static constexpr std::string_view PASSWORD_KEY = "password";
     static constexpr std::string_view TOKEN_KEY = "token";
 
 private:
-    std::string m_username;
+    std::string m_login;
     std::string m_hashPassword;
 };
 

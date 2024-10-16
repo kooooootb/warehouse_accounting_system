@@ -3,11 +3,26 @@
 
 #include <filesystem>
 
-#include <instrumental/interface.h>
-#include <instrumental/types.h>
+#include <instrumental/common.h>
+#include <instrumental/settings.h>
 
 namespace srv
 {
+namespace docmgr
+{
+
+class DocumentManagerSettings : public ufa::settings::SettingsBase
+{
+public:
+    SETTINGS_INIT(DocumentManagerSettings)
+    {
+        SETTINGS_INIT_FIELD(documentRoot);
+    }
+
+    SETTINGS_FIELD(documentRoot, std::string);
+};
+
+}  // namespace docmgr
 
 struct IDocumentManager : public ufa::IBase
 {
@@ -18,7 +33,7 @@ struct IDocumentManager : public ufa::IBase
      */
     virtual ufa::Result RestoreDocument(std::filesystem::path& relPath, bool checkExistance = false) = 0;
 
-    virtual void SetRoot(std::filesystem::path&& rootPath) = 0;
+    virtual void SetSettings(const docmgr::DocumentManagerSettings& settings) = 0;
 };
 
 }  // namespace srv

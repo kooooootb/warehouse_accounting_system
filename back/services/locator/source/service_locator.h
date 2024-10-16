@@ -23,7 +23,7 @@ public:
     void RegisterDefaults() override;
 
 protected:
-    std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) override;
+    std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) const override;
     ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) override;
     std::shared_ptr<IServiceLocator> GetSharedFromThis() override;
 

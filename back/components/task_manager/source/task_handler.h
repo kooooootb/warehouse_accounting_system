@@ -6,20 +6,18 @@
 #include <tasks/base_task.h>
 #include <tracer/tracer_provider.h>
 
-#include <dependency_manager/dependency_manager.h>
-
 namespace taskmgr
 {
 
 class TaskHandler : public srv::tracer::TracerProvider
 {
 public:
-    TaskHandler(std::shared_ptr<srv::IServiceLocator> locator, std::unique_ptr<deps::IDependencyManager> depManager);
+    TaskHandler(std::shared_ptr<srv::IServiceLocator> locator);
 
     void HandleTask(tasks::BaseTask& task);
 
 private:
-    std::unique_ptr<deps::IDependencyManager> m_depManager;
+    std::shared_ptr<srv::IServiceLocator> m_locator;
 };
 
 }  // namespace taskmgr
