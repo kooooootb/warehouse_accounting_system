@@ -1,20 +1,21 @@
-#include "task_handler.h"
 #include <tracer/tracer.h>
 #include <tracer/tracer_provider.h>
+
+#include "task_handler.h"
 
 namespace taskmgr
 {
 
-TaskHandler::TaskHandler(std::shared_ptr<srv::IServiceLocator> locator, std::unique_ptr<deps::IDependencyManager> depManager)
+TaskHandler::TaskHandler(std::shared_ptr<srv::IServiceLocator> locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
-    , m_depManager(std::move(depManager))
 {
+    TRACE_INF << TRACE_HEADER;
 }
 
 void TaskHandler::HandleTask(tasks::BaseTask& task)
 {
     TRACE_INF << TRACE_HEADER << "Executing task";
-    task.Execute(*m_depManager);
+    task.Execute(*m_locator);
 }
 
 }  // namespace taskmgr

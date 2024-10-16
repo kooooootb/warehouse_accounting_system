@@ -2,11 +2,9 @@
 #define H_CC0C686D_89E2_4CB3_9DA6_C0C92EDCBF85
 
 #include <authorizer/authorizer.h>
-#include <db_connector/accessor.h>
 #include <instrumental/interface.h>
 #include <instrumental/types.h>
 #include <locator/service_locator.h>
-#include <utilities/document_manager.h>
 
 #include <task_manager/callback.h>
 
@@ -22,12 +20,9 @@ struct ITaskManager : public ufa::IBase
      * @param callback will call it after getting results
      * @return ufa::Result 
      */
-    virtual ufa::Result AddTask(auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) = 0;
+    virtual ufa::Result AddTask(srv::auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) = 0;
 
-    static std::unique_ptr<ITaskManager> Create(std::shared_ptr<srv::IServiceLocator> locator,
-        std::shared_ptr<db::IAccessor> accessor,
-        std::shared_ptr<auth::IAuthorizer> authorizer,
-        std::shared_ptr<docmgr::IDocumentManager> documentManager);
+    static std::unique_ptr<ITaskManager> Create(std::shared_ptr<srv::IServiceLocator> locator);
 };
 
 }  // namespace taskmgr

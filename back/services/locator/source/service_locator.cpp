@@ -50,7 +50,7 @@ void ServiceLocator::Setup()
     CHECK_SUCCESS(TryRegisterDefaultInterface<srv::IDocumentManager>());
 }
 
-std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid)
+std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid) const
 {
     const auto ifaceIt = m_ifaceStorage.find(iid);
 

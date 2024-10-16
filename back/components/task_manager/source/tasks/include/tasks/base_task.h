@@ -4,7 +4,6 @@
 #include <nlohmann/json.hpp>
 
 #include <authorizer/authorizer.h>
-#include <dependency_manager/dependency_manager.h>
 #include <instrumental/types.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
@@ -25,7 +24,7 @@ namespace tasks
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, auth::userid_t userId, Callback&& callback)
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, srv::auth::userid_t userId, Callback&& callback)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_initiativeUserId(std::move(userId))
         , m_callback(std::move(callback))
@@ -55,23 +54,23 @@ public:
         return ufa::Result::SUCCESS;
     }
 
-    void Execute(const deps::IDependencyManager& depManager)
+    void Execute(const srv::IServiceLocator& locator)
     {
         TRACE_INF << TRACE_HEADER;
 
         std::string response;
-        const auto result = ExecuteInternal(depManager, response);
+        const auto result = ExecuteInternal(locator, response);
 
         TRACE_DBG << TRACE_HEADER << "Calling callback with response: " << response;
         m_callback(std::move(response), result);
     }
 
 protected:
-    virtual ufa::Result ExecuteInternal(const deps::IDependencyManager& depManager, std::string& result) = 0;
+    virtual ufa::Result ExecuteInternal(const srv::IServiceLocator& locator, std::string& result) = 0;
     virtual void ParseInternal(json&& json) = 0;
 
 protected:
-    auth::userid_t m_initiativeUserId;
+    srv::auth::userid_t m_initiativeUserId;
 
 private:
     Callback m_callback;

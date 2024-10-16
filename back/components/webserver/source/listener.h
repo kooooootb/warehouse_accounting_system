@@ -9,7 +9,8 @@
 #include <instrumental/types.h>
 #include <tracer/tracer_provider.h>
 
-#include "session_factory.h"
+#include <session/session_factory.h>
+#include <webserver/server.h>
 
 namespace asio = boost::asio;
 using tcp = boost::asio::ip::tcp;
@@ -20,18 +21,20 @@ namespace ws
 class Listener : public srv::tracer::TracerProvider, public std::enable_shared_from_this<Listener>
 {
 public:
-    Listener(std::shared_ptr<srv::ITracer> tracer,
+    Listener(const ServerSettings& settings,
+        std::shared_ptr<srv::ITracer> tracer,
         std::shared_ptr<asio::io_context> ioContext,
         tcp::endpoint endpoint,
-        std::unique_ptr<ISessionFactory> sessionFactory);
+        std::unique_ptr<session::ISessionFactory> sessionFactory);
 
-    int GetPort() const;
-    asio::ip::address GetAddress() const;
+    ~Listener();
 
-    void Start();
-    void Stop();
+    void Start(size_t tasksCount);
+    void Stop(size_t tasksCount);
 
-    void SetSessionFactory(std::unique_ptr<ISessionFactory> sessionFactory);
+    void StopAll();
+
+    void SetSettings(const ServerSettings& settings);
 
 private:
     void DoAccept();
@@ -42,8 +45,10 @@ private:
     tcp::endpoint m_endpoint;
     tcp::acceptor m_acceptor;
 
-    std::unique_ptr<ISessionFactory> m_sessionFactory;
     std::shared_mutex m_sessionFactoryMtx;
+    std::unique_ptr<session::ISessionFactory> m_sessionFactory;
+
+    std::atomic<size_t> m_tasksToStopCount;
 };
 
 }  // namespace ws

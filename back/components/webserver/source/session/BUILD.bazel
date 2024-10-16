@@ -1,4 +1,4 @@
-package(default_visibility = ["//back:__subpackages__"])
+package(default_visibility = ["//back/components/webserver:__subpackages__"])
 
 cc_library(
     name = "iface",
@@ -8,8 +8,10 @@ cc_library(
     includes = ["./include"],
     deps = [
         "//back/components/task_manager:iface",
+        "//back/components/webserver:iface",
         "//back/instrumental:include",
         "//back/services/locator:iface",
+        "@boost//:asio",
     ],
 )
 
@@ -21,11 +23,12 @@ cc_library(
     ]),
     deps = [
         ":iface",
-        "//back/components/task_manager:iface",  # parse tasks
-        "//back/components/webserver/source/session:lib",
+        "//back/components/task_manager:iface",
+        "//back/components/webserver:iface",
+        "//back/instrumental:include",
+        "//back/services/authorizer:iface",
         "//back/services/document_manager:iface",
         "//back/services/locator:iface",
-        "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
         "@boost//:asio_ssl",
         "@boost//:beast",

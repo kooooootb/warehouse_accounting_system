@@ -21,7 +21,7 @@ Tracer::Tracer(const std::shared_ptr<IServiceLocator>& locator)
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));
 
     TracerSettings tracerSettings;
-    settingsProvider->FillSettings(&tracerSettings);
+    settingsProvider->FillSettings(tracerSettings);
 
     SetSettings(std::move(tracerSettings));
 }
@@ -43,7 +43,7 @@ TraceCollectorProxy Tracer::StartCollecting(TraceLevel traceLevel)
     }
 }
 
-void Tracer::SetSettings(TracerSettings&& settings)
+void Tracer::SetSettings(const TracerSettings& settings)
 {
     std::lock_guard lock(m_settingsMutex);
 

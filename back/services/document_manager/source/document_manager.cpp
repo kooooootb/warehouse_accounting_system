@@ -1,12 +1,15 @@
 #include <filesystem>
 #include <memory>
+#include <mutex>
 
 #include <document_manager/document_manager.h>
 #include <instrumental/common.h>
+#include <instrumental/settings.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
 #include <tracer/tracer.h>
 
+#include "back/services/settings_provider/include/settings_provider/settings_provider.h"
 #include "document_manager.h"
 
 namespace srv
@@ -14,20 +17,29 @@ namespace srv
 namespace docmgr
 {
 
+constexpr std::string_view INDEX_FILENAME = "index.html";
+constexpr std::string_view DEFAULT_DOCUMENT_ROOT = ".";
+
 DocumentManager::DocumentManager(const std::shared_ptr<srv::IServiceLocator>& locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
 {
     TRACE_INF << TRACE_HEADER;
 
-    SetRoot(DEFAULT_DOCUMENT_ROOT);
+    auto settingsProvider = locator->GetInterface<srv::ISettingsProvider>();
+
+    DocumentManagerSettings settings;
+    settingsProvider->FillSettings(settings);
+
+    SetSettings(settings);
 }
 
 ufa::Result DocumentManager::RestoreDocument(std::filesystem::path& relPath, bool checkExistance)
 {
+    TRACE_INF << TRACE_HEADER << "relPath: " << relPath << "checkExistance: " << checkExistance;
+
     if (relPath.empty())
     {
-        relPath = m_rootPath / INDEX_FILENAME;
-        return ufa::Result::SUCCESS;
+        relPath = INDEX_FILENAME;
     }
 
     relPath = relPath.lexically_normal();
@@ -37,7 +49,10 @@ ufa::Result DocumentManager::RestoreDocument(std::filesystem::path& relPath, boo
         return ufa::Result::WRONG_FORMAT;
     }
 
-    relPath = m_rootPath / relPath;
+    {
+        std::lock_guard lock(m_settingsMutex);
+        relPath = m_rootPath / relPath;
+    }
 
     if (checkExistance && !std::filesystem::exists(relPath))
     {
@@ -49,9 +64,14 @@ ufa::Result DocumentManager::RestoreDocument(std::filesystem::path& relPath, boo
     return ufa::Result::SUCCESS;
 }
 
-void DocumentManager::SetRoot(std::filesystem::path&& rootPath)
+void DocumentManager::SetSettings(const docmgr::DocumentManagerSettings& settings)
 {
-    m_rootPath = std::move(rootPath);
+    TRACE_INF << TRACE_HEADER << settings;
+
+    std::lock_guard lock(m_settingsMutex);
+
+    if (settings.documentRoot.has_value())
+        m_rootPath = settings.documentRoot.value();
 }
 
 }  // namespace docmgr

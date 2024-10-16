@@ -17,10 +17,10 @@ public:
     DECLARE_IID(0x37787C77)
 
     template <class T>
-    ufa::Result GetInterface(std::shared_ptr<T>& object);
+    ufa::Result GetInterface(std::shared_ptr<T>& object) const;
 
     template <class T>
-    std::shared_ptr<T> GetInterface();
+    std::shared_ptr<T> GetInterface() const;
 
     template <class T>
     ufa::Result RegisterInterface(std::shared_ptr<T> object);
@@ -42,13 +42,13 @@ public:
     static ufa::Result Create(std::shared_ptr<srv::IServiceLocator>& object);
 
 protected:
-    virtual std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) = 0;
+    virtual std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) const = 0;
     virtual ufa::Result RegisterInterfaceImpl(std::shared_ptr<srv::IService> object, srv::iid_t iid) = 0;
     virtual std::shared_ptr<IServiceLocator> GetSharedFromThis() = 0;
 };
 
 template <class T>
-ufa::Result IServiceLocator::GetInterface(std::shared_ptr<T>& object)
+ufa::Result IServiceLocator::GetInterface(std::shared_ptr<T>& object) const
 {
     auto iface = GetInterfaceImpl(GET_IID(T));
     object = std::static_pointer_cast<T>(iface);
@@ -57,7 +57,7 @@ ufa::Result IServiceLocator::GetInterface(std::shared_ptr<T>& object)
 }
 
 template <class T>
-std::shared_ptr<T> IServiceLocator::GetInterface()
+std::shared_ptr<T> IServiceLocator::GetInterface() const
 {
     auto iface = std::static_pointer_cast<T>(GetInterfaceImpl(GET_IID(T)));
     CHECK_TRUE(iface != nullptr);

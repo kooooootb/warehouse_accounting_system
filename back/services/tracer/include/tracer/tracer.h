@@ -145,7 +145,7 @@ struct ITracer : public srv::IService
     /**
      * @brief Set the Settings object
      */
-    virtual void SetSettings(tracer::TracerSettings&& settings) = 0;
+    virtual void SetSettings(const tracer::TracerSettings& settings) = 0;
 
     /**
      * @brief inner method for straight tracing

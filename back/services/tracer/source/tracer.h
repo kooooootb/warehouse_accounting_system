@@ -20,7 +20,7 @@ public:
     Tracer(const std::shared_ptr<IServiceLocator>& locator);
 
     TraceCollectorProxy StartCollecting(TraceLevel traceLevel) override;
-    void SetSettings(TracerSettings&& settings) override;
+    void SetSettings(const TracerSettings& settings) override;
     void Trace(std::unique_ptr<tracer::ITraceMessage> traceMessage) override;
 
 private:

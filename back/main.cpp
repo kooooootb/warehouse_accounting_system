@@ -8,7 +8,6 @@
 #include <locator/service_locator.h>
 #include <task_manager/task_manager.h>
 #include <tracer/tracer.h>
-#include <utilities/document_manager.h>
 #include <webserver/server.h>
 
 int main(int argc, char* argv[])

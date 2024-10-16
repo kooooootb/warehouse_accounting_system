@@ -12,6 +12,7 @@ cc_library(
     deps = [
         "//back/components/task_manager:callback",
         "//back/instrumental:include",
+        "//back/services/authorizer:iface",
         "//back/services/tracer:iface",
         "@nlohmann_json//:json",
     ],
