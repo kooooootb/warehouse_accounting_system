@@ -74,18 +74,17 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
         CHECK_TRUE(!login.empty());
         CHECK_TRUE(!password.empty());
 
-        const auto res = m_accessor->FillUser(user);  // wrong, todo fix after accessor improvements
+        const auto res = ufa::Result::SUCCESS;  //= m_accessor->FillUser(user);  // wrong, todo fix after accessor improvements
         if (res == ufa::Result::NOT_FOUND)
         {
-            TRACE_ERR << TRACE_HEADER << "User not found: " << user.name.value();
+            TRACE_ERR << TRACE_HEADER << "User not found: " << login;
             return ufa::Result::UNAUTHORIZED;
         }
         CHECK_SUCCESS(res);
-        CHECK_TRUE(user.id.has_value());
 
         token = jwt::create()
                     .set_issuer(ISSUER.data())
-                    .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(string_converters::ToString(user.id.value())))
+                    .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(std::string(login)))
                     .set_payload_claim(EXP_PAYLOAD_KEY.data(),
                         jwt::claim(string_converters::ToString(
                             m_dateProvider->GetTimestamp() + 30ull * 60ull * 60ull * 1000ull * 1000ull * 1000ull)))
@@ -107,3 +106,5 @@ std::string Authorizer::GetSecretKey() const
 
 }  // namespace auth
 }  // namespace srv
+
+DECLARE_DEFAULT_INTERFACE(srv::IAuthorizer, srv::auth::Authorizer);

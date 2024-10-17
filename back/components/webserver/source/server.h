@@ -11,9 +11,8 @@
 #include <webserver/server.h>
 
 #include "listener.h"
-#include "worker.h"
 
-namespace asio = boost::asio;  // dumb clangd cant find asio ns w/out using
+namespace asio = boost::asio;  // dumb clangd cant find asio ns w/out this
 
 namespace ws
 {
@@ -27,24 +26,26 @@ public:
 
     ufa::Result Start() override;
     ufa::Result Stop() override;
+
+    /**
+     * @brief set settings
+     * @warning Reducing workers count in current realization will cause hanging all accepted connection
+     * @todo fix warning
+     */
     void SetSettings(const ServerSettings& settings) override;
 
 private:
-    void SetWorkers(int numWorkers);
+    void SetWorkers(int numWorkers);  // is called under settings mutex
     void RunWorker();
-    void RemoveJoinedWorkers();
 
 private:
     std::shared_ptr<asio::io_context> m_ioContext;
 
-    std::mutex m_workersMutex;  // for changing workers count
-    size_t m_workersCount;      // m_workers.size() can be bigger cause worker didnt stop after reducing them
-    std::vector<std::unique_ptr<Worker>> m_workers;
+    std::mutex m_settingsMutex;
+    std::vector<std::unique_ptr<std::thread>> m_workers;
     asio::executor_work_guard<boost::asio::io_context::executor_type> m_workGuard;
 
     std::unique_ptr<Listener> m_listener;
-
-    std::shared_ptr<taskmgr::ITaskManager> m_taskManager;
 };
 
 }  // namespace ws

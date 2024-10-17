@@ -17,15 +17,19 @@ struct LazyServiceProvider
 public:
     LazyServiceProvider(std::weak_ptr<IServiceLocator> locatorWeak);
 
+protected:
     // return shared ptr as this provider doesnt own
     std::shared_ptr<T> GetLazy() const;
+
+    // late initialization especially for IServiceLocator
+    void SetLocator(std::weak_ptr<IServiceLocator> locator) const;
 
 private:
     bool TryGetService() const;
 
 private:
     // make it weak because services shouldn't own servicelocator
-    const std::weak_ptr<IServiceLocator> m_locatorWeak;
+    mutable std::weak_ptr<IServiceLocator> m_locatorWeak;
     // make it weak because it can break services owning tree
     // mutable for const methods, service dying (and pointer reset) seems to happen rarely
     // todo: do something with mutable
@@ -76,6 +80,12 @@ std::shared_ptr<T> LazyServiceProvider<T>::GetLazy() const
         m_serviceWeak.reset();
         return nullptr;
     }
+}
+
+template <typename T>
+void LazyServiceProvider<T>::SetLocator(std::weak_ptr<IServiceLocator> locator) const
+{
+    m_locatorWeak = std::move(locator);
 }
 
 }  // namespace tools

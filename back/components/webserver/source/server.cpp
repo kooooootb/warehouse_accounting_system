@@ -1,5 +1,4 @@
 #include <functional>
-#include <iostream>
 #include <mutex>
 #include <stdexcept>
 #include <utility>
@@ -31,7 +30,6 @@ Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<ta
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_ioContext(std::make_shared<asio::io_context>())
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
-    , m_taskManager(std::move(taskManager))
 {
     TRACE_INF << TRACE_HEADER;
 
@@ -41,6 +39,7 @@ Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<ta
     ServerSettings settings;
     settingsProvider->FillSettings(settings);
 
+    m_listener = std::make_unique<Listener>(settings, std::move(locator), std::move(taskManager), m_ioContext);
     SetSettings(std::move(settings));
 }
 
@@ -64,11 +63,14 @@ std::unique_ptr<IServer> IServer::Create(std::shared_ptr<srv::IServiceLocator> l
 
 void Server::SetSettings(const ServerSettings& settings)
 {
-    TRACE_INF << TRACE_HEADER << "Settings: " << settings;
+    TRACE_INF << TRACE_HEADER;
 
-    // Set workers
-    if (settings.workers.has_value())
-        SetWorkers(settings.workers.value());
+    {
+        std::lock_guard lock(m_settingsMutex);
+
+        // Set workers
+        SetWorkers(settings.workers.value_or(DEFAULT_WORKERS_NUMBER));
+    }
 
     m_listener->SetSettings(settings);
 }
@@ -76,25 +78,7 @@ void Server::SetSettings(const ServerSettings& settings)
 ufa::Result Server::Start()
 {
     TRACE_INF << TRACE_HEADER;
-
-    try
-    {
-        m_listener->Start();
-        m_ioContext->poll();
-    }
-    catch (const std::exception& ex)
-    {
-        TRACE_ERR << TRACE_HEADER << "Server start failed with exception, what():" << ex.what();
-        std::cerr << "Server start failed with exception, what():" << ex.what() << std::endl;
-        return ufa::Result::ERROR;
-    }
-    catch (...)
-    {
-        TRACE_ERR << TRACE_HEADER << "Server start failed with unknown exception";
-        std::cerr << "Server start failed with unknown exception" << std::endl;
-        return ufa::Result::ERROR;
-    }
-
+    // I have a feeling this does nothing
     return ufa::Result::SUCCESS;
 }
 
@@ -104,19 +88,16 @@ ufa::Result Server::Stop()
 
     try
     {
-        m_listener->Stop();
         m_ioContext->stop();
     }
     catch (const std::exception& ex)
     {
         TRACE_ERR << TRACE_HEADER << "Server stop failed with exception, what():" << ex.what();
-        std::cerr << "Server stop failed with exception, what():" << ex.what() << std::endl;
         return ufa::Result::ERROR;
     }
     catch (...)
     {
         TRACE_ERR << TRACE_HEADER << "Server stop failed with unknown exception";
-        std::cerr << "Server stop failed with unknown exception" << std::endl;
         return ufa::Result::ERROR;
     }
 
@@ -125,13 +106,9 @@ ufa::Result Server::Stop()
 
 void Server::SetWorkers(int numWorkers)
 {
-    std::lock_guard lock(m_workersMutex);
-
-    TRACE_INF << TRACE_HEADER << "Changing server workers number to:" << numWorkers;
+    TRACE_INF << TRACE_HEADER << "Changing server workers number from: " << m_workers.size() << "to:" << numWorkers;
 
     CHECK_TRUE(m_ioContext != nullptr);
-
-    RemoveJoinedWorkers();
 
     if (numWorkers >= m_workers.size())
     {
@@ -140,10 +117,29 @@ void Server::SetWorkers(int numWorkers)
         {
             m_workers.emplace_back(std::make_unique<std::thread>(std::bind(&Server::RunWorker, this)));
         }
+        m_listener->AddTasks(numWorkers - m_workers.size());
     }
     else
     {
-        m_listener->Stop();
+        // reduce by restarting
+        m_listener->ReduceTasks(m_workers.size() - numWorkers);
+
+        // stop threads
+        m_ioContext->stop();
+        for (auto& worker : m_workers)
+        {
+            worker->join();
+        }
+
+        // reset stopped flag
+        m_ioContext->restart();
+
+        // reinitialize std::thread vector
+        m_workers.clear();
+        for (int i = 0; i < numWorkers; ++i)
+        {
+            m_workers.emplace_back(std::make_unique<std::thread>(std::bind(&Server::RunWorker, this)));
+        }
     }
 }
 
@@ -161,25 +157,12 @@ void Server::RunWorker()
         catch (const std::exception& ex)
         {
             TRACE_ERR << TRACE_HEADER << "Worker caught exception, what() :" << ex.what();
-            std::cerr << "Worker caught exception, what() :" << ex.what() << std::endl;
         }
         catch (...)
         {
             TRACE_ERR << TRACE_HEADER << "Worker caught unknown exception";
-            std::cerr << "Worker caught unknown exception" << std::endl;
         }
     }
-}
-
-void Server::RemoveJoinedWorkers()
-{
-    m_workers.erase(std::remove_if(std::begin(m_workers),
-                        std::end(m_workers),
-                        [](const auto& worker) -> bool
-                        {
-                            return worker.IsFinished();
-                        }),
-        std::end(m_workers));
 }
 
 }  // namespace ws

@@ -26,11 +26,12 @@ public:
     ufa::Result RegisterInterface(std::shared_ptr<T> object);
 
     /**
-     * @brief register default common services
+     * @brief Late setup startegy
+     * mainly it will register default common services
      * If other interface is already registered with some default interfaces's id
      * then don't register this one default interface
      */
-    virtual void RegisterDefaults() = 0;
+    virtual void Setup() = 0;
 
     /**
      * @brief client services implement this template to include it in default initialization

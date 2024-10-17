@@ -22,6 +22,8 @@ class ISessionFactory : public ufa::IBase
 public:
     virtual std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) = 0;
 
+    virtual void SetSettings(const ServerSettings& settings) = 0;
+
     static std::unique_ptr<ISessionFactory> Create(const ServerSettings& settings,
         std::shared_ptr<srv::IServiceLocator> locator,
         std::shared_ptr<taskmgr::ITaskManager> taskManager);

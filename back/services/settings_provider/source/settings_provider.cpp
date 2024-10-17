@@ -1,12 +1,13 @@
-#include <config_reader/config_reader.h>
-#include <environment/environment.h>
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
+
 #include <instrumental/check.h>
 #include <instrumental/common.h>
 #include <instrumental/types.h>
 
-#include <algorithm>
-#include <cctype>
-#include <filesystem>
+#include <config_reader/config_reader.h>
+#include <environment/environment.h>
 
 #include "settings_provider.h"
 

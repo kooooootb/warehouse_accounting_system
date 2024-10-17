@@ -9,6 +9,9 @@
 namespace ws
 {
 
+/**
+ * @brief this class was made to help reduce workers count
+ */
 class Worker
 {
 public:
