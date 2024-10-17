@@ -9,38 +9,12 @@
 #include <locator/service_locator.h>
 #include <tracer/tracer_provider.h>
 
+#include "connection_options.h"
+
 namespace srv
 {
 namespace db
 {
-
-class ConnectionOptions : public srv::tracer::TracerProvider
-{
-public:
-    ConnectionOptions(std::shared_ptr<srv::ITracer> tracer);
-
-    void SetSettings(const AccessorSettings& settings);
-
-    const std::string& GetConnectionString() const;
-
-private:
-    // for constructing connections string
-    static constexpr std::string_view ADDRESS_CONN = "host";
-    static constexpr std::string_view PORT_CONN = "port";
-    static constexpr std::string_view DBNAME_CONN = "dbname";
-    static constexpr std::string_view USER_CONN = "user";
-    static constexpr std::string_view PASSWORD_CONN = "password";
-
-private:
-    std::shared_mutex m_optionsMutex;
-    mutable std::string m_cachedString;
-
-    std::string m_address;
-    uint32_t m_port;
-    std::string m_dbname;
-    std::string m_user;
-    std::string m_password;
-};
 
 class Accessor : public srv::tracer::TracerProvider, public srv::IAccessor
 {
