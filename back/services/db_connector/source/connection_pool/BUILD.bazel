@@ -1,0 +1,28 @@
+package(default_visibility = ["//back:__subpackages__"])
+
+cc_library(
+    name = "iface",
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
+    includes = ["./include"],
+    deps = [
+        "//:libpqxx",
+        "//back/services/locator:iface",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "//:libpqxx",
+        "//back/services/settings_provider:iface",
+        "//back/services/tracer:iface",
+        "@fmt",
+    ],
+)
