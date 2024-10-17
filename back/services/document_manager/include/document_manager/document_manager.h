@@ -6,6 +6,8 @@
 #include <instrumental/common.h>
 #include <instrumental/settings.h>
 
+#include <locator/service.h>
+
 namespace srv
 {
 namespace docmgr
@@ -24,8 +26,10 @@ public:
 
 }  // namespace docmgr
 
-struct IDocumentManager : public ufa::IBase
+struct IDocumentManager : public srv::IService
 {
+    DECLARE_IID(0X3260C4C8);
+
     /**
      * @brief Restore the Document object using rel path
      * @param relPath resulting path, containing relative to root path

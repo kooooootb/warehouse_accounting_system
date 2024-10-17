@@ -16,10 +16,7 @@
 namespace srv
 {
 
-ServiceLocator::ServiceLocator() : srv::tracer::TracerLazyProvider(weak_from_this())
-{
-    TRACE_INF << TRACE_HEADER;  // doesn't have much sense
-}
+ServiceLocator::ServiceLocator() : srv::tracer::TracerLazyProvider(std::weak_ptr<IServiceLocator>()) {}
 
 ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& object)
 {
@@ -27,16 +24,18 @@ ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& objec
     return ufa::Result::SUCCESS;
 }
 
+void ServiceLocator::Setup()
+{
+    TRACE_INF << TRACE_HEADER;
+
+    RegisterDefaults();
+}
+
 void ServiceLocator::RegisterDefaults()
 {
     TRACE_INF << TRACE_HEADER;
 
-    Setup();
-}
-
-void ServiceLocator::Setup()
-{
-    TRACE_INF << TRACE_HEADER;
+    tracer::TracerLazyProvider::SetLocator(weak_from_this());
 
     // order is pretty much important because services depend on each other
     // can resolve it through dependency graph but it is too time-cost
@@ -56,11 +55,11 @@ std::shared_ptr<srv::IService> ServiceLocator::GetInterfaceImpl(srv::iid_t iid) 
 
     if (ifaceIt != m_ifaceStorage.cend())
     {
-        TRACE_INF << TRACE_HEADER << "Returning interface with iid: " << iid;
+        // TRACE_INF << TRACE_HEADER << "Returning interface with iid: " << iid;
         return ifaceIt->second;
     }
 
-    TRACE_WRN << TRACE_HEADER << "Couldn't find interface with iid: " << iid;
+    // TRACE_WRN << TRACE_HEADER << "Couldn't find interface with iid: " << iid;
     return nullptr;
 }
 

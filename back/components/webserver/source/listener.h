@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 
 #include <instrumental/types.h>
+#include <locator/service_locator.h>
+#include <task_manager/task_manager.h>
 #include <tracer/tracer_provider.h>
 
 #include <session/session_factory.h>
@@ -18,21 +20,22 @@ using tcp = boost::asio::ip::tcp;
 namespace ws
 {
 
-class Listener : public srv::tracer::TracerProvider, public std::enable_shared_from_this<Listener>
+/**
+ * @brief accepts connections using passed io_context workers
+ */
+class Listener : public srv::tracer::TracerProvider
 {
 public:
     Listener(const ServerSettings& settings,
-        std::shared_ptr<srv::ITracer> tracer,
-        std::shared_ptr<asio::io_context> ioContext,
-        tcp::endpoint endpoint,
-        std::unique_ptr<session::ISessionFactory> sessionFactory);
+        std::shared_ptr<srv::IServiceLocator> locator,
+        std::shared_ptr<taskmgr::ITaskManager> taskManager,
+        std::shared_ptr<asio::io_context> ioContext);
 
+    // will stop associated io_context
     ~Listener();
 
-    void Start(size_t tasksCount);
-    void Stop(size_t tasksCount);
-
-    void StopAll();
+    void AddTasks(size_t tasksCount);
+    void ReduceTasks(size_t tasksCount);
 
     void SetSettings(const ServerSettings& settings);
 
@@ -40,15 +43,22 @@ private:
     void DoAccept();
     void OnAccept(boost::system::error_code ec, tcp::socket socket);
 
+    void SetEndpoint(const ServerSettings& settings);  // will reinit acceptor and cancel all accepts
+
+    tcp::endpoint ExtractEndpoint(const ServerSettings& settings);
+
 private:
     std::shared_ptr<asio::io_context> m_ioContext;
-    tcp::endpoint m_endpoint;
+
+    std::mutex m_settingsMutex;
+    asio::ip::address m_savedAddress;
+    int32_t m_savedPort;
     tcp::acceptor m_acceptor;
 
-    std::shared_mutex m_sessionFactoryMtx;
     std::unique_ptr<session::ISessionFactory> m_sessionFactory;
 
-    std::atomic<size_t> m_tasksToStopCount;
+    std::atomic<int32_t> m_tasksToStopCount = 0;  // use signed type, dont use its assignment methods
+    std::atomic<size_t> m_totalRunnedTasksCount = 0;
 };
 
 }  // namespace ws

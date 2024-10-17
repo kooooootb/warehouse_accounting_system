@@ -20,7 +20,7 @@ class ServiceLocator : public std::enable_shared_from_this<ServiceLocator>,
 public:
     ServiceLocator();
 
-    void RegisterDefaults() override;
+    void Setup() override;
 
 protected:
     std::shared_ptr<srv::IService> GetInterfaceImpl(srv::iid_t iid) const override;
@@ -35,7 +35,7 @@ private:
     template <class T>
     ufa::Result TryRegisterDefaultInterface();
 
-    void Setup();
+    void RegisterDefaults();
 
 private:
     std::unordered_map<srv::iid_t, std::shared_ptr<srv::IService>> m_ifaceStorage;
@@ -44,6 +44,8 @@ private:
 template <class T>
 ufa::Result ServiceLocator::TryRegisterDefaultInterface()
 {
+    TRACE_INF << TRACE_HEADER << "Registering iface with id: " << GET_IID(T);
+
     const auto iid = GET_IID(T);
     const auto it = m_ifaceStorage.find(iid);
     if (it == m_ifaceStorage.cend())

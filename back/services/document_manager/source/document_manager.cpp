@@ -2,14 +2,15 @@
 #include <memory>
 #include <mutex>
 
-#include <document_manager/document_manager.h>
 #include <instrumental/common.h>
 #include <instrumental/settings.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
+
+#include <document_manager/document_manager.h>
+#include <settings_provider/settings_provider.h>
 #include <tracer/tracer.h>
 
-#include "back/services/settings_provider/include/settings_provider/settings_provider.h"
 #include "document_manager.h"
 
 namespace srv
@@ -22,6 +23,7 @@ constexpr std::string_view DEFAULT_DOCUMENT_ROOT = ".";
 
 DocumentManager::DocumentManager(const std::shared_ptr<srv::IServiceLocator>& locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
+    , m_rootPath(DEFAULT_DOCUMENT_ROOT)
 {
     TRACE_INF << TRACE_HEADER;
 

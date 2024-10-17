@@ -1,2 +1,5 @@
 think about service includes
 make project file root in ienvironment for webserver, documentmanager etc
+make settings provider cache all settings so each settings are only getting bigger throgh execution so we dont need to save m_saved... vars
+service locator thread safe
+service locator traces in getinterface

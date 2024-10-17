@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    serviceLocator->RegisterDefaults();
+    serviceLocator->Setup();
 
     std::shared_ptr<srv::ITracer> tracer;
     CHECK_SUCCESS(serviceLocator->GetInterface(tracer));
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        auto taskManager = taskmgr::ITaskManager::Create(serviceLocator);
+        std::shared_ptr<taskmgr::ITaskManager> taskManager = taskmgr::ITaskManager::Create(serviceLocator);
         auto server = ws::IServer::Create(serviceLocator, taskManager);
 
         server->Start();

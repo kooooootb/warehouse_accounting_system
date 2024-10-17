@@ -78,7 +78,6 @@ inline bool TryExtractFromOptional(std::optional<T> from, T& to)
 namespace string_converters
 {
 
-template <>
 inline std::string ToString(const ufa::settings::SettingsBase& settings)
 {
     auto fieldNames = settings.GetFields();
@@ -88,10 +87,12 @@ inline std::string ToString(const ufa::settings::SettingsBase& settings)
     result << '<';
 
     CHECK_TRUE(fieldNames.size() == fieldValues.size());
-    for (size_t i = 0; i < fieldNames.size(); ++i)
+    for (size_t i = 0; i < fieldNames.size() - 1; ++i)
     {
-        result << fieldNames[i] << " = " << fieldValues[i];
+        result << fieldNames[i] << " = " << fieldValues[i] << ", ";
     }
+
+    result << fieldNames.back() << " = " << fieldValues.back() << ", ";
 
     result << '>';
 
@@ -105,7 +106,7 @@ inline std::enable_if_t<std::is_base_of_v<ufa::settings::SettingsBase, std::deca
     std::string>
 ToString(const FromT& settings)
 {
-    return ToString<const ufa::settings::SettingsBase&>(settings);
+    return ToString(static_cast<const ufa::settings::SettingsBase&>(settings));
 }
 
 }  // namespace string_converters
