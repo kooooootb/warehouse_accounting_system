@@ -1,4 +1,4 @@
-package(default_visibility = ["//back:__subpackages__"])
+package(default_visibility = ["//back/services/db_connector:__subpackages__"])
 
 cc_library(
     name = "iface",
@@ -8,8 +8,9 @@ cc_library(
     includes = ["./include"],
     deps = [
         "//:libpqxx",
+        "//back/instrumental:include",
+        "//back/services/db_connector:iface",
         "//back/services/locator:iface",
-        "//back/services/tracer:iface",
     ],
 )
 
@@ -24,6 +25,5 @@ cc_library(
         "//:libpqxx",
         "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
-        "@fmt",
     ],
 )

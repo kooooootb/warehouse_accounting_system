@@ -117,6 +117,21 @@ inline bool FromString(const std::string& from)
     return !from.empty() && from.front() == 't' ? true : false;  // return false when empty or "f*"
 }
 
+template <typename T>
+std::string ToString(T begin, T end, std::string_view separator)
+{
+    std::stringstream result;
+
+    for (; begin != std::prev(end); ++begin)
+    {
+        result << string_converters::ToString(*begin) << separator;
+    }
+
+    result << *begin;
+
+    return result.str();
+}
+
 }  // namespace string_converters
 
 #endif  // H_6850FD1E_2620_4732_9663_03B50CD70AE4

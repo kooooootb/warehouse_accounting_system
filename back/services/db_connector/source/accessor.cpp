@@ -27,11 +27,9 @@ namespace db
 {
 
 constexpr bool DEFAULT_ALWAYS_REINITIALIZE = true;
-constexpr uint32_t DEFAULT_CONNECTION_ATTEMPTS = 50;
 
 Accessor::Accessor(const std::shared_ptr<srv::IServiceLocator>& locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
-    , m_connectionOptions(GetTracer())
     , m_connectAttempts(DEFAULT_CONNECTION_ATTEMPTS)
     , m_alwaysReinitialize(DEFAULT_ALWAYS_REINITIALIZE)
 {
@@ -40,7 +38,7 @@ Accessor::Accessor(const std::shared_ptr<srv::IServiceLocator>& locator)
     std::shared_ptr<srv::ISettingsProvider> settingsProvider;
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));
 
-    AccessorSettings settings;
+    DBConnectorSettings settings;
     settingsProvider->FillSettings(settings);
 
     SetSettings(std::move(settings));
@@ -51,10 +49,8 @@ Accessor::Accessor(const std::shared_ptr<srv::IServiceLocator>& locator)
     }
 }
 
-void Accessor::SetSettings(const AccessorSettings& settings)
+void Accessor::SetSettings(const DBConnectorSettings& settings)
 {
-    m_connectionOptions.SetSettings(settings);
-
     {
         std::shared_lock lock(m_optionsMutex);
 
