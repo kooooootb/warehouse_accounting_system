@@ -22,7 +22,8 @@ public:
         std::unique_ptr<SelectOptions>&& options,
         std::unique_ptr<SelectValues>&& values);
 
-    std::pair<std::string, uint32_t> SerializeParametrized() override;
+    QueryIdentificator GetIdentificator() override;
+
     pqxx::params GetParams() override;
 
 private:

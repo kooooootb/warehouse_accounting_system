@@ -1,6 +1,12 @@
 #ifndef H_D4AFC819_7297_4302_BC08_35144F1768C4
 #define H_D4AFC819_7297_4302_BC08_35144F1768C4
 
+#include <db_connector/query/query.h>
+
+#include <query/query_manager.h>
+
+#include "queries_storage_type.h"
+
 namespace srv
 {
 namespace db
@@ -8,17 +14,18 @@ namespace db
 namespace qry
 {
 
-/**
-     * @brief allows iterating through queries props
-     * @warning will lock queries internal mutex so dispose is asayc
-     */
-class QueriesLock
+class QueriesLock : public IQueryManager::IQueriesLock
 {
 public:
-    QueriesLock(std::mutex& queriesMutex, const std::map<uint64_t, std::unique_ptr<IQueryOptions>>& queries);
+    QueriesLock(std::mutex& queriesMutex, const queriesStorage_t& queries);
+
+    IQueryManager::QueriesIterator begin() override;
+    IQueryManager::QueriesIterator end() override;
+    IQueryManager::QueriesIterator rbegin() override;
+    IQueryManager::QueriesIterator rend() override;
 
 private:
-    const std::map<uint64_t, std::unique_ptr<IQueryOptions>>& m_queries;
+    const queriesStorage_t& m_queries;
     std::lock_guard<std::mutex> m_lock;
 };
 
