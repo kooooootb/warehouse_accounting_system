@@ -40,6 +40,7 @@ BaseQuery<OptionsT, ValuesT>::BaseQuery(std::shared_ptr<srv::ITracer> tracer,
 template <typename OptionsT, typename ValuesT>
 std::unique_ptr<IQueryOptions> BaseQuery<OptionsT, ValuesT>::ExtractOptions()
 {
+    TRACE_INF << TRACE_HEADER << "Extracting options";
     return std::move(m_options);
 }
 

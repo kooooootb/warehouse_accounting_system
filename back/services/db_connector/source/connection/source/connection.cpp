@@ -20,17 +20,17 @@ Connection::Connection(std::shared_ptr<srv::ITracer> tracer, const ConnectionOpt
 void Connection::RefreshSupportedQueries(qry::IQueryManager& queryManager)
 {
     auto queries = queryManager.GetQueries();
-    auto queriesIt = std::prev(queries->end());
+    auto queriesIt = queries->rbegin();
 
-    const auto realLast = queriesIt->first;
+    const auto realLast = queriesIt->id;
 
     if (m_lastSupportedQuery < realLast)
     {
-        while (queriesIt->first <= m_lastSupportedQuery)
+        do
         {
-            SupportQuery(queriesIt->first, queryManager.SerializeQuery(queriesIt->second));
-            queriesIt = std::prev(queriesIt);
-        }
+            SupportQuery(queriesIt->id, queriesIt->queryOptions->SerializeParametrized());
+            ++queriesIt;
+        } while (queriesIt->id <= m_lastSupportedQuery);
     }
 }
 

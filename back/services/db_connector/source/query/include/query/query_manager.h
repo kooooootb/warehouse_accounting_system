@@ -45,11 +45,10 @@ struct IQueryManager : public ufa::IBase
         {
             virtual Field GetField() = 0;
             virtual void Next() = 0;
-            virtual void Prev() = 0;
             virtual bool Equals(const IQueriesIteratorInternal& it) = 0;
         };
 
-        QueriesIterator(bool isForward, std::unique_ptr<IQueriesIteratorInternal>&& internalIt)
+        QueriesIterator(std::unique_ptr<IQueriesIteratorInternal>&& internalIt)
             : m_internalIt(std::move(internalIt))
             , m_curField(m_internalIt->GetField())
         {
@@ -68,14 +67,6 @@ struct IQueryManager : public ufa::IBase
         QueriesIterator& operator++()
         {
             m_internalIt->Next();
-            m_curField = m_internalIt->GetField();
-
-            return *this;
-        }
-
-        QueriesIterator& operator--()
-        {
-            m_internalIt->Prev();
             m_curField = m_internalIt->GetField();
 
             return *this;
@@ -100,7 +91,7 @@ struct IQueryManager : public ufa::IBase
      * @brief allows iterating through queries props
      * @warning implementation locks queries internal mutex so dispose is asayc
      */
-    class IQueriesLock : ufa::IBase
+    struct IQueriesLock : ufa::IBase
     {
         virtual QueriesIterator begin() = 0;
         virtual QueriesIterator end() = 0;
