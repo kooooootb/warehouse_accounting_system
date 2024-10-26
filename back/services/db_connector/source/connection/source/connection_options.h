@@ -4,8 +4,9 @@
 #include <memory>
 #include <shared_mutex>
 
-#include <db_connector/accessor.h>
 #include <tracer/tracer_provider.h>
+
+#include <db_connector/settings.h>
 
 namespace srv
 {

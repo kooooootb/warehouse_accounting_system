@@ -26,6 +26,16 @@ struct IQueryOptions : public ufa::IBase
     virtual std::string SerializeParametrized(placeholder_t& placeholders) = 0;
 
     /**
+     * @brief serialize query in parametrized string
+     * @return parametrized string
+     */
+    virtual std::string SerializeParametrized()
+    {
+        placeholder_t placeholders;
+        return SerializeParametrized(placeholders);
+    }
+
+    /**
      * @brief compare two options
      * @warning should be called on same implementations, its callers responsibility to guard it
      */

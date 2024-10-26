@@ -1,5 +1,6 @@
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
+
 #include <tracer/tracer_provider.h>
 
 #include <db_connector/query/query_options.h>
@@ -35,7 +36,6 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
 {
     const auto identificator = query->GetIdentificator();
     const auto options = query->ExtractOptions();
-    placeholder_t placeholders;
 
     TRACE_INF << TRACE_HEADER << "type: " << identificator;
     queryid_t willUseId;
@@ -70,8 +70,7 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
                 vec.emplace_back(willUseId, std::move(options));
 
                 TRACE_INF << TRACE_HEADER << "Add support for known query type, id: " << willUseId;
-                TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId
-                          << "query: " << options->SerializeParametrized(placeholders);
+                TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId << "query: " << options->SerializeParametrized();
             }
         }
         else
@@ -85,7 +84,7 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
             m_supportedQueries.insert(std::make_pair(identificator, std::move(vec)));
 
             TRACE_INF << TRACE_HEADER << "Add new query type: " << identificator << ", and new id: " << willUseId;
-            TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId << "query: " << options->SerializeParametrized(placeholders);
+            TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId << "query: " << options->SerializeParametrized();
         }
     }
 
