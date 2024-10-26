@@ -19,7 +19,7 @@ enum class Result : int32_t
     WRONG_FORMAT = 6,             // met wrong input format
     DUPLICATE = 7,                // something duplicated
     UNAUTHORIZED = 8,             // unauthorized access
-    NOT_IMPLEMENTED = 9,          // some interface do'nt have implementation yet
+    NOT_IMPLEMENTED = 9,          // some interface or feature doesn't have implementation yet
     NO_CONNECTION = 10,           // couldn't create connection
 };
 

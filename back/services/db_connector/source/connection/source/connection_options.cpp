@@ -21,7 +21,7 @@ ConnectionOptions::ConnectionOptions(std::shared_ptr<srv::ITracer> tracer)
 {
 }
 
-void ConnectionOptions::SetSettings(const AccessorSettings& settings)
+void ConnectionOptions::SetSettings(const DBConnectorSettings& settings)
 {
     std::unique_lock lock(m_optionsMutex);
 

@@ -9,8 +9,6 @@
 #include <locator/service_locator.h>
 #include <tracer/tracer_provider.h>
 
-#include "connection_options.h"
-
 namespace srv
 {
 namespace db
@@ -22,7 +20,7 @@ public:
     Accessor(const std::shared_ptr<srv::IServiceLocator>& locator);
 
 private:
-    void SetSettings(const AccessorSettings& settings);
+    void SetSettings(const DBConnectorSettings& settings);
 
     bool DBNeedsReinitializing();
     void InitializeDB();
@@ -31,8 +29,6 @@ private:
     std::string JoinFilters(const std::vector<std::string>& filters);
 
 private:
-    ConnectionOptions m_connectionOptions;
-
     // options
     std::shared_mutex m_optionsMutex;
     uint32_t m_connectAttempts;

@@ -17,7 +17,7 @@ class ConnectionOptions : public srv::tracer::TracerProvider
 public:
     ConnectionOptions(std::shared_ptr<srv::ITracer> tracer);
 
-    void SetSettings(const AccessorSettings& settings);
+    void SetSettings(const DBConnectorSettings& settings);
 
     const std::string& GetConnectionString() const;
 
