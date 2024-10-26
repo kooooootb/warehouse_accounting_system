@@ -4,24 +4,32 @@
 #include <instrumental/common.h>
 #include <instrumental/serialized_enum.h>
 
+#include <tracer/tracer.h>
+
+#include "query_identificator.h"
+#include "utilities.h"
+
 namespace srv
 {
 namespace db
 {
 
-struct IQueryOptions
+struct IQueryOptions : public ufa::IBase
 {
-    /**
-     * @brief get unique query implementation identificator
-     */
-    virtual QueryIdentificator GetIdentificator() = 0;
+    virtual QueryIdentificator GetIdentificator() const = 0;
 
     /**
      * @brief serialize query in parametrized string
-     * @return pair->first - count of parameters
-     * @return pair->second - parametrized string
+     * @param placeholders will generate placeholders
+     * @return parametrized string
      */
-    virtual std::pair<std::string, uint32_t> SerializeParametrized() = 0;
+    virtual std::string SerializeParametrized(placeholder_t& placeholders) = 0;
+
+    /**
+     * @brief compare two options
+     * @warning should be called on same implementations, its callers responsibility to guard it
+     */
+    virtual bool Equals(const IQueryOptions& options) = 0;
 };
 
 }  // namespace db

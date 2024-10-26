@@ -4,10 +4,11 @@
 #include <pqxx/pqxx>
 
 #include <instrumental/common.h>
+#include <instrumental/serialized_enum.h>
 
 #include <tracer/tracer.h>
 
-DEFINE_ENUM_WITH_SERIALIZATION(srv::db, QueryIdentificator, SELECT);
+#include "query_options.h"
 
 namespace srv
 {
@@ -22,12 +23,9 @@ namespace db
 struct IQuery : public ufa::IBase
 {
     /**
-     * @brief serialize query in parametrized string
-     * @warning internally this calls same IQueryOptions method
-     * @return pair->first - count of parameters
-     * @return pair->second - parametrized string
+     * @brief identify query implementation
      */
-    virtual std::pair<std::string, uint32_t> SerializeParametrized() = 0;
+    virtual QueryIdentificator GetIdentificator() = 0;
 
     /**
     * @brief retrieve pqxx's params for current query to use in actual querying
