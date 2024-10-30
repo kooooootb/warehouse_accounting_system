@@ -7,7 +7,6 @@
 
 #include "settings.h"
 #include "transaction.h"
-#include "transaction_entry.h"
 
 namespace srv
 {
