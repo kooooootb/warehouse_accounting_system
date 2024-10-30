@@ -33,10 +33,10 @@ ConnectionPool::ConnectionPool(const DBConnectorSettings& settings, const std::s
     SetSettings(settings);
 }
 
-std::unique_ptr<IConnectionPool> IConnectionPool::Create(const DBConnectorSettings& settings,
+std::shared_ptr<IConnectionPool> IConnectionPool::Create(const DBConnectorSettings& settings,
     const std::shared_ptr<srv::IServiceLocator>& locator)
 {
-    return std::make_unique<ConnectionPool>(settings, locator);
+    return std::make_shared<ConnectionPool>(settings, locator);
 }
 
 void ConnectionPool::SetSettings(const DBConnectorSettings& settings)
@@ -67,7 +67,7 @@ IConnectionPool::ConnectionProxy ConnectionPool::GetConnection()
         auto connection = std::move(m_freeConnections.back());
         m_freeConnections.pop_back();
 
-        return {this, std::move(connection)};
+        return {shared_from_this(), std::move(connection)};
     }
     else if (m_toCreate > 0)
     {
@@ -77,7 +77,7 @@ IConnectionPool::ConnectionProxy ConnectionPool::GetConnection()
         auto connection = CreateConnection();
         m_toCreate -= 1;
 
-        return {this, std::move(connection)};
+        return {shared_from_this(), std::move(connection)};
     }
     else
     {
@@ -87,7 +87,7 @@ IConnectionPool::ConnectionProxy ConnectionPool::GetConnection()
         auto connection = CreateConnection();
         m_toDelete += 1;
 
-        return {this, std::move(connection)};
+        return {shared_from_this(), std::move(connection)};
     }
 }
 

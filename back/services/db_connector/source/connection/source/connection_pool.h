@@ -1,9 +1,12 @@
 #ifndef H_CB087953_3294_405A_B767_115465F31B79
 #define H_CB087953_3294_405A_B767_115465F31B79
 
-#include <db_connector/accessor.h>
+#include <memory>
+
 #include <locator/service_locator.h>
 #include <tracer/tracer_provider.h>
+
+#include <db_connector/accessor.h>
 
 #include <connection/connection_pool.h>
 
@@ -16,7 +19,7 @@ namespace db
 namespace conn
 {
 
-class ConnectionPool : public srv::tracer::TracerProvider, public IConnectionPool
+class ConnectionPool : public srv::tracer::TracerProvider, public IConnectionPool, public std::enable_shared_from_this<ConnectionPool>
 {
 public:
     ConnectionPool(const DBConnectorSettings& settings, const std::shared_ptr<IServiceLocator>& locator);
