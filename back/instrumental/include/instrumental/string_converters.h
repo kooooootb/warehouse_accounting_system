@@ -127,7 +127,7 @@ std::string ToString(T begin, T end, std::string_view separator)
         result << string_converters::ToString(*begin) << separator;
     }
 
-    result << *begin;
+    result << string_converters::ToString(*begin);
 
     return result.str();
 }

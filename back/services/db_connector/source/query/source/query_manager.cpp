@@ -40,7 +40,7 @@ std::unique_ptr<IQueryManager::IQueriesLock> QueryManager::GetQueries()
 uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
 {
     const auto identificator = query->GetIdentificator();
-    const auto options = query->ExtractOptions();
+    auto options = query->ExtractOptions();
 
     TRACE_INF << TRACE_HEADER << "type: " << identificator;
     queryid_t willUseId;
@@ -54,11 +54,11 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
         {
             auto& vec = mapIt->second;
 
-            if (const auto vecIt = std::find(std::cbegin(vec),
+            if (const auto vecIt = std::find_if(std::cbegin(vec),
                     std::cend(vec),
                     [&options](const auto& pair)
                     {
-                        return pair.second->Equals(options);
+                        return pair.second->Equals(*options);
                     });
                 vecIt != std::cend(vec))
             {
@@ -75,7 +75,7 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
                 vec.emplace_back(willUseId, std::move(options));
 
                 TRACE_INF << TRACE_HEADER << "Add support for known query type, id: " << willUseId;
-                TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId << "query: " << options->SerializeParametrized();
+                TRACE_DBG << TRACE_HEADER << "Query: " << options->SerializeParametrized();
             }
         }
         else

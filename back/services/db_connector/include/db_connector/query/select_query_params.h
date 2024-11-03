@@ -3,32 +3,19 @@
 
 #include <optional>
 
-#include <instrumental/serialized_enum.h>
+#include <tracer/tracer.h>
 
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/product_definitions/tables.h>
-
-#include <tracer/tracer.h>
-
 #include <db_connector/query/query_options.h>
 
 #include "condition.h"
-
-DEFINE_ENUM_WITH_SERIALIZATION(srv::db, JoinType, LEFT, RIGHT, INNER);
+#include "join.h"
 
 namespace srv
 {
 namespace db
 {
-
-struct Join
-{
-    JoinType type = JoinType::LEFT;
-    std::optional<Table> leftTable;
-    Column leftColumn;
-    Table joiningTable;
-    Column joiningColumn;
-};
 
 struct SelectOptions : public IQueryOptions
 {
@@ -43,16 +30,25 @@ struct SelectOptions : public IQueryOptions
 
         std::string result;
 
-        result += fmt::format("SELECT {} FROM {} "sv,
-            string_converters::ToString(std::begin(columns), std::end(columns), ", "sv),
-            string_converters::ToString(table));
+        CHECK_TRUE(table != Table::Invalid);
+
+        if (columns.empty())
+        {
+            result += fmt::format("SELECT * FROM {} "sv, string_converters::ToString(table));
+        }
+        else
+        {
+            result += fmt::format("SELECT {} FROM {}"sv,
+                string_converters::ToString(std::begin(columns), std::end(columns), ", "sv),
+                string_converters::ToString(table));
+        }
 
         for (const auto& join : joins)
         {
-            result += fmt::format(" {} JOIN {} ON {}.{}={}.{} "sv,
+            result += fmt::format(" {} JOIN {} ON {}.{}={}.{}"sv,
                 string_converters::ToString(join.type),
                 string_converters::ToString(join.joiningTable),
-                string_converters::ToString(join.leftTable),
+                string_converters::ToString(join.leftTable.value_or(table)),
                 string_converters::ToString(join.leftColumn),
                 string_converters::ToString(join.joiningTable),
                 string_converters::ToString(join.joiningColumn));
@@ -60,7 +56,7 @@ struct SelectOptions : public IQueryOptions
 
         if (condition != nullptr)
         {
-            result += fmt::format("WHERE {} "sv, condition->ToString(placeholders));
+            result += fmt::format(" WHERE {} "sv, condition->ToString(placeholders));
         }
 
         result += ';';
@@ -92,9 +88,9 @@ struct SelectOptions : public IQueryOptions
         return true;
     }
 
-    Table table;                  // e.g. .. FROM this
-    std::vector<Column> columns;  // e.g. SELECT this FROM ...
-    std::vector<Join> joins;      // for all joins
+    Table table = Table::Invalid;  // e.g. .. FROM this
+    std::vector<Column> columns;   // e.g. SELECT this FROM ...
+    std::vector<Join> joins;       // for all joins
     Column id;
     std::unique_ptr<ICondition> condition;  // can be grouped
 };

@@ -22,11 +22,26 @@ cc_library(
     deps = [
         ":iface",
         "//:libpqxx",
-        "//back/services/db_connector/source/connection:iface",
-        "//back/services/db_connector/source/query:iface",
-        "//back/services/db_connector/source/transaction:iface",
+        "//back/services/db_connector/source/connection:lib",
+        "//back/services/db_connector/source/query:lib",
+        "//back/services/db_connector/source/transaction:lib",
         "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
         "@fmt",
+    ],
+)
+
+cc_binary(
+    name = "test",
+    srcs = glob([
+        "test/**/*.h",
+        "test/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        ":lib",
+        "//back/services/tracer:mock",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
     ],
 )

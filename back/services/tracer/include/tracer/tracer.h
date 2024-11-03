@@ -1,6 +1,7 @@
 #ifndef H_279EA6B0_A913_4430_A483_0A5FAAA2F146
 #define H_279EA6B0_A913_4430_A483_0A5FAAA2F146
 
+#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <optional>
@@ -92,6 +93,15 @@ public:
     {
         if (m_traceCollector != nullptr)
             m_traceCollector->AddMessage(string_converters::ToString(std::forward<SourceT>(message)));
+
+        return *this;
+    }
+
+    template <typename SourceT>
+    TraceCollectorProxy& operator<<(SourceT* ptr)
+    {
+        if (m_traceCollector != nullptr)
+            m_traceCollector->AddMessage(string_converters::ToString(reinterpret_cast<uintptr_t>(ptr)));  // we are just id'ing pointer
 
         return *this;
     }

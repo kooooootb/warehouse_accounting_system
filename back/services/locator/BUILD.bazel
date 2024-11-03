@@ -30,3 +30,16 @@ cc_library(
         "//back/services/tracer:lib",
     ],
 )
+
+cc_library(
+    name = "mock",
+    srcs = glob([
+        "mock/**/*.h",
+        "mock/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)

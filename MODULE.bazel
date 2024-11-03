@@ -18,6 +18,9 @@ bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
 # fmt
 bazel_dep(name = "fmt", version = "10.2.1")
 
+# gtests
+bazel_dep(name = "googletest", version = "1.15.2")
+
 ### llvm toolchain
 
 bazel_dep(name = "toolchains_llvm", version = "1.1.2")

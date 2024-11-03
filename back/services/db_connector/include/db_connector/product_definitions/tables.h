@@ -5,6 +5,7 @@
 
 DEFINE_ENUM_WITH_SERIALIZATION(srv::db,
     Table,
+    Invalid,
     Color,
     Invoice_Item,
     Invoice,
