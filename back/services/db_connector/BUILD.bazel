@@ -22,6 +22,9 @@ cc_library(
     deps = [
         ":iface",
         "//:libpqxx",
+        "//back/services/db_connector/source/connection:iface",
+        "//back/services/db_connector/source/query:iface",
+        "//back/services/db_connector/source/transaction:iface",
         "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
         "@fmt",

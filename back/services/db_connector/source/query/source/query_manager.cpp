@@ -27,6 +27,11 @@ std::unique_ptr<IQueryManager> IQueryManager::Create(const DBConnectorSettings& 
     return std::make_unique<QueryManager>(settings, locator);
 }
 
+void QueryManager::SetSettings(const DBConnectorSettings& settings)
+{
+    TRACE_INF << TRACE_HEADER;
+}
+
 std::unique_ptr<IQueryManager::IQueriesLock> QueryManager::GetQueries()
 {
     return std::make_unique<QueriesLock>(m_queriesMutex, m_supportedQueries);

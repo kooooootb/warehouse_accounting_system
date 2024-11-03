@@ -5,6 +5,7 @@
 #include <instrumental/interface.h>
 
 #include <db_connector/transaction.h>
+#include <db_connector/transaction_policies.h>
 
 #include <connection/connection_pool.h>
 #include <query/query_manager.h>
@@ -18,7 +19,8 @@ namespace trsct
 
 struct ITransactionFactory : public ufa::IBase
 {
-    virtual std::unique_ptr<ITransaction> CreateTransaction() = 0;
+    virtual std::unique_ptr<ITransaction> CreateTransaction(WritePolicy writePolicy = WritePolicy::ReadWrite,
+        Isolation isolationLevel = Isolation::RepeatableRead) = 0;
 
     virtual void SetSettings(const DBConnectorSettings& settings) = 0;
 

@@ -6,8 +6,7 @@
 #include <instrumental/interface.h>
 
 #include "transaction_entry/transaction_entry.h"
-
-#include "query/query_factory.h"
+#include "transaction_entry/transaction_entry_factory.h"
 
 namespace srv
 {
@@ -16,8 +15,22 @@ namespace db
 
 struct ITransaction : public ufa::IBase
 {
+    /**
+     * @brief set entry from which transaction will being executing
+     */
     virtual void SetRootEntry(std::unique_ptr<ITransactionEntry>&& entry) = 0;
-    virtual void Execute() = 0;
+
+    /**
+     * @brief execute all entries
+     * @return SUCCESS on success, ERROR on db error, like lost connection
+     */
+    virtual ufa::Result Execute() = 0;
+
+    /**
+     * @brief this factory will create entries wich will be executed in terms on this transaction
+     * @warning factory is owned by transaction and is destroyed with transaction
+     */
+    virtual ITransactionEntryFactory& GetEntriesFactory() = 0;
 };
 
 }  // namespace db

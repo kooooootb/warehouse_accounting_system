@@ -10,6 +10,7 @@ namespace db
 
 using placeholder_t = pqxx::placeholders<uint32_t>;
 using params_t = pqxx::params;
+using result_t = pqxx::result;
 
 }  // namespace db
 }  // namespace srv

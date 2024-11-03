@@ -13,8 +13,16 @@ namespace db
 
 struct ITransactionEntry : public ufa::IBase
 {
+    /**
+     * @brief execute inner logic like querying db or calculating expressions
+     */
     virtual void Execute() = 0;
-    virtual std::unique_ptr<ITransactionEntry> GetNext() = 0;
+
+    /**
+     * @brief get next entry which was selected by inner logic
+     * @return non owning pointer to entry
+     */
+    virtual ITransactionEntry* GetNext() = 0;
 };
 
 }  // namespace db

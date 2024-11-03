@@ -5,9 +5,14 @@
 
 #include <pqxx/pqxx>
 
-#include <db_connector/accessor.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer_provider.h>
+
+#include <db_connector/accessor.h>
+
+#include <connection/connection_pool.h>
+#include <query/query_manager.h>
+#include <transaction/transaction_factory.h>
 
 namespace srv
 {
@@ -19,20 +24,14 @@ class Accessor : public srv::tracer::TracerProvider, public srv::IAccessor
 public:
     Accessor(const std::shared_ptr<srv::IServiceLocator>& locator);
 
-private:
-    void SetSettings(const DBConnectorSettings& settings);
+    void SetSettings(const db::DBConnectorSettings& settings) override;
 
-    bool DBNeedsReinitializing();
-    void InitializeDB();
-    pqxx::connection CreateConnection();
-
-    std::string JoinFilters(const std::vector<std::string>& filters);
+    std::unique_ptr<ITransaction> CreateTransaction(WritePolicy writePolicy, Isolation isolation) override;
 
 private:
-    // options
-    std::shared_mutex m_optionsMutex;
-    uint32_t m_connectAttempts;
-    bool m_alwaysReinitialize;
+    std::shared_ptr<conn::IConnectionPool> m_connectionPool;
+    std::shared_ptr<qry::IQueryManager> m_queryManager;
+    std::shared_ptr<trsct::ITransactionFactory> m_transactionFactory;
 };
 
 }  // namespace db

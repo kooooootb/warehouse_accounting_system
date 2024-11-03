@@ -1,6 +1,7 @@
 #ifndef H_BB4F8FFF_2AD4_42E7_B55D_F313131E7CFA
 #define H_BB4F8FFF_2AD4_42E7_B55D_F313131E7CFA
 
+#include <type_traits>
 #include "check.h"
 #include "settings_detail.h"
 #include "string_converters.h"
@@ -61,8 +62,10 @@
 namespace ufa
 {
 
-template <typename T>
-inline bool TryExtractFromOptional(std::optional<T> from, T& to)
+template <typename T, typename U>
+inline typename std::enable_if_t<std::is_same_v<T, U> || std::is_same_v<std::atomic<T>, U>, bool> TryExtractFromOptional(
+    std::optional<T> from,
+    U& to)
 {
     if (from.has_value())
     {

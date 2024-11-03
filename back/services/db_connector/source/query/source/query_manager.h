@@ -28,6 +28,8 @@ public:
 
     uint64_t GetOrSupportQueryId(std::unique_ptr<IQuery>&& query) override;
 
+    void SetSettings(const DBConnectorSettings& settings) override;
+
 private:
     std::mutex m_queriesMutex;
     uint64_t m_currentId = 0;

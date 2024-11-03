@@ -1,15 +1,14 @@
 #ifndef H_DABCA060_B73E_4ECA_A036_9025F233F4FF
 #define H_DABCA060_B73E_4ECA_A036_9025F233F4FF
 
-#include <db_connector/query/query_options.h>
 #include <instrumental/common.h>
 #include <instrumental/interface.h>
 
 #include <locator/service_locator.h>
 
-#include <db_connector/settings.h>
-
 #include <db_connector/query/query.h>
+#include <db_connector/query/query_options.h>
+#include <db_connector/settings.h>
 
 namespace srv
 {
@@ -109,6 +108,8 @@ struct IQueryManager : public ufa::IBase
      * @warning eliminates query options functionality
      */
     virtual uint64_t GetOrSupportQueryId(std::unique_ptr<IQuery>&& query) = 0;
+
+    virtual void SetSettings(const DBConnectorSettings& settings) = 0;
 
     static std::unique_ptr<IQueryManager> Create(const DBConnectorSettings& settings, const std::shared_ptr<IServiceLocator>& locator);
 };

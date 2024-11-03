@@ -14,6 +14,8 @@ namespace db
 namespace conn
 {
 
+using raw_t = pqxx::connection;
+
 /**
  * @warning not thread safe so is underlying pqxx::connection
  */
