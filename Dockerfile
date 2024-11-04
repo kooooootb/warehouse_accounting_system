@@ -16,31 +16,31 @@ RUN apt-get install -y apt-transport-https curl gnupg && \
     
 ### Handle build environment
 # Create folder with outputs
-RUN mkdir /rms_output
+RUN mkdir /was_output
 # Create folder with sources
-RUN mkdir /rms_sources
+RUN mkdir /was_sources
 # Create user for build
 RUN groupadd -r builder && useradd -m -r -g builder builder && \
 # Hand him output and sources folders ownership
-    chown -R builder:builder /rms_output && \
-    chown -R builder:builder /rms_sources 
+    chown -R builder:builder /was_output && \
+    chown -R builder:builder /was_sources 
 # Switch to him
 USER builder
-WORKDIR /rms_sources
+WORKDIR /was_sources
 
 ### Prepare dependencies and build them (prevent often rebuild while changing main targets)
-COPY --chown=builder .bazelrc BUILD.bazel MODULE.bazel WORKSPACE /rms_sources
-RUN bazel --output_base=/rms_output build //:libpqxx --config dbg
-RUN bazel --output_base=/rms_output build //:jwt --config dbg
+COPY --chown=builder .bazelrc BUILD.bazel MODULE.bazel WORKSPACE /was_sources
+RUN bazel --output_base=/was_output build //:libpqxx --config dbg
+RUN bazel --output_base=/was_output build //:jwt --config dbg
 
 ### Prepare project sources
-COPY --chown=builder back /rms_sources/back
+COPY --chown=builder back /was_sources/back
 
 ### Build project
-RUN bazel --output_base=/rms_output build //back:rms314 --config dbg
+RUN bazel --output_base=/was_output build //back:was --config dbg
 
 ### Run generated bin by hand
-CMD /rms_sources/bazel-bin/back/rms314.runfiles/_main/back/rms314
+CMD /was_sources/bazel-bin/back/was.runfiles/_main/back/was
 
 ### Run with bazel run
-# CMD bazel --output_base=/rms_output run //back:rms314 --config dbg
+# CMD bazel --output_base=/was_output run //back:was --config dbg

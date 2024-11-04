@@ -14,7 +14,7 @@ namespace auth
 
 constexpr std::string_view USERID_PAYLOAD_KEY = "userId";
 constexpr std::string_view EXP_PAYLOAD_KEY = "expiration";
-constexpr std::string_view ISSUER = "rms";
+constexpr std::string_view ISSUER = "was";
 constexpr std::string_view SECRET = "secret";  // not so secret, todo
 
 class Authorizer : public srv::tracer::TracerProvider, public IAuthorizer

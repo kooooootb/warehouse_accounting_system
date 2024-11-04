@@ -164,7 +164,7 @@ std::string TraceWriter::GetFilename() const
     std::string timestamp = m_dateProvider->GetTimeString();
     std::replace(std::begin(timestamp), std::end(timestamp), ':', '.');
 
-    const std::string fileSuffix = "_rms.log";
+    const std::string fileSuffix = "_was.log";
     return timestamp + fileSuffix;
 }
 

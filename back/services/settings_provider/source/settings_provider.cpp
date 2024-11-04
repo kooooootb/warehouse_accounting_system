@@ -20,7 +20,7 @@ namespace settings_provider
 namespace
 {
 
-constexpr std::string_view EnvironmentKeyPrefix = "RMS";
+constexpr std::string_view EnvironmentKeyPrefix = "WAS";
 constexpr std::string_view EnvironmentKeySeparator = "_";
 
 std::string ConvertToEnvironmentKey(std::string_view sectionName, std::string_view key)
