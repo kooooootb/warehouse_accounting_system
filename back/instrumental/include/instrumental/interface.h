@@ -9,7 +9,7 @@ namespace ufa
 {
 
 /**
- * @brief base interface struct
+ * @brief base interface struct, provides virtual destructor
  */
 struct IBase
 {

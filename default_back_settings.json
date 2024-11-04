@@ -1,13 +1,14 @@
 {
     "DBConnectorSettings": {
         "dbmsAddress": "127.0.0.1",
-        "dbmsDbname": "rms",
+        "dbmsDbname": "was",
         "dbmsPort": 5432,
         "dbmsUser": "postgres",
         "dbmsPassword": "defaultpassword",
-        "connectAttempts": 5,
-        "alwaysReinitialize": true,
-        "connectionCount": 4
+        "connectAttempts": 2,
+        "connectionCount": 4,
+        "shouldReinitializeDb": true,
+        "shouldCreateDb": true
     },
     "ServerSettings": {
         "port": 10000,

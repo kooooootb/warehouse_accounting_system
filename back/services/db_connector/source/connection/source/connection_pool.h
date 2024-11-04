@@ -1,6 +1,7 @@
 #ifndef H_CB087953_3294_405A_B767_115465F31B79
 #define H_CB087953_3294_405A_B767_115465F31B79
 
+#include <atomic>
 #include <memory>
 
 #include <locator/service_locator.h>
@@ -37,7 +38,7 @@ private:
 
 private:
     ConnectionOptions m_connectionOptions;
-    uint32_t m_connectionAttempts;
+    std::atomic<uint32_t> m_connectionAttempts;
 
     std::mutex m_connectionMutex;
     std::list<std::unique_ptr<IConnection>> m_freeConnections;  // unused connections under quota

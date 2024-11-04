@@ -9,9 +9,7 @@ namespace db
 namespace qry
 {
 
-inline QueriesLock::QueriesLock(std::mutex& queriesMutex, const queriesStorage_t& queries) : m_queries(queries), m_lock(queriesMutex)
-{
-}
+QueriesLock::QueriesLock(std::mutex& queriesMutex, const queriesStorage_t& queries) : m_queries(queries), m_lock(queriesMutex) {}
 
 IQueryManager::QueriesIterator QueriesLock::begin()
 {

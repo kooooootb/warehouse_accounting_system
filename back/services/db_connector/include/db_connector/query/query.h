@@ -33,7 +33,7 @@ struct IQuery : public ufa::IBase
     virtual pqxx::params GetParams() = 0;
 
     /**
-    * @brief this eliminates query options functionality
+    * @warning this eliminates query options functionality
     */
     virtual std::unique_ptr<IQueryOptions> ExtractOptions() = 0;
 };

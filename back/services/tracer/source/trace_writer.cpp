@@ -59,9 +59,14 @@ void TraceWriter::Queue(std::unique_ptr<ITraceMessage> traceMessage)
 
 void TraceWriter::Run()
 {
-    while (!m_stop)
+    while (true)
     {
         std::unique_lock lock(m_messagesMutex);
+
+        if (m_stop && m_messagesQueue.empty())
+        {
+            break;
+        }
 
         uint32_t processTimeoutMs;
         uint32_t minMessagesToProcess;

@@ -20,9 +20,10 @@ public:
         SETTINGS_INIT_FIELD(dbmsUser);
         SETTINGS_INIT_FIELD(dbmsPassword);
         SETTINGS_INIT_FIELD(connectAttempts);
-        SETTINGS_INIT_FIELD(alwaysReinitialize);
         SETTINGS_INIT_FIELD(connectionCount);
         SETTINGS_INIT_FIELD(commitAttempts);
+        SETTINGS_INIT_FIELD(shouldReinitializeDb);
+        SETTINGS_INIT_FIELD(shouldCreateDb);
     }
 
     SETTINGS_FIELD(dbmsAddress, std::string);
@@ -31,9 +32,10 @@ public:
     SETTINGS_FIELD(dbmsUser, std::string);
     SETTINGS_FIELD(dbmsPassword, std::string);
     SETTINGS_FIELD(connectAttempts, uint32_t);
-    SETTINGS_FIELD(alwaysReinitialize, bool);
     SETTINGS_FIELD(connectionCount, uint32_t);
     SETTINGS_FIELD(commitAttempts, uint32_t);
+    SETTINGS_FIELD(shouldReinitializeDb, bool);
+    SETTINGS_FIELD(shouldCreateDb, bool);
 };
 
 }  // namespace db

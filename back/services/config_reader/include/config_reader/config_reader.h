@@ -10,12 +10,12 @@ namespace srv
 namespace config_reader
 {
 
-constexpr std::string_view CONFIG_ENV_KEY = "RMS_SETTINGS_FILE";
+constexpr std::string_view CONFIG_ENV_KEY = "WAS_SETTINGS_FILE";
 
 /**
  * @brief If settings file wasn't specified will try open this from pwd
  */
-constexpr std::string_view CONFIG_DEFAULT_FILE = "rms_settings.cfg";
+constexpr std::string_view CONFIG_DEFAULT_FILE = "was_settings.cfg";
 
 }  // namespace config_reader
 

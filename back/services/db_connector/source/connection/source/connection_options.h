@@ -12,13 +12,18 @@ namespace srv
 {
 namespace db
 {
+namespace conn
+{
 
 class ConnectionOptions : public srv::tracer::TracerProvider
 {
 public:
     ConnectionOptions(std::shared_ptr<srv::ITracer> tracer);
 
-    void SetSettings(const DBConnectorSettings& settings);
+    /**
+     * @brief set settings, return true if something changed
+     */
+    bool SetSettings(const DBConnectorSettings& settings);
 
     const std::string& GetConnectionString() const;
 
@@ -41,6 +46,7 @@ private:
     std::string m_password;
 };
 
+}  // namespace conn
 }  // namespace db
 }  // namespace srv
 

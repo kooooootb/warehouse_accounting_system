@@ -43,7 +43,15 @@ void ConnectionPool::SetSettings(const DBConnectorSettings& settings)
 {
     TRACE_INF << TRACE_HEADER;
 
-    m_connectionOptions.SetSettings(settings);
+    if (m_connectionOptions.SetSettings(settings))
+    {
+        std::lock_guard lock(m_connectionMutex);
+
+        // if connection settings changed, reset created connections
+        const auto alreadyCreated = m_freeConnections.size();
+        m_freeConnections.clear();
+        m_toCreate += alreadyCreated;
+    }
 
     if (settings.connectionCount.has_value())
     {
@@ -169,10 +177,10 @@ std::unique_ptr<IConnection> ConnectionPool::CreateConnection()
             TRACE_WRN << TRACE_HEADER << "Failed connecting to db, error: " << ex.what() << ", attempt : " << attempt;
             std::this_thread::sleep_for(Timeout);
         }
-    } while (++attempt <= m_connectionAttempts);
+    } while (++attempt < m_connectionAttempts);
 
     CHECK_SUCCESS(ufa::Result::NO_CONNECTION,
-        "Connection to db failed after " << attempt << " retries, connection string: " << m_connectionOptions.GetConnectionString());
+        "Connection to db failed after " << --attempt << " retries, connection string: " << m_connectionOptions.GetConnectionString());
 }
 
 }  // namespace conn

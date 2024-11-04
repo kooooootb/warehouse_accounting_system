@@ -20,11 +20,19 @@ struct IAccessor : public srv::IService
      * @brief create transaction
      * @param writePolicy specify if transaction should be read-write or read-only, default = read-write
      * @param isolation specify transaction isolation level, default = repeatable read
+     * @return SUCCESS on success, NO_CONNECTION if connection couldn't be made
      */
-    virtual std::unique_ptr<db::ITransaction> CreateTransaction(db::WritePolicy writePolicy = db::WritePolicy::ReadWrite,
+    virtual ufa::Result CreateTransaction(std::unique_ptr<db::ITransaction>& transaction,
+        db::WritePolicy writePolicy = db::WritePolicy::ReadWrite,
         db::Isolation isolation = db::Isolation::RepeatableRead) = 0;
 
     virtual void SetSettings(const db::DBConnectorSettings& settings) = 0;
+
+    /**
+     * @brief cheeck if db is usable and no error was received
+     * @return SUCCESS if db can be used, ERROR if db cannot be used
+     */
+    virtual ufa::Result IsDbValid() = 0;
 };
 
 }  // namespace srv

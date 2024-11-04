@@ -13,12 +13,15 @@ namespace conn
 
 Connection::Connection(std::shared_ptr<srv::ITracer> tracer, const ConnectionOptions& options)
     : srv::tracer::TracerProvider(std::move(tracer))
+    , m_rawConnection(options.GetConnectionString())
 {
-    pqxx::connection(options.GetConnectionString());
+    TRACE_INF << TRACE_HEADER;
 }
 
 void Connection::RefreshSupportedQueries(qry::IQueryManager& queryManager)
 {
+    TRACE_INF << TRACE_HEADER;
+
     auto queries = queryManager.GetQueries();
     auto queriesIt = queries->rbegin();
 
@@ -36,16 +39,22 @@ void Connection::RefreshSupportedQueries(qry::IQueryManager& queryManager)
 
 uint64_t Connection::GetLastSupportedQueryId()
 {
+    TRACE_INF << TRACE_HEADER << m_lastSupportedQuery;
+
     return m_lastSupportedQuery;
 }
 
 pqxx::connection& Connection::GetRaw()
 {
+    TRACE_INF << TRACE_HEADER;
+
     return m_rawConnection;
 }
 
 void Connection::SupportQuery(uint64_t id, const std::string& parametrizedQuery)
 {
+    TRACE_INF << TRACE_HEADER;
+
     m_rawConnection.prepare(string_converters::ToString(id), parametrizedQuery);
 }
 

@@ -23,6 +23,7 @@ cc_library(
         ":iface",
         "//:libpqxx",
         "//back/services/db_connector/source/connection:lib",
+        "//back/services/db_connector/source/db_manager:lib",
         "//back/services/db_connector/source/query:lib",
         "//back/services/db_connector/source/transaction:lib",
         "//back/services/settings_provider:iface",

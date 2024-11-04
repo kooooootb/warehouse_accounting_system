@@ -1,0 +1,28 @@
+package(default_visibility = ["//back/services/db_connector:__subpackages__"])
+
+cc_library(
+    name = "iface",
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
+    includes = ["./include"],
+    deps = [
+        "//back/instrumental:include",
+        "//back/services/db_connector:iface",
+        "//back/services/db_connector/source/connection:iface",
+        "//back/services/locator:iface",
+    ],
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob([
+        "source/**/*.h",
+        "source/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        "//back/services/tracer:iface",
+        "@fmt",
+    ],
+)

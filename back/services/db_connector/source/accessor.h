@@ -5,12 +5,14 @@
 
 #include <pqxx/pqxx>
 
+#include <instrumental/types.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer_provider.h>
 
 #include <db_connector/accessor.h>
 
 #include <connection/connection_pool.h>
+#include <db_manager/db_manager.h>
 #include <query/query_manager.h>
 #include <transaction/transaction_factory.h>
 
@@ -26,12 +28,17 @@ public:
 
     void SetSettings(const db::DBConnectorSettings& settings) override;
 
-    std::unique_ptr<ITransaction> CreateTransaction(WritePolicy writePolicy, Isolation isolation) override;
+    ufa::Result CreateTransaction(std::unique_ptr<db::ITransaction>& transaction,
+        db::WritePolicy writePolicy,
+        db::Isolation isolation) override;
+
+    ufa::Result IsDbValid() override;
 
 private:
     std::shared_ptr<conn::IConnectionPool> m_connectionPool;
     std::shared_ptr<qry::IQueryManager> m_queryManager;
     std::shared_ptr<trsct::ITransactionFactory> m_transactionFactory;
+    std::shared_ptr<dbmgr::IDbManager> m_dbManager;
 };
 
 }  // namespace db

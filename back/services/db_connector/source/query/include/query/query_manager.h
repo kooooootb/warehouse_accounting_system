@@ -40,7 +40,7 @@ struct IQueryManager : public ufa::IBase
             IQueryOptions* queryOptions;
         };
 
-        struct IQueriesIteratorInternal
+        struct IQueriesIteratorInternal : public ufa::IBase
         {
             virtual Field GetField() = 0;
             virtual void Next() = 0;

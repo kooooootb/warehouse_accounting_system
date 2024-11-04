@@ -4,6 +4,8 @@ namespace srv
 {
 namespace db
 {
+namespace conn
+{
 
 constexpr std::string_view DEFAULT_ADDRESS = "127.0.0.1";
 constexpr uint32_t DEFAULT_PORT = 5432;
@@ -21,17 +23,26 @@ ConnectionOptions::ConnectionOptions(std::shared_ptr<srv::ITracer> tracer)
 {
 }
 
-void ConnectionOptions::SetSettings(const DBConnectorSettings& settings)
+bool ConnectionOptions::SetSettings(const DBConnectorSettings& settings)
 {
     std::unique_lock lock(m_optionsMutex);
 
-    ufa::TryExtractFromOptional(settings.dbmsAddress, m_address);
-    ufa::TryExtractFromOptional(settings.dbmsPort, m_port);
-    ufa::TryExtractFromOptional(settings.dbmsDbname, m_dbname);
-    ufa::TryExtractFromOptional(settings.dbmsUser, m_user);
-    ufa::TryExtractFromOptional(settings.dbmsPassword, m_password);
+    // if something changed
+    if (settings.dbmsAddress.has_value() || settings.dbmsPort.has_value() || settings.dbmsDbname.has_value() ||
+        settings.dbmsUser.has_value() || settings.dbmsPassword.has_value())
+    {
+        ufa::TryExtractFromOptional(settings.dbmsAddress, m_address);
+        ufa::TryExtractFromOptional(settings.dbmsPort, m_port);
+        ufa::TryExtractFromOptional(settings.dbmsDbname, m_dbname);
+        ufa::TryExtractFromOptional(settings.dbmsUser, m_user);
+        ufa::TryExtractFromOptional(settings.dbmsPassword, m_password);
 
-    m_cachedString.clear();
+        m_cachedString.clear();
+
+        return true;
+    }
+
+    return false;
 }
 
 const std::string& ConnectionOptions::GetConnectionString() const
@@ -59,5 +70,6 @@ const std::string& ConnectionOptions::GetConnectionString() const
     return m_cachedString;
 }
 
+}  // namespace conn
 }  // namespace db
 }  // namespace srv
