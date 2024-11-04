@@ -65,14 +65,17 @@ void Server::SetSettings(const ServerSettings& settings)
 {
     TRACE_INF << TRACE_HEADER;
 
+    m_listener->SetSettings(settings);
+
     {
         std::lock_guard lock(m_settingsMutex);
 
-        // Set workers
-        SetWorkers(settings.workers.value_or(DEFAULT_WORKERS_NUMBER));
+        if (m_workers.empty() || settings.workers.has_value())
+        {
+            // Set workers
+            SetWorkers(settings.workers.value_or(DEFAULT_WORKERS_NUMBER));
+        }
     }
-
-    m_listener->SetSettings(settings);
 }
 
 ufa::Result Server::Start()
@@ -95,18 +98,13 @@ ufa::Result Server::Stop()
         TRACE_ERR << TRACE_HEADER << "Server stop failed with exception, what():" << ex.what();
         return ufa::Result::ERROR;
     }
-    catch (...)
-    {
-        TRACE_ERR << TRACE_HEADER << "Server stop failed with unknown exception";
-        return ufa::Result::ERROR;
-    }
 
     return ufa::Result::SUCCESS;
 }
 
 void Server::SetWorkers(int numWorkers)
 {
-    TRACE_INF << TRACE_HEADER << "Changing server workers number from: " << m_workers.size() << "to:" << numWorkers;
+    TRACE_INF << TRACE_HEADER << "Changing server workers number from: " << m_workers.size() << " to: " << numWorkers;
 
     CHECK_TRUE(m_ioContext != nullptr);
 
@@ -145,12 +143,12 @@ void Server::SetWorkers(int numWorkers)
 
 void Server::RunWorker()
 {
-    TRACE_INF << TRACE_HEADER;
-
     while (true)
     {
         try
         {
+            TRACE_INF << TRACE_HEADER;
+
             m_ioContext->run();
             break;
         }

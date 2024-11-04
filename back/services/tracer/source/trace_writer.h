@@ -61,6 +61,8 @@ private:
     // trace settings
     std::mutex m_settingsMutex;
     std::filesystem::path m_traceFile;
+
+    //filters messages from tracer, so if tracer decided no to trace, it will not be printed in console in anyway
     TraceLevel m_maxLevelForConsole = TraceLevel::ERROR;
     uint32_t m_minMessagesToProcess = 5;
     uint32_t m_processTimeoutMs = 10000;

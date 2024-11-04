@@ -83,7 +83,7 @@ void BaseSession::HandleRequest()
 {
     TRACE_INF << TRACE_HEADER;
 
-    if (std::any_of(std::cbegin(ALLOWED_VERBS),
+    if (!std::any_of(std::cbegin(ALLOWED_VERBS),
             std::cend(ALLOWED_VERBS),
             [method = this->m_request.method()](http::verb allowedMethod) -> bool
             {

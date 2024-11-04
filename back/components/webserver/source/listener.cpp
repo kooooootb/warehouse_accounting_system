@@ -31,8 +31,6 @@ Listener::Listener(const ServerSettings& settings,
     , m_sessionFactory(session::ISessionFactory::Create(settings, std::move(locator), std::move(taskManager)))
 {
     TRACE_INF << TRACE_HEADER;
-
-    SetSettings(settings);
 }
 
 Listener::~Listener()
