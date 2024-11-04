@@ -14,6 +14,7 @@ namespace
 {
 
 constexpr std::string_view AUTHORIZATION_TARGET = "/authorization";
+constexpr std::string_view AUTHENTICATE_HEADER = "Authorization";
 constexpr std::string_view API_TARGET = "/api";
 
 constexpr http::verb ALLOWED_VERBS[] = {http::verb::get, http::verb::post};
@@ -263,7 +264,7 @@ ufa::Result BaseSession::Authenticate(srv::auth::userid_t& userId)
 {
     TRACE_INF << TRACE_HEADER;
 
-    const auto token = m_request[AUTHORIZATION_TARGET];
+    const auto token = m_request[AUTHENTICATE_HEADER];
     if (token.empty())
     {
         return ufa::Result::WRONG_FORMAT;

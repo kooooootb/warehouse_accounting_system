@@ -38,7 +38,7 @@ ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, 
 void Authorization::ParseInternal(json&& json)
 {
     m_login = json.at(USERNAME_KEY).get<std::string>();
-    m_hashPassword = util::hash::HashToBase64(json.at(PASSWORD_KEY).get<std::string>());  // TODO
+    m_hashPassword = util::hash::HashToBase64(json.at(PASSWORD_KEY).get<std::string>());
 }
 
 }  // namespace tasks
