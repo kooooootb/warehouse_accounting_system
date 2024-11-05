@@ -24,7 +24,8 @@ ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, 
     CHECK_SUCCESS(locator.GetInterface(authorizer));
 
     std::string token;
-    const auto authResult = authorizer->GenerateToken(m_login, m_hashPassword, token);
+    srv::auth::userid_t userid;
+    const auto authResult = authorizer->GenerateToken(m_login, m_hashPassword, token, userid);
 
     if (authResult == ufa::Result::SUCCESS)
     {

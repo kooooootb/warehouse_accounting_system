@@ -4,6 +4,7 @@
 
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/product_definitions/tables.h>
+#include <db_connector/query/condition.h>
 #include <db_connector/query/query_factory.h>
 #include <db_connector/query/select_query_params.h>
 
@@ -28,7 +29,21 @@ TEST_F(QuerySerializationFixture, Select)
 
     const auto query = QueryFactory::Create(m_tracerMock, std::move(options), std::move(values));
 
-    std::string_view queryString = "SELECT user_id, name, created_by FROM User;";
+    std::string_view queryString = "SELECT user_id, name, created_by FROM public.\"User\";";
+
+    EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
+}
+
+TEST_F(QuerySerializationFixture, Select_All)
+{
+    auto options = std::make_unique<SelectOptions>();
+    auto values = std::make_unique<SelectValues>();
+
+    options->table = Table::User;
+
+    const auto query = QueryFactory::Create(m_tracerMock, std::move(options), std::move(values));
+
+    std::string_view queryString = "SELECT * FROM public.\"User\";";
 
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
 }
@@ -51,7 +66,43 @@ TEST_F(QuerySerializationFixture, Select_WithJoin)
 
     const auto query = QueryFactory::Create(m_tracerMock, std::move(options), std::move(values));
 
-    std::string_view queryString = "SELECT user_id, name, main_color FROM User INNER JOIN Product ON User.user_id=Product.created_by;";
+    std::string_view queryString =
+        "SELECT user_id, name, main_color FROM public.\"User\" INNER JOIN Product ON User.user_id=Product.created_by;";
+
+    EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
+}
+
+TEST_F(QuerySerializationFixture, Select_WithCondition)
+{
+    auto options = std::make_unique<SelectOptions>();
+    auto values = std::make_unique<SelectValues>();
+
+    options->table = Table::User;
+    options->columns = {Column::user_id, Column::name};
+
+    auto real1 = std::make_unique<RealCondition<int>>(Column::user_id, 123, RealConditionType::Greater);
+    auto real2 = std::make_unique<RealCondition<std::string_view>>(Column::name, "John", RealConditionType::Equal);
+    auto real3 = std::make_unique<RealCondition<std::string_view>>(Column::login, "Jack", RealConditionType::NotEqual);
+
+    auto not1 = std::make_unique<NotCondition>();
+    not1->condition = std::move(real3);
+
+    auto group1 = std::make_unique<GroupCondition>();
+    group1->type = GroupConditionType::AND;
+    group1->conditions.emplace_back(std::move(real1));
+    group1->conditions.emplace_back(std::move(real2));
+
+    auto group2 = std::make_unique<GroupCondition>();
+    group2->type = GroupConditionType::OR;
+    group2->conditions.emplace_back(std::move(group1));
+    group2->conditions.emplace_back(std::move(not1));
+
+    options->condition = std::move(group2);
+
+    const auto query = QueryFactory::Create(m_tracerMock, std::move(options), std::move(values));
+
+    std::string_view queryString =
+        R"(SELECT user_id, name FROM public."User" WHERE (((user_id > $1) AND (name = $2)) OR (NOT (login != $3)));)";
 
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
 }

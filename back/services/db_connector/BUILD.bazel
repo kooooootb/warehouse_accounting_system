@@ -10,6 +10,7 @@ cc_library(
         "//:libpqxx",
         "//back/services/locator:iface",
         "//back/services/tracer:iface",
+        "@fmt",
     ],
 )
 
@@ -28,7 +29,6 @@ cc_library(
         "//back/services/db_connector/source/transaction:lib",
         "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
-        "@fmt",
     ],
 )
 

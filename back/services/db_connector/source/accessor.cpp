@@ -18,9 +18,6 @@
 
 #include "accessor.h"
 
-#include "scripts/check_valid.h"
-#include "scripts/initialize.h"
-
 namespace srv
 {
 namespace db

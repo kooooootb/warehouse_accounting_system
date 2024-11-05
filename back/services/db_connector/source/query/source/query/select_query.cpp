@@ -39,13 +39,15 @@ pqxx::params SelectQuery::GetParams()
 {
     TRACE_INF << TRACE_HEADER;
 
-    return {};
+    return m_conditionParams;
 }
 
 void SelectQuery::ExtractParamsFromCondition()
 {
-    if (const auto& condition = m_options->condition; condition != nullptr)
-        condition->CollectParams(m_conditionParams);
+    if (m_options->condition != nullptr)
+    {
+        m_options->condition->CollectParams(m_conditionParams);
+    }
 }
 
 }  // namespace db

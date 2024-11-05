@@ -24,6 +24,7 @@ enum class RealConditionType : int32_t
     Equal,
     Less,
     Greater,
+    NotEqual,
     NotLess,
     NotGreater
 };
@@ -45,6 +46,8 @@ inline std::string ToString(::srv::db::RealConditionType condition)
             return "<";
         case ::srv::db::RealConditionType::Greater:
             return ">";
+        case ::srv::db::RealConditionType::NotEqual:
+            return "!=";
         case ::srv::db::RealConditionType::NotLess:
             return ">=";
         case ::srv::db::RealConditionType::NotGreater:
@@ -170,6 +173,21 @@ struct NotCondition : public ICondition
 
     std::unique_ptr<ICondition> condition;
 };
+
+inline std::unique_ptr<GroupCondition> CreateGroupCondition(GroupConditionType type)
+{
+    auto condition = std::make_unique<GroupCondition>();
+    condition->type = type;
+    return std::move(condition);
+}
+
+template <typename ValueT>
+inline std::unique_ptr<RealCondition<ValueT>> CreateRealCondition(Column column,
+    ValueT value,
+    RealConditionType type = RealConditionType::Equal)
+{
+    return std::make_unique<RealCondition<ValueT>>(column, value, type);
+}
 
 }  // namespace db
 }  // namespace srv

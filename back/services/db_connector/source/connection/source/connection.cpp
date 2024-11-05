@@ -29,11 +29,16 @@ void Connection::RefreshSupportedQueries(qry::IQueryManager& queryManager)
 
     if (m_lastSupportedQuery < realLast)
     {
+        // refresh supported query id
+        const auto savedLastSupportedId = m_lastSupportedQuery;
+        m_lastSupportedQuery = realLast;
+
+        // actually support the,
         do
         {
             SupportQuery(queriesIt->id, queriesIt->queryOptions->SerializeParametrized());
             ++queriesIt;
-        } while (queriesIt->id <= m_lastSupportedQuery);
+        } while (queriesIt != queries->rend() && queriesIt->id <= savedLastSupportedId);
     }
 }
 

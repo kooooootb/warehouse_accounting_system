@@ -116,7 +116,7 @@ void Server::SetWorkers(int numWorkers)
         {
             m_workers.emplace_back(std::make_unique<std::thread>(std::bind(&Server::RunWorker, this)));
         }
-        m_listener->AddTasks(numWorkers - m_workers.size());
+        m_listener->AddTasks(increaseBy);
     }
     else
     {

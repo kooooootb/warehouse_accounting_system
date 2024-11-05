@@ -63,7 +63,10 @@ inline IConnectionPool::ConnectionProxy::ConnectionProxy(std::shared_ptr<IConnec
 
 inline IConnectionPool::ConnectionProxy::~ConnectionProxy() noexcept
 {
-    m_pool->ReturnConnection(std::move(m_connection));
+    if (m_pool != nullptr)  // in case of moved object
+    {
+        m_pool->ReturnConnection(std::move(m_connection));
+    }
 }
 
 inline IConnection& IConnectionPool::ConnectionProxy::GetConnection()

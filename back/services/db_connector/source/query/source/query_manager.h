@@ -32,7 +32,7 @@ public:
 
 private:
     std::mutex m_queriesMutex;
-    uint64_t m_currentId = 0;
+    uint64_t m_currentId = 1;
     queriesStorage_t m_supportedQueries;
 };
 

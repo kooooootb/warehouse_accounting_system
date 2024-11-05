@@ -3,12 +3,18 @@
 
 #include <jwt-cpp/jwt.h>
 
-#include <authorizer/authorizer.h>
-#include <date_provider/date_provider.h>
-#include <db_connector/accessor.h>
 #include <instrumental/check.h>
 #include <instrumental/string_converters.h>
 #include <instrumental/types.h>
+
+#include <authorizer/authorizer.h>
+#include <date_provider/date_provider.h>
+#include <db_connector/accessor.h>
+#include <db_connector/query/condition.h>
+#include <db_connector/query/query_factory.h>
+#include <db_connector/query/select_query_params.h>
+#include <db_connector/query/utilities.h>
+#include <tracer/trace_macros.h>
 #include <tracer/tracer_provider.h>
 
 #include "authorizer.h"
@@ -18,6 +24,11 @@ namespace srv
 
 namespace auth
 {
+
+constexpr std::string_view USERID_PAYLOAD_KEY = "userId";
+constexpr std::string_view EXP_PAYLOAD_KEY = "expiration";
+constexpr std::string_view ISSUER = "was";
+constexpr std::string_view SECRET = "secret";  // not so secret, todo
 
 Authorizer::Authorizer(const std::shared_ptr<srv::IServiceLocator>& locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
@@ -65,7 +76,7 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, userid_t& userId)
     }
 }
 
-ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token)
+ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token, auth::userid_t& userid)
 {
     TRACE_INF << TRACE_HEADER;
 
@@ -74,13 +85,14 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
         CHECK_TRUE(!login.empty());
         CHECK_TRUE(!password.empty());
 
-        const auto res = ufa::Result::SUCCESS;  //= m_accessor->FillUser(user);  // wrong, todo fix after accessor improvements
-        if (res == ufa::Result::NOT_FOUND)
+        // const auto res = ufa::Result::SUCCESS;  //= m_accessor->FillUser(user);  // wrong, todo fix after accessor improvements
+        const auto res = ValidateCredentials(login, password, userid);
+
+        if (res != ufa::Result::SUCCESS)
         {
-            TRACE_ERR << TRACE_HEADER << "User not found: " << login;
+            TRACE_ERR << TRACE_HEADER << "User not found: " << login << ", validation error: " << res;
             return ufa::Result::UNAUTHORIZED;
         }
-        CHECK_SUCCESS(res);
 
         token = jwt::create()
                     .set_issuer(ISSUER.data())
@@ -102,6 +114,64 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
 std::string Authorizer::GetSecretKey() const
 {
     return std::string(SECRET);
+}
+
+ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_view password, userid_t& userid)
+{
+    try
+    {
+        using namespace srv::db;
+
+        std::unique_ptr<db::ITransaction> transaction;
+        CHECK_SUCCESS(m_accessor->CreateTransaction(transaction));
+
+        auto& entriesFactory = transaction->GetEntriesFactory();
+
+        auto options = std::make_unique<SelectOptions>();
+        auto values = std::make_unique<SelectValues>();
+
+        options->table = Table::User;
+        options->columns = {Column::user_id};
+
+        auto loginCondition = CreateRealCondition(Column::login, login);
+        auto passwordCondition = CreateRealCondition(Column::password_hashed, password);
+
+        auto grouped = CreateGroupCondition(GroupConditionType::AND);
+        grouped->conditions.emplace_back(std::move(loginCondition));
+        grouped->conditions.emplace_back(std::move(passwordCondition));
+
+        options->condition = std::move(grouped);
+
+        auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+
+        result_t result;
+        auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &result);
+
+        transaction->SetRootEntry(std::move(entry));
+
+        transaction->Execute();
+
+        if (result.empty())
+        {
+            return ufa::Result::NOT_FOUND;
+        }
+        else if (result.size() == 1)
+        {
+            CHECK_TRUE(result.columns() == 1);
+            userid = result.at(0, 0).as<userid_t>();
+        }
+        else
+        {
+            CHECK_SUCCESS(ufa::Result::WRONG_FORMAT, "Got several users with same login and password");
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        TRACE_ERR << TRACE_HEADER << "Received exception while validating, what(): " << ex.what();
+        return ufa::Result::ERROR;
+    }
+
+    return ufa::Result::SUCCESS;
 }
 
 }  // namespace auth

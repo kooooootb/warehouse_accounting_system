@@ -72,10 +72,10 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
                 // add query to vector
                 willUseId = m_currentId++;
 
-                vec.emplace_back(willUseId, std::move(options));
-
                 TRACE_INF << TRACE_HEADER << "Add support for known query type, id: " << willUseId;
                 TRACE_DBG << TRACE_HEADER << "Query: " << options->SerializeParametrized();
+
+                vec.emplace_back(willUseId, std::move(options));
             }
         }
         else
@@ -83,13 +83,13 @@ uint64_t QueryManager::GetOrSupportQueryId(std::unique_ptr<IQuery>&& query)
             // add new query type to map and add query to new vector
             willUseId = m_currentId++;
 
+            TRACE_INF << TRACE_HEADER << "Add new query type: " << identificator << ", and new id: " << willUseId;
+            TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId << "query: " << options->SerializeParametrized();
+
             decltype(m_supportedQueries)::mapped_type vec;
             vec.emplace_back(willUseId, std::move(options));
 
             m_supportedQueries.insert(std::make_pair(identificator, std::move(vec)));
-
-            TRACE_INF << TRACE_HEADER << "Add new query type: " << identificator << ", and new id: " << willUseId;
-            TRACE_DBG << TRACE_HEADER << "Parametrized id: " << willUseId << "query: " << options->SerializeParametrized();
         }
     }
 

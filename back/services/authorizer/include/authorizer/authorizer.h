@@ -36,7 +36,7 @@ struct IAuthorizer : public srv::IService
     DECLARE_IID(0X5EF435B7);
 
     /**
-     * @brief check jwt token existence and validity
+     * @brief check jwt token existence and validity, executes quick as all data is in token
      * @param token input token
      * @param userId output user id
      * @return ufa::Result SUCCESS on successful validation, WRONG_FORMAT when can't decode token, UNAUTHORIZED otherwise
@@ -44,14 +44,18 @@ struct IAuthorizer : public srv::IService
     virtual ufa::Result ValidateToken(std::string_view token, auth::userid_t& userId) = 0;
 
     /**
-     * @brief creates token for user with given login
+     * @brief creates token for user with given login, executes slow as we need to validate credentials in db
      * @param login given login
      * @param password password for user with given login
      * @param token output string containing a token
+     * @param userId output containing found user_id
      * @todo make secure password
      * @return ufa::Result SUCCESS on success, UNAUTHORIZED otherwise
      */
-    virtual ufa::Result GenerateToken(std::string_view login, std::string_view password, std::string& token) = 0;
+    virtual ufa::Result GenerateToken(std::string_view login,
+        std::string_view password,
+        std::string& token,
+        auth::userid_t& userid) = 0;
 };
 
 }  // namespace srv

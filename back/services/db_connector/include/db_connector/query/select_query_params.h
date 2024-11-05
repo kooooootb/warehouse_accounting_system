@@ -34,11 +34,11 @@ struct SelectOptions : public IQueryOptions
 
         if (columns.empty())
         {
-            result += fmt::format("SELECT * FROM {} "sv, string_converters::ToString(table));
+            result += fmt::format("SELECT * FROM public.\"{}\""sv, string_converters::ToString(table));
         }
         else
         {
-            result += fmt::format("SELECT {} FROM {}"sv,
+            result += fmt::format("SELECT {} FROM public.\"{}\""sv,
                 string_converters::ToString(std::begin(columns), std::end(columns), ", "sv),
                 string_converters::ToString(table));
         }
@@ -56,7 +56,7 @@ struct SelectOptions : public IQueryOptions
 
         if (condition != nullptr)
         {
-            result += fmt::format(" WHERE {} "sv, condition->ToString(placeholders));
+            result += fmt::format(" WHERE {}"sv, condition->ToString(placeholders));
         }
 
         result += ';';
@@ -79,8 +79,9 @@ struct SelectOptions : public IQueryOptions
             return false;
         }
 
-        placeholder_t ph;
-        if (condition->ToString(ph) != selectOptions.condition->ToString(ph))  // im too lazy providing this logic
+        placeholder_t ph1;
+        placeholder_t ph2;
+        if (condition->ToString(ph1) != selectOptions.condition->ToString(ph2))  // im too lazy providing this logic
         {
             return false;
         }

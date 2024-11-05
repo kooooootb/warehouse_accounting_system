@@ -14,3 +14,16 @@ cc_library(
         "@openssl//:ssl",
     ],
 )
+
+cc_binary(
+    name = "test",
+    srcs = glob([
+        "test/**/*.h",
+        "test/**/*.cpp",
+    ]),
+    deps = [
+        ":hash",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
