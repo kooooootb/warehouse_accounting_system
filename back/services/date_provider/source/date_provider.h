@@ -24,6 +24,7 @@ public:
 
 private:
     std::chrono::high_resolution_clock::duration GetDuration() const;
+    std::string PadWithZeroes(const std::string& value, std::string::size_type resultWidth) const;
 
 private:
     std::chrono::high_resolution_clock::duration m_epochOffset;

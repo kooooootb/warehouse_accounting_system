@@ -40,10 +40,10 @@ std::string DateProvider::GetTimeString() const
     auto seconds = std::to_string(chrono::duration_cast<chrono::seconds>(duration).count() % 60);
     auto microseconds = std::to_string(chrono::duration_cast<chrono::microseconds>(duration).count() % 1000000);
 
-    hours.resize(2, '0');
-    minutes.resize(2, '0');
-    seconds.resize(2, '0');
-    microseconds.resize(6, '0');
+    PadWithZeroes(hours, 2);
+    PadWithZeroes(minutes, 2);
+    PadWithZeroes(seconds, 2);
+    PadWithZeroes(microseconds, 6);
 
     result.insert(0, hours.c_str(), 2);
     result.push_back(':');
@@ -54,6 +54,11 @@ std::string DateProvider::GetTimeString() const
     result.insert(9, microseconds.c_str(), 6);
 
     return result;
+}
+
+std::string DateProvider::PadWithZeroes(const std::string& value, std::string::size_type resultWidth) const
+{
+    return std::string(resultWidth - std::min(resultWidth, value.length()), '0') + value;
 }
 
 }  // namespace date
