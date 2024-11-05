@@ -111,7 +111,8 @@ void Server::SetWorkers(int numWorkers)
     if (numWorkers >= m_workers.size())
     {
         // enlarge
-        for (auto i = 0; i < numWorkers - m_workers.size(); ++i)
+        const auto increaseBy = numWorkers - m_workers.size();
+        for (auto i = 0; i < increaseBy; ++i)
         {
             m_workers.emplace_back(std::make_unique<std::thread>(std::bind(&Server::RunWorker, this)));
         }
