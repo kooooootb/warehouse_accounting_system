@@ -204,7 +204,7 @@ ALTER TABLE ONLY public."Warehouse_Item"
 ALTER TABLE ONLY public."Warehouse"
     ADD CONSTRAINT "Warehouse_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
 
-INSERT INTO "User" (login, password_hashed, name, created_date, created_by) VALUES('superuser', 'C191615151114051D19181D1D1E151F11171918131C1B18181F1F1A141819181', 'Super User', current_timestamp, NULL);
+INSERT INTO public."User" (login, password_hashed, name, created_date, created_by) VALUES('superuser', 'C191615151114051D19181D1D1E151F11171918131C1B18181F1F1A141819181', 'Super User', current_timestamp, NULL);
 )";
 
 }
