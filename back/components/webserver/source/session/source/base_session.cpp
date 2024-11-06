@@ -116,7 +116,7 @@ void BaseSession::HandleRequest()
 
             if (authenticationResult == ufa::Result::WRONG_FORMAT)
             {
-                return SendResponse(PrepareResponse("Invalid authentication header", http::status::bad_request));
+                return SendResponse(PrepareResponse("Invalid authentication header", http::status::unauthorized));
             }
             else if (authenticationResult == ufa::Result::UNAUTHORIZED)
             {
