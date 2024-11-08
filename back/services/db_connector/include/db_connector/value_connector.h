@@ -15,6 +15,7 @@ namespace db
 /**
  * @brief this class collects values, like pqxx::params
  * it was created because we cannot access stored values in pqxx::params and its not comfortable
+ * used in tracing and tests
  */
 class ValueCollector
 {
@@ -58,6 +59,11 @@ public:
     list_t::const_iterator end() const
     {
         return std::end(m_values);
+    }
+
+    bool operator==(const ValueCollector& collector) const
+    {
+        return m_values == collector.m_values;
     }
 
 private:

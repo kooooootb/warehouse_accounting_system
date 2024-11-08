@@ -10,16 +10,16 @@
 
 using namespace srv::db;
 
-class QuerySerializationFixture : public testing::Test
+class SelectQuerySerializationFixture : public testing::Test
 {
 public:
-    QuerySerializationFixture() : m_tracerMock(srv::mock::TracerMock::Create()) {}
+    SelectQuerySerializationFixture() : m_tracerMock(srv::mock::TracerMock::Create()) {}
 
 protected:
     std::shared_ptr<srv::ITracer> m_tracerMock;
 };
 
-TEST_F(QuerySerializationFixture, Select)
+TEST_F(SelectQuerySerializationFixture, HP)
 {
     auto options = std::make_unique<SelectOptions>();
     auto values = std::make_unique<SelectValues>();
@@ -34,7 +34,7 @@ TEST_F(QuerySerializationFixture, Select)
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
 }
 
-TEST_F(QuerySerializationFixture, Select_All)
+TEST_F(SelectQuerySerializationFixture, All)
 {
     auto options = std::make_unique<SelectOptions>();
     auto values = std::make_unique<SelectValues>();
@@ -48,7 +48,7 @@ TEST_F(QuerySerializationFixture, Select_All)
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
 }
 
-TEST_F(QuerySerializationFixture, Select_WithJoin)
+TEST_F(SelectQuerySerializationFixture, WithJoin)
 {
     auto options = std::make_unique<SelectOptions>();
     auto values = std::make_unique<SelectValues>();
@@ -72,7 +72,7 @@ TEST_F(QuerySerializationFixture, Select_WithJoin)
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
 }
 
-TEST_F(QuerySerializationFixture, Select_WithCondition)
+TEST_F(SelectQuerySerializationFixture, WithCondition)
 {
     auto options = std::make_unique<SelectOptions>();
     auto values = std::make_unique<SelectValues>();
@@ -105,4 +105,9 @@ TEST_F(QuerySerializationFixture, Select_WithCondition)
         R"(SELECT user_id, name FROM public."User" WHERE (((user_id > $1) AND (name = $2)) OR (NOT (login != $3)));)";
 
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
+
+    params_t expectedParams;
+    expectedParams.Append(123).Append("John").Append("Jack");
+
+    EXPECT_EQ(query->ExtractParams(), expectedParams);
 }
