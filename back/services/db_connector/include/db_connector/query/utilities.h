@@ -3,13 +3,15 @@
 
 #include <pqxx/pqxx>
 
+#include <db_connector/value_connector.h>
+
 namespace srv
 {
 namespace db
 {
 
 using placeholder_t = pqxx::placeholders<uint32_t>;
-using params_t = pqxx::params;
+using params_t = ValueCollector;
 using result_t = pqxx::result;
 
 }  // namespace db

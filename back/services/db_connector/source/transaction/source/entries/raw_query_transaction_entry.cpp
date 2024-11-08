@@ -26,9 +26,10 @@ RawQueryTransactionEntry::RawQueryTransactionEntry(std::shared_ptr<srv::ITracer>
 
 void RawQueryTransactionEntry::Execute()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_INF << TRACE_HEADER << "Executing query, parametrized: " << m_queryParametrized << ", params: ["
+              << string_converters::ToString(m_params) << "]";
 
-    *m_result = m_transaction->Get()->exec_params(m_queryParametrized, m_params);
+    *m_result = m_transaction->Get()->exec_params(m_queryParametrized, m_params.ToPqxx());
 }
 
 ITransactionEntry* RawQueryTransactionEntry::GetNext()

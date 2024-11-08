@@ -24,13 +24,13 @@ public:
 
     QueryIdentificator GetIdentificator() override;
 
-    pqxx::params GetParams() override;
+    params_t GetParams() override;
 
 private:
     void ExtractParamsFromCondition();
 
 private:
-    pqxx::params m_conditionParams;
+    params_t m_conditionParams;
 };
 
 }  // namespace db

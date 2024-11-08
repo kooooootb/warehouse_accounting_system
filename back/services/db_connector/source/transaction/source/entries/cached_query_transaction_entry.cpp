@@ -1,3 +1,4 @@
+#include <instrumental/settings.h>
 #include <instrumental/string_converters.h>
 #include <tracer/tracer_provider.h>
 
@@ -26,9 +27,9 @@ CachedQueryTransactionEntry::CachedQueryTransactionEntry(std::shared_ptr<srv::IT
 
 void CachedQueryTransactionEntry::Execute()
 {
-    TRACE_INF << TRACE_HEADER << "Going to execute query id: " << m_queryId << ", params size: " << m_params.size();
+    TRACE_INF << TRACE_HEADER << "Executing query, id: " << m_queryId << ", params: [" << string_converters::ToString(m_params) << "]";
 
-    *m_result = m_transaction->Get()->exec_prepared(string_converters::ToString(m_queryId), m_params);
+    *m_result = m_transaction->Get()->exec_prepared(string_converters::ToString(m_queryId), m_params.ToPqxx());
 }
 
 ITransactionEntry* CachedQueryTransactionEntry::GetNext()

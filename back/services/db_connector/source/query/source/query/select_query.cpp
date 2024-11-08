@@ -35,7 +35,7 @@ QueryIdentificator SelectQuery::GetIdentificator()
     return QueryIdentificator::SELECT;
 }
 
-pqxx::params SelectQuery::GetParams()
+params_t SelectQuery::GetParams()
 {
     TRACE_INF << TRACE_HEADER;
 

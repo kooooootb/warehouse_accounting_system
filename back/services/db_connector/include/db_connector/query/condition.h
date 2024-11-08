@@ -146,7 +146,7 @@ struct RealCondition : public ICondition
 
     void CollectParams(params_t& params) const override
     {
-        params.append(value);
+        params.Append(value);
     }
 
     RealConditionType type;
@@ -178,7 +178,7 @@ inline std::unique_ptr<GroupCondition> CreateGroupCondition(GroupConditionType t
 {
     auto condition = std::make_unique<GroupCondition>();
     condition->type = type;
-    return std::move(condition);
+    return condition;
 }
 
 template <typename ValueT>

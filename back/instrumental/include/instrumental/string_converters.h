@@ -20,7 +20,7 @@ inline std::enable_if_t<
     std::string>
 ToString(FromT from)
 {
-    return from;
+    return std::string(from);
 }
 
 // for all integers except bool

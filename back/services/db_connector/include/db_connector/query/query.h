@@ -30,7 +30,7 @@ struct IQuery : public ufa::IBase
     /**
     * @brief retrieve pqxx's params for current query to use in actual querying
     */
-    virtual pqxx::params GetParams() = 0;
+    virtual params_t GetParams() = 0;
 
     /**
     * @warning this eliminates query options functionality
