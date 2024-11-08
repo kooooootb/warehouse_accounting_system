@@ -32,7 +32,7 @@ std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateQueryTran
 
     if (isCached)
     {
-        const auto params = query->GetParams();
+        const auto params = query->ExtractParams();
         const auto queryId = m_queryManager->GetOrSupportQueryId(std::move(query));
 
         if (m_connection->GetLastSupportedQueryId() < queryId)
@@ -44,7 +44,7 @@ std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateQueryTran
     }
     else
     {
-        const auto params = query->GetParams();
+        const auto params = query->ExtractParams();
         const auto queryParametrized = query->ExtractOptions()->SerializeParametrized();
 
         return std::make_unique<RawQueryTransactionEntry>(GetTracer(), m_transaction, queryParametrized, std::move(params), result);

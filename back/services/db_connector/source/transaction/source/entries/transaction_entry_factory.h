@@ -8,7 +8,8 @@
 
 #include <connection/connection.h>
 #include <query/query_manager.h>
-#include "back/services/db_connector/source/transaction/source/raw_transaction.h"
+
+#include "../raw_transaction.h"
 
 namespace srv
 {

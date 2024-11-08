@@ -21,6 +21,12 @@ public:
     static std::unique_ptr<IQuery> Create(std::shared_ptr<srv::ITracer> tracer,
         std::unique_ptr<OptionsT>&& options,
         std::unique_ptr<ValuesT>&& values);
+
+    /**
+     * @brief for querying with parametrized custom string and separate params
+     * @param parametrizedString won't be escaped from injections
+     */
+    static std::unique_ptr<IQuery> CreateRaw(std::shared_ptr<srv::ITracer> tracer, std::string parametrizedString, params_t params);
 };
 
 }  // namespace db

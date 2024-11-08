@@ -35,11 +35,11 @@ QueryIdentificator SelectQuery::GetIdentificator()
     return QueryIdentificator::SELECT;
 }
 
-params_t SelectQuery::GetParams()
+params_t SelectQuery::ExtractParams()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_INF << TRACE_HEADER << "Extracing values";
 
-    return m_conditionParams;
+    return std::move(m_conditionParams);
 }
 
 void SelectQuery::ExtractParamsFromCondition()

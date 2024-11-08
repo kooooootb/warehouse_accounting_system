@@ -37,7 +37,6 @@ struct IQueryOptions : public ufa::IBase
 
     /**
      * @brief compare two options
-     * @warning should be called on same implementations, its callers responsibility to guard it
      */
     virtual bool Equals(const IQueryOptions& options) = 0;
 };
