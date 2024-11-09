@@ -19,7 +19,7 @@ namespace tasks
 class Authorization : public BaseTask
 {
 public:
-    Authorization(std::shared_ptr<srv::ITracer> tracer, srv::auth::userid_t userId, Callback&& callback);
+    Authorization(std::shared_ptr<srv::ITracer> tracer, userid_t userId, Callback&& callback);
 
     constexpr static std::string_view GetTarget()
     {

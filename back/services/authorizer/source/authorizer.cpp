@@ -50,7 +50,7 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, userid_t& userId)
         auto payload = decoded.get_payload_json();
 
         const auto expirationDate = payload[EXP_PAYLOAD_KEY.data()];
-        if (m_dateProvider->GetTimestamp() > string_converters::FromString<srv::IDateProvider::timestamp_t>(expirationDate.to_str()))
+        if (m_dateProvider->GetTimestamp() > string_converters::FromString<timestamp_t>(expirationDate.to_str()))
         {
             // expired
             TRACE_ERR << TRACE_HEADER << "Received expired token: " << token;
@@ -76,7 +76,7 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, userid_t& userId)
     }
 }
 
-ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token, auth::userid_t& userid)
+ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid)
 {
     TRACE_INF << TRACE_HEADER;
 

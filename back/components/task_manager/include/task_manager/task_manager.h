@@ -20,7 +20,7 @@ struct ITaskManager : public ufa::IBase
      * @param callback will call it after getting results
      * @return ufa::Result 
      */
-    virtual ufa::Result AddTask(srv::auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback) = 0;
+    virtual ufa::Result AddTask(userid_t userId, std::string_view target, std::string&& json, Callback&& callback) = 0;
 
     static std::unique_ptr<ITaskManager> Create(std::shared_ptr<srv::IServiceLocator> locator);
 };

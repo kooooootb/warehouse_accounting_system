@@ -38,12 +38,12 @@ public:
 protected:
     void HandleRequest();
 
-    void HandleApi(srv::auth::userid_t initiativeUserId);
+    void HandleApi(userid_t initiativeUserId);
     void HandleFile();
 
     http::message_generator PrepareResponse(std::string body, http::status status);
 
-    ufa::Result Authenticate(srv::auth::userid_t& initiativeUserId);
+    ufa::Result Authenticate(userid_t& initiativeUserId);
 
 protected:
     virtual void SendResponse(http::message_generator&& message) = 0;

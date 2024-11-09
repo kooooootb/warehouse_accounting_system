@@ -22,7 +22,7 @@ namespace
 template <std::size_t index>
 inline typename std::enable_if<index == std::tuple_size_v<tasks::TasksList>, ufa::Result>::type GenerateTask(
     std::shared_ptr<srv::ITracer> tracer,
-    srv::auth::userid_t userId,
+    userid_t userId,
     std::string_view target,
     std::string&& json,
     Callback&& callback,
@@ -34,7 +34,7 @@ inline typename std::enable_if<index == std::tuple_size_v<tasks::TasksList>, ufa
 template <std::size_t index = 0>
 inline typename std::enable_if<std::less<std::size_t>{}(index, std::tuple_size_v<tasks::TasksList>), ufa::Result>::type GenerateTask(
     std::shared_ptr<srv::ITracer> tracer,
-    srv::auth::userid_t userId,
+    userid_t userId,
     std::string_view target,
     std::string&& json,
     Callback&& callback,
@@ -65,7 +65,7 @@ std::unique_ptr<ITaskManager> ITaskManager::Create(std::shared_ptr<srv::IService
     return std::make_unique<TaskManager>(std::move(locator));
 }
 
-ufa::Result TaskManager::AddTask(srv::auth::userid_t userId, std::string_view target, std::string&& json, Callback&& callback)
+ufa::Result TaskManager::AddTask(userid_t userId, std::string_view target, std::string&& json, Callback&& callback)
 {
     TRACE_INF << TRACE_HEADER;
 

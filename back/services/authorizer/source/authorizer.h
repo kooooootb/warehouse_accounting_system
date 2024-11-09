@@ -20,7 +20,7 @@ public:
     Authorizer(const std::shared_ptr<srv::IServiceLocator>& locator);
 
     ufa::Result ValidateToken(std::string_view token, userid_t& userId) override;
-    ufa::Result GenerateToken(std::string_view login, std::string_view password, std::string& token, auth::userid_t& userid) override;
+    ufa::Result GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid) override;
 
 private:
     std::string GetSecretKey() const;

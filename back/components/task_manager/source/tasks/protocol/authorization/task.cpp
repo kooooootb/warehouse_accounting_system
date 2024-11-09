@@ -11,7 +11,7 @@ namespace taskmgr
 namespace tasks
 {
 
-Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, srv::auth::userid_t userId, Callback&& callback)
+Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, userid_t userId, Callback&& callback)
     : BaseTask(std::move(tracer), std::move(userId), std::move(callback))
 {
 }
@@ -24,7 +24,7 @@ ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, 
     CHECK_SUCCESS(locator.GetInterface(authorizer));
 
     std::string token;
-    srv::auth::userid_t userid;
+    userid_t userid;
     const auto authResult = authorizer->GenerateToken(m_login, m_hashPassword, token, userid);
 
     if (authResult == ufa::Result::SUCCESS)

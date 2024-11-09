@@ -24,7 +24,7 @@ namespace tasks
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, srv::auth::userid_t userId, Callback&& callback)
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, userid_t userId, Callback&& callback)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_initiativeUserId(std::move(userId))
         , m_callback(std::move(callback))
@@ -70,7 +70,7 @@ protected:
     virtual void ParseInternal(json&& json) = 0;
 
 protected:
-    srv::auth::userid_t m_initiativeUserId;
+    userid_t m_initiativeUserId;
 
 private:
     Callback m_callback;

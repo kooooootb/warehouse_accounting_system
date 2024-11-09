@@ -105,7 +105,7 @@ void BaseSession::HandleRequest()
     if (target.size() > API_TARGET.size() + 2 && target.starts_with(API_TARGET))
     {
         TRACE_INF << TRACE_HEADER << "Retrieved api request: " << target;
-        srv::auth::userid_t initiativeUserId = 0;
+        userid_t initiativeUserId = 0;
 
         // check authentication only when /api and not when authorizing
         if (!(target.size() == API_TARGET.size() + AUTHORIZATION_TARGET.size() && target.starts_with(API_TARGET) &&
@@ -134,7 +134,7 @@ void BaseSession::HandleRequest()
     }
 }
 
-void BaseSession::HandleApi(srv::auth::userid_t initiativeUserId)
+void BaseSession::HandleApi(userid_t initiativeUserId)
 {
     TRACE_INF << TRACE_HEADER;
 
@@ -260,7 +260,7 @@ http::message_generator BaseSession::PrepareResponse(std::string body, http::sta
     return res;
 }
 
-ufa::Result BaseSession::Authenticate(srv::auth::userid_t& userId)
+ufa::Result BaseSession::Authenticate(userid_t& userId)
 {
     TRACE_INF << TRACE_HEADER;
 

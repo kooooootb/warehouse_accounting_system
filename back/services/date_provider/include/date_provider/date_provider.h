@@ -4,6 +4,8 @@
 #include <chrono>
 #include <string>
 
+#include <instrumental/time.h>
+
 #include <locator/service.h>
 
 namespace srv
@@ -12,8 +14,6 @@ namespace srv
 struct IDateProvider : public srv::IService
 {
     DECLARE_IID(0xEDE6FE29)
-
-    using timestamp_t = uint64_t;
 
     /**
     * @brief get number that goes up as time goes by
