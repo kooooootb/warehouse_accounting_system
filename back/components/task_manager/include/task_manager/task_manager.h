@@ -1,13 +1,13 @@
 #ifndef H_CC0C686D_89E2_4CB3_9DA6_C0C92EDCBF85
 #define H_CC0C686D_89E2_4CB3_9DA6_C0C92EDCBF85
 
-#include <instrumental/interface.h>
-#include <instrumental/types.h>
+#include <instrumental/common.h>
 
 #include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 
-#include <task_manager/callback.h>
+#include "callback.h"
+#include "task_info.h"
 
 namespace taskmgr
 {
@@ -16,12 +16,10 @@ struct ITaskManager : public ufa::IBase
 {
     /**
      * @brief parse task from json string and pass it to queue for execution
-     * @param userId initiative user's id for future tasks' needs
-     * @param target task identificator
-     * @param callback will call it after getting results
+     * @param taskInfo task parameters
      * @return ufa::Result 
      */
-    virtual ufa::Result AddTask(userid_t userId, std::string_view target, std::string&& json, Callback&& callback) = 0;
+    virtual ufa::Result AddTask(TaskInfo&& taskInfo) = 0;
 
     static std::unique_ptr<ITaskManager> Create(std::shared_ptr<srv::IServiceLocator> locator);
 };

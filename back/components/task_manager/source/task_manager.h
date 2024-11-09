@@ -16,7 +16,7 @@ class TaskManager : public srv::tracer::TracerProvider, public ITaskManager
 public:
     TaskManager(std::shared_ptr<srv::IServiceLocator> locator);
 
-    ufa::Result AddTask(userid_t userId, std::string_view target, std::string&& json, Callback&& callback) override;
+    ufa::Result AddTask(TaskInfo&& taskInfo) override;
 
 private:
     std::shared_ptr<TaskHandler> m_taskHandler;

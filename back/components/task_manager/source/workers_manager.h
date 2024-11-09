@@ -8,9 +8,11 @@
 #include <thread>
 
 #include <instrumental/common.h>
+
 #include <locator/service_locator.h>
-#include <tasks/base_task.h>
 #include <tracer/tracer_provider.h>
+
+#include <tasks/base_task.h>
 
 #include "task_handler.h"
 

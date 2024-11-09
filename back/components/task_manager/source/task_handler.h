@@ -2,9 +2,11 @@
 #define H_C1DA314E_7670_407C_B283_13C043B194F7
 
 #include <instrumental/common.h>
+
 #include <locator/service_locator.h>
-#include <tasks/base_task.h>
 #include <tracer/tracer_provider.h>
+
+#include <tasks/base_task.h>
 
 namespace taskmgr
 {

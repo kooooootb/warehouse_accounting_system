@@ -6,7 +6,7 @@
 namespace taskmgr
 {
 
-using Callback = std::function<void(std::string&&, ufa::Result)>;
+using callback_t = std::function<void(std::string&& /* result */, ufa::Result /* error */)>;
 
 }  // namespace taskmgr
 

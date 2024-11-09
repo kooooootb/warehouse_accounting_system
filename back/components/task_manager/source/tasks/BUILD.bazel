@@ -10,7 +10,7 @@ cc_library(
     ]),
     includes = ["./include"],
     deps = [
-        "//back/components/task_manager:callback",
+        "//back/components/task_manager:iface",
         "//back/instrumental:include",
         "//back/services/authorizer:iface",
         "//back/services/tracer:iface",

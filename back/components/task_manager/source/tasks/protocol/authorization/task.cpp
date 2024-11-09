@@ -11,8 +11,8 @@ namespace taskmgr
 namespace tasks
 {
 
-Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, userid_t userId, Callback&& callback)
-    : BaseTask(std::move(tracer), std::move(userId), std::move(callback))
+Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, TaskInfo&& taskInfo)
+    : BaseTask(std::move(tracer), std::move(taskInfo))
 {
 }
 

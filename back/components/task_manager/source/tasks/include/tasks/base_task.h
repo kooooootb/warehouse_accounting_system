@@ -3,13 +3,15 @@
 
 #include <nlohmann/json.hpp>
 
+#include <instrumental/common.h>
+
 #include <authorizer/authorizer.h>
-#include <instrumental/types.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
 #include <tracer/tracer_provider.h>
 
 #include <task_manager/callback.h>
+#include <task_manager/task_info.h>
 
 using json = nlohmann::json;
 
@@ -24,12 +26,13 @@ namespace tasks
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, userid_t userId, Callback&& callback)
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, TaskInfo&& taskInfo)
         : srv::tracer::TracerProvider(std::move(tracer))
-        , m_initiativeUserId(std::move(userId))
-        , m_callback(std::move(callback))
+        , m_initiativeUserId(std::move(taskInfo.initiativeUserid))
+        , m_callback(std::move(taskInfo.callback))
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_INF << TRACE_HEADER << "Task identificator: " << taskInfo.identificator
+                  << ", initiative user: " << taskInfo.initiativeUserid;
     }
 
     /**
@@ -73,7 +76,7 @@ protected:
     userid_t m_initiativeUserId;
 
 private:
-    Callback m_callback;
+    callback_t m_callback;
 };
 
 }  // namespace tasks

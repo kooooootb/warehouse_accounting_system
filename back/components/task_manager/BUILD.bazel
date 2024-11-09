@@ -1,29 +1,12 @@
 package(default_visibility = ["//back:__subpackages__"])
 
 cc_library(
-    name = "callback",
-    hdrs = glob(
-        [
-            "include/**/callback.h",
-        ],
-    ),
-    includes = ["./include"],
-    deps = [
-        "//back/instrumental:include",
-    ],
-)
-
-cc_library(
     name = "iface",
-    hdrs = glob(
-        [
-            "include/**/*.h",
-        ],
-        exclude = ["include/**/callback.h"],
-    ),
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
     includes = ["./include"],
     deps = [
-        ":callback",
         "//back/instrumental:include",
         "//back/services/authorizer:iface",
         "//back/services/locator:iface",

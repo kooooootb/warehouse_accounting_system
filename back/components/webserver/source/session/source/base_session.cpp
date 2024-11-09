@@ -1,7 +1,11 @@
 #include <boost/beast/version.hpp>
+#include <exception>
 
 #include <authorizer/authorizer.h>
+#include <instrumental/types.h>
 #include <task_manager/callback.h>
+#include <task_manager/task_identificator.h>
+#include <task_manager/task_info.h>
 
 #include "base_session.h"
 
@@ -64,6 +68,33 @@ std::string_view GetMimeType(const std::filesystem::path& extension)
     if (extension == ".svgz")
         return "image/svg+xml";
     return "application/text";
+}
+
+http::status ConvertToHttpStatus(ufa::Result result)
+{
+    switch (result)
+    {
+        case ufa::Result::WRONG_FORMAT:
+            return http::status::bad_request;
+        case ufa::Result::NOT_FOUND:
+            return http::status::not_found;
+        case ufa::Result::UNAUTHORIZED:
+            return http::status::unauthorized;
+        default:
+            // unknown error
+            return http::status::internal_server_error;
+    }
+}
+
+taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http::verb verb)
+{
+    using TI = taskmgr::TaskIdentificator;
+
+    if (target == "authorize")
+        return TI::Authorize;
+
+    CHECK_SUCCESS(ufa::Result::NOT_FOUND,
+        "Couldn't parse task identificator. target: " << target << ", verb" << http::to_string(verb));
 }
 
 }  // namespace
@@ -141,38 +172,36 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
     auto target = m_request.target();
     target.remove_prefix(API_TARGET.size() + 1);
 
-    taskmgr::Callback callback = [this, self = shared_from_this()](std::string&& message, ufa::Result result)
+    taskmgr::TaskInfo taskInfo;
+
+    try
+    {
+        taskInfo.identificator = ParseTaskIdentificator(target, m_request.method());
+    }
+    catch (const std::exception& ex)
+    {
+        TRACE_ERR << TRACE_HEADER << ex.what();
+        return SendResponse(PrepareResponse("Task not found", http::status::not_found));
+    }
+
+    taskInfo.callback = [this, self = shared_from_this()](std::string&& message, ufa::Result result)
     {
         if (result != ufa::Result::SUCCESS)
         {
-            http::status status = http::status::internal_server_error;
-
-            switch (result)
-            {
-                case ufa::Result::WRONG_FORMAT:
-                    status = http::status::bad_request;
-                    break;
-                case ufa::Result::NOT_FOUND:
-                    status = http::status::not_found;
-                    break;
-                case ufa::Result::UNAUTHORIZED:
-                    status = http::status::unauthorized;
-                    break;
-                default:
-                    status = http::status::internal_server_error;
-            }
+            const auto status = ConvertToHttpStatus(result);
 
             TRACE_ERR << TRACE_HEADER << "Task execution failed with error: " << result << ", responding with "
-                      << static_cast<unsigned>(status);
+                      << static_cast<unsigned>(status) << ", message: " << message;
             SendResponse(PrepareResponse(std::move(message), status));
         }
         else
         {
+            TRACE_DBG << TRACE_HEADER << "Responding ok with message: " << message;
             SendResponse(PrepareResponse(std::move(message), http::status::ok));
         }
     };
 
-    const auto result = m_taskManager->AddTask(std::move(initiativeUserId), target, std::move(m_request.body()), std::move(callback));
+    const auto result = m_taskManager->AddTask(std::move(taskInfo));
 
     if (result == ufa::Result::WRONG_FORMAT)
     {
@@ -182,8 +211,8 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
 
     if (result == ufa::Result::NOT_FOUND)
     {
-        TRACE_ERR << TRACE_HEADER << "Target not found" << target;
-        return SendResponse(PrepareResponse("Invalid target", http::status::not_found));
+        TRACE_ERR << TRACE_HEADER << "Task not implemented" << target;
+        return SendResponse(PrepareResponse("Task not found", http::status::not_found));
     }
 
     CHECK_SUCCESS(result, "Error while parsing body: " << string_converters::ToString(result));

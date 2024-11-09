@@ -3,12 +3,16 @@
 
 #include <string_view>
 
-#include <authorizer/authorizer.h>
 #include <instrumental/common.h>
+
+#include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
 
 #include <task_manager/callback.h>
+#include <task_manager/task_identificator.h>
+#include <task_manager/task_info.h>
+
 #include <tasks/base_task.h>
 
 namespace taskmgr
@@ -19,11 +23,11 @@ namespace tasks
 class Authorization : public BaseTask
 {
 public:
-    Authorization(std::shared_ptr<srv::ITracer> tracer, userid_t userId, Callback&& callback);
+    Authorization(std::shared_ptr<srv::ITracer> tracer, TaskInfo&& taskInfo);
 
-    constexpr static std::string_view GetTarget()
+    constexpr static TaskIdentificator GetIdentificator()
     {
-        return "authorization";
+        return TaskIdentificator::Authorize;
     }
 
 protected:
