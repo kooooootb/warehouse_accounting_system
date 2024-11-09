@@ -51,6 +51,19 @@ public:
         return result;
     }
 
+    /**
+     * @brief merge valuescollectors, clears this
+     */
+    void ExtractTo(ValueCollector& to)
+    {
+        to.m_values.splice(std::end(to.m_values), m_values);
+    }
+
+    size_t size() const
+    {
+        return m_values.size();
+    }
+
     list_t::const_iterator begin() const
     {
         return std::begin(m_values);

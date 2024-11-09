@@ -1,6 +1,3 @@
-#include <fmt/core.h>
-#include <pqxx/pqxx>
-
 #include <tracer/tracer_provider.h>
 
 #include <db_connector/query/query_factory.h>
@@ -12,10 +9,8 @@ namespace srv
 namespace db
 {
 
-SelectQuery::SelectQuery(std::shared_ptr<srv::ITracer> tracer,
-    std::unique_ptr<SelectOptions>&& options,
-    std::unique_ptr<SelectValues>&& values)
-    : BaseQuery(std::move(tracer), std::move(options), std::move(values))
+SelectQuery::SelectQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<SelectOptions>&& options, SelectValues&& values)
+    : BaseQuery(std::move(tracer), std::move(options))
 {
     TRACE_INF << TRACE_HEADER;
 
@@ -25,7 +20,7 @@ SelectQuery::SelectQuery(std::shared_ptr<srv::ITracer> tracer,
 template <>
 std::unique_ptr<IQuery> QueryFactory::Create(std::shared_ptr<srv::ITracer> tracer,
     std::unique_ptr<SelectOptions>&& options,
-    std::unique_ptr<SelectValues>&& values)
+    SelectValues&& values)
 {
     return std::make_unique<SelectQuery>(std::move(tracer), std::move(options), std::move(values));
 }

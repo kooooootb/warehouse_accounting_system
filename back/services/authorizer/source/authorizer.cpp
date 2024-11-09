@@ -128,7 +128,7 @@ ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_
         auto& entriesFactory = transaction->GetEntriesFactory();
 
         auto options = std::make_unique<SelectOptions>();
-        auto values = std::make_unique<SelectValues>();
+        SelectValues values;
 
         options->table = Table::User;
         options->columns = {Column::user_id};

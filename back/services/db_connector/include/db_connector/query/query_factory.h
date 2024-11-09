@@ -18,9 +18,7 @@ public:
     QueryFactory() = delete;
 
     template <typename OptionsT, typename ValuesT>
-    static std::unique_ptr<IQuery> Create(std::shared_ptr<srv::ITracer> tracer,
-        std::unique_ptr<OptionsT>&& options,
-        std::unique_ptr<ValuesT>&& values);
+    static std::unique_ptr<IQuery> Create(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<OptionsT>&& options, ValuesT&& values);
 
     /**
      * @brief for querying with parametrized custom string and separate params

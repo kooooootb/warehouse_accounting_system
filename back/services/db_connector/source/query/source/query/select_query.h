@@ -11,12 +11,10 @@ namespace srv
 namespace db
 {
 
-class SelectQuery : public BaseQuery<SelectOptions, SelectValues>
+class SelectQuery : public BaseQuery<SelectOptions>
 {
 public:
-    SelectQuery(std::shared_ptr<srv::ITracer> tracer,
-        std::unique_ptr<SelectOptions>&& options,
-        std::unique_ptr<SelectValues>&& values);
+    SelectQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<SelectOptions>&& options, SelectValues&& values);
 
     QueryIdentificator GetIdentificator() override;
 

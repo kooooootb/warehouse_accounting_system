@@ -12,33 +12,29 @@ namespace db
 {
 
 /**
- * @brief helper class for copy paste functionalities
+ * @brief helper class for copy paste functionalities, handles options, values are transformed and stored in implementations
  */
-template <typename OptionsT, typename ValuesT>
+template <typename OptionsT>
 class BaseQuery : public srv::tracer::TracerProvider, public IQuery
 {
 public:
-    BaseQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<OptionsT>&& options, std::unique_ptr<ValuesT>&& values);
+    BaseQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<OptionsT>&& options);
 
     std::unique_ptr<IQueryOptions> ExtractOptions() override;
 
 protected:
     std::unique_ptr<OptionsT> m_options;
-    std::unique_ptr<ValuesT> m_values;
 };
 
-template <typename OptionsT, typename ValuesT>
-BaseQuery<OptionsT, ValuesT>::BaseQuery(std::shared_ptr<srv::ITracer> tracer,
-    std::unique_ptr<OptionsT>&& options,
-    std::unique_ptr<ValuesT>&& values)
+template <typename OptionsT>
+BaseQuery<OptionsT>::BaseQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<OptionsT>&& options)
     : srv::tracer::TracerProvider(std::move(tracer))
     , m_options(std::move(options))
-    , m_values(std::move(values))
 {
 }
 
-template <typename OptionsT, typename ValuesT>
-std::unique_ptr<IQueryOptions> BaseQuery<OptionsT, ValuesT>::ExtractOptions()
+template <typename OptionsT>
+std::unique_ptr<IQueryOptions> BaseQuery<OptionsT>::ExtractOptions()
 {
     TRACE_INF << TRACE_HEADER << "Extracting options";
     return std::move(m_options);

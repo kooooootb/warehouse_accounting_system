@@ -30,7 +30,7 @@ struct SelectOptions : public IQueryOptions
 
         std::string result;
 
-        CHECK_TRUE(table != Table::Invalid);
+        CHECK_TRUE(table != Table::Invalid, "Invalid query options");
 
         if (columns.empty())
         {
@@ -74,7 +74,7 @@ struct SelectOptions : public IQueryOptions
         const auto& selectOptions = static_cast<const SelectOptions&>(options);
 
         // in most situations this will be enough
-        if (table != selectOptions.table || columns != selectOptions.columns || joins != selectOptions.joins || id != selectOptions.id)
+        if (table != selectOptions.table || columns != selectOptions.columns || joins != selectOptions.joins)
         {
             return false;
         }
@@ -89,41 +89,15 @@ struct SelectOptions : public IQueryOptions
         return true;
     }
 
-    Table table = Table::Invalid;  // e.g. .. FROM this
-    std::vector<Column> columns;   // e.g. SELECT this FROM ...
-    std::vector<Join> joins;       // for all joins
-    Column id;
+    Table table = Table::Invalid;           // e.g. .. FROM this
+    std::vector<Column> columns;            // e.g. SELECT this FROM ...
+    std::vector<Join> joins;                // for all joins
     std::unique_ptr<ICondition> condition;  // can be grouped
 };
 
 struct SelectValues  // for extendability reasons
 {
 };
-
-/*
-SELECT columns FROM table;
-*/
-
-/*
-SELECT columns
-FROM table
-INNER JOIN join.joiningTable ON leftTable.leftColumn=joiningTable.joiningColumn;
-*/
-
-/*
-UPDATE table
-SET columns={}
-WHERE id = {};
-*/
-
-/*
-INSERT INTO table (columns)
-VALUES ({});
-*/
-
-/*
-DELETE FROM table WHERE id={};
-*/
 
 }  // namespace db
 }  // namespace srv

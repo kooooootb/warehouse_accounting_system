@@ -3,6 +3,6 @@
 
 #include <instrumental/serialized_enum.h>
 
-DEFINE_ENUM_WITH_SERIALIZATION(srv::db, QueryIdentificator, SELECT, RAW);
+DEFINE_ENUM_WITH_SERIALIZATION(srv::db, QueryIdentificator, RAW, SELECT, INSERT);
 
 #endif  // H_6F620547_1B91_40D6_AA38_CF931CD40923

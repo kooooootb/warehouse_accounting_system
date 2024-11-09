@@ -1,3 +1,4 @@
+#include <db_connector/query/query_identificator.h>
 #include <gtest/gtest.h>
 
 #include <tracer/mock/tracer_mock.h>
@@ -22,7 +23,7 @@ protected:
 TEST_F(SelectQuerySerializationFixture, HP)
 {
     auto options = std::make_unique<SelectOptions>();
-    auto values = std::make_unique<SelectValues>();
+    SelectValues values;
 
     options->table = Table::User;
     options->columns = {Column::user_id, Column::name, Column::created_by};
@@ -37,7 +38,7 @@ TEST_F(SelectQuerySerializationFixture, HP)
 TEST_F(SelectQuerySerializationFixture, All)
 {
     auto options = std::make_unique<SelectOptions>();
-    auto values = std::make_unique<SelectValues>();
+    SelectValues values;
 
     options->table = Table::User;
 
@@ -51,7 +52,7 @@ TEST_F(SelectQuerySerializationFixture, All)
 TEST_F(SelectQuerySerializationFixture, WithJoin)
 {
     auto options = std::make_unique<SelectOptions>();
-    auto values = std::make_unique<SelectValues>();
+    SelectValues values;
 
     options->table = Table::User;
     options->columns = {Column::user_id, Column::name, Column::main_color};
@@ -75,7 +76,7 @@ TEST_F(SelectQuerySerializationFixture, WithJoin)
 TEST_F(SelectQuerySerializationFixture, WithCondition)
 {
     auto options = std::make_unique<SelectOptions>();
-    auto values = std::make_unique<SelectValues>();
+    SelectValues values;
 
     options->table = Table::User;
     options->columns = {Column::user_id, Column::name};
@@ -110,4 +111,18 @@ TEST_F(SelectQuerySerializationFixture, WithCondition)
     expectedParams.Append(123).Append("John").Append("Jack");
 
     EXPECT_EQ(query->ExtractParams(), expectedParams);
+}
+
+TEST_F(SelectQuerySerializationFixture, QueryIdentificator)
+{
+    auto options = std::make_unique<SelectOptions>();
+    SelectValues values;
+
+    options->table = Table::User;
+    options->columns = {Column::user_id, Column::name, Column::main_color};
+
+    const auto query = QueryFactory::Create(m_tracerMock, std::move(options), std::move(values));
+
+    EXPECT_EQ(query->GetIdentificator(), QueryIdentificator::SELECT);
+    EXPECT_EQ(query->ExtractOptions()->GetIdentificator(), QueryIdentificator::SELECT);
 }

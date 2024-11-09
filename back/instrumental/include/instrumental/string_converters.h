@@ -121,6 +121,11 @@ inline bool FromString(const std::string& from)
 template <typename T>
 std::string ToString(T begin, T end, std::string_view separator)
 {
+    if (begin == end)
+    {
+        return {};
+    }
+
     std::vector<std::string> results;
     results.reserve(std::distance(begin, end));
     size_t resultSize = 0;
