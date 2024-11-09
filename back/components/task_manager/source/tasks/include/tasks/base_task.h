@@ -26,35 +26,26 @@ namespace tasks
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, TaskInfo&& taskInfo)
+    /**
+     * @throw when body is in wrong format
+     */
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
         : srv::tracer::TracerProvider(std::move(tracer))
-        , m_initiativeUserId(std::move(taskInfo.initiativeUserid))
-        , m_callback(std::move(taskInfo.callback))
+        , m_initiativeUserId(taskInfo.initiativeUserid)
     {
         TRACE_INF << TRACE_HEADER << "Task identificator: " << taskInfo.identificator
                   << ", initiative user: " << taskInfo.initiativeUserid;
     }
 
     /**
-     * @brief parse task from json
+     * @brief includes parse task from json and setting callback
+     * was created to call overriden methods
      * @return ufa::Result SUCCESS on success, WRONG_FORMAT when json is invalid
      */
-    ufa::Result Parse(std::string&& jsonStr)
+    ufa::Result Initialize(TaskInfo&& taskInfo)
     {
-        TRACE_DBG << TRACE_HEADER << "Parsing task: " << jsonStr;  // will leak sensitive, todo
-
-        try
-        {
-            auto json = json::parse(std::move(jsonStr));
-            ParseInternal(std::move(json));
-        }
-        catch (const std::exception& ex)
-        {
-            TRACE_ERR << TRACE_HEADER << "invalid json:";
-            return ufa::Result::WRONG_FORMAT;
-        }
-
-        return ufa::Result::SUCCESS;
+        m_callback = std::move(taskInfo.callback);
+        return Parse(std::move(taskInfo.body));
     }
 
     void Execute(const srv::IServiceLocator& locator)
@@ -74,6 +65,29 @@ protected:
 
 protected:
     userid_t m_initiativeUserId;
+
+private:
+    /**
+     * @brief parse task from json
+     * @return ufa::Result SUCCESS on success, WRONG_FORMAT when json is invalid
+     */
+    ufa::Result Parse(std::string&& jsonStr)
+    {
+        TRACE_DBG << TRACE_HEADER << "Parsing task: " << jsonStr;  // will leak sensitive, todo
+
+        try
+        {
+            auto json = json::parse(std::move(jsonStr));
+            ParseInternal(std::move(json));
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "invalid json, what(): " << ex.what();
+            return ufa::Result::WRONG_FORMAT;
+        }
+
+        return ufa::Result::SUCCESS;
+    }
 
 private:
     callback_t m_callback;

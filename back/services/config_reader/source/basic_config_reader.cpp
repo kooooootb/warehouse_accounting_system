@@ -103,7 +103,7 @@ BasicConfigReader::BasicConfigReader(const std::shared_ptr<IServiceLocator>& loc
 
 ufa::Result BasicConfigReader::ReadValue(const std::vector<std::string_view>& keys, std::string& value)
 {
-    TRACE_INF << TRACE_HEADER << ToString(keys);
+    TRACE_DBG << TRACE_HEADER << ToString(keys);
 
     std::ifstream fs(m_configPath);
     const std::string key = CombineKeys(keys);
@@ -118,23 +118,23 @@ ufa::Result BasicConfigReader::ReadValue(const std::vector<std::string_view>& ke
             {
                 value = curValue;
 
-                TRACE_INF << TRACE_HEADER << "Found value: " << value;
+                TRACE_DBG << TRACE_HEADER << "Found value: " << value;
                 return ufa::Result::SUCCESS;
             }
         }
         catch (const std::exception& ex)
         {
-            TRACE_WRN << TRACE_HEADER << "Config format error: " << ex.what();
+            TRACE_ERR << TRACE_HEADER << "Config format error: " << ex.what();
         }
     }
 
-    TRACE_WRN << TRACE_HEADER << "Couldn't find value";
+    TRACE_DBG << TRACE_HEADER << "Couldn't find value";
     return ufa::Result::NOT_FOUND;
 }
 
 std::pair<std::string_view, std::string_view> BasicConfigReader::SplitLine(std::string_view line)
 {
-    TRACE_INF << TRACE_HEADER << line;
+    TRACE_DBG << TRACE_HEADER << line;
 
     const auto splitterPos = line.find(SPLITTER);
 

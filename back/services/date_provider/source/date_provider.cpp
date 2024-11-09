@@ -7,6 +7,16 @@ namespace srv
 namespace date
 {
 
+namespace
+{
+
+void PadWithZeroes(std::string& value, std::string::size_type resultWidth)
+{
+    value = std::string(resultWidth - std::min(resultWidth, value.length()), '0') + value;
+}
+
+}  // namespace
+
 namespace chrono = std::chrono;
 
 DateProvider::DateProvider(const std::shared_ptr<IServiceLocator>& locator)
@@ -54,11 +64,6 @@ std::string DateProvider::GetTimeString() const
     result.insert(9, microseconds.c_str(), 6);
 
     return result;
-}
-
-std::string DateProvider::PadWithZeroes(const std::string& value, std::string::size_type resultWidth) const
-{
-    return std::string(resultWidth - std::min(resultWidth, value.length()), '0') + value;
 }
 
 }  // namespace date

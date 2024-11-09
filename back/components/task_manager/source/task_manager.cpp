@@ -45,16 +45,9 @@ inline typename std::enable_if<std::less<std::size_t>{}(index, std::tuple_size_v
     using Task = std::tuple_element_t<index, tasks::TasksList>;
     if (taskInfo.identificator == Task::GetIdentificator())
     {
-        try
-        {
-            task = std::make_unique<Task>(tracer, std::move(taskInfo));
-            TRACE_INF << TRACE_HEADER << "Found task, identificator: " << Task::GetIdentificator();
-        }
-        catch (const std::exception& ex)
-        {
-            TRACE_ERR << TRACE_HEADER << ex.what() << ", identificator: " << Task::GetIdentificator();
-            return ufa::Result::WRONG_FORMAT;
-        }
+        TRACE_INF << TRACE_HEADER << "Found task, identificator: " << Task::GetIdentificator();
+        task = std::make_unique<Task>(tracer, taskInfo);
+        return task->Initialize(std::move(taskInfo));
     }
 
     return GenerateTask<index + 1>(std::move(tracer), std::move(taskInfo), task);

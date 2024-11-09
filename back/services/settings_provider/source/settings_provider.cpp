@@ -58,12 +58,12 @@ SettingsProvider::SettingsProvider(const std::shared_ptr<IServiceLocator>& locat
 
 bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const
 {
-    TRACE_INF << TRACE_HEADER << "Settings name: " << settingsName << ", setting: " << name;
+    TRACE_DBG << TRACE_HEADER << "Settings name: " << settingsName << ", setting: " << name;
     if (m_environment != nullptr)
     {
         if (m_environment->GetValue(ConvertToEnvironmentKey(settingsName, name), value) == ufa::Result::SUCCESS)
         {
-            TRACE_INF << TRACE_HEADER << "Received: " << value;
+            TRACE_DBG << TRACE_HEADER << "Received: " << value;
             return true;
         }
     }

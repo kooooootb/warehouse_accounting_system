@@ -59,18 +59,18 @@ Environment::Environment(const std::shared_ptr<IServiceLocator>& locator) : srv:
 
 ufa::Result Environment::GetValue(std::string_view key, std::string& toValue) const
 {
-    TRACE_INF << TRACE_HEADER << "Getting value for key: " << key;
+    TRACE_DBG << TRACE_HEADER << "Getting value for key: " << key;
 
     if (GetValueFromArguments(key, toValue) != ufa::Result::SUCCESS)
     {
         if (const auto res = GetValueFromEnvironment(key, toValue); res != ufa::Result::SUCCESS)
         {
-            TRACE_WRN << TRACE_HEADER << "Getting value failed with reason: " << res;
+            TRACE_DBG << TRACE_HEADER << "Getting value failed with reason: " << res;
             return res;
         }
     }
 
-    TRACE_INF << TRACE_HEADER << "Got value: " << toValue;
+    TRACE_DBG << TRACE_HEADER << "Got value: " << toValue;
     return ufa::Result::SUCCESS;
 }
 
@@ -131,26 +131,26 @@ ufa::Result Environment::AddParameter(std::string_view key, std::string_view val
 
 ufa::Result Environment::GetValueFromArguments(std::string_view key, std::string& toValue) const
 {
-    TRACE_INF << TRACE_HEADER << "key: " << key;
+    TRACE_DBG << TRACE_HEADER << "key: " << key;
 
     const auto it = m_cmdArguments.find(key);
     if (it != m_cmdArguments.cend())
     {
         toValue = it->second;
 
-        TRACE_INF << TRACE_HEADER << "Received value: " << toValue;
+        TRACE_DBG << TRACE_HEADER << "Received value: " << toValue;
         return ufa::Result::SUCCESS;
     }
     else
     {
-        TRACE_WRN << TRACE_HEADER << "Couldn't find key";
+        TRACE_DBG << TRACE_HEADER << "Couldn't find key";
         return ufa::Result::NOT_FOUND;
     }
 }
 
 ufa::Result Environment::GetValueFromEnvironment(std::string_view key, std::string& toValue) const
 {
-    TRACE_INF << TRACE_HEADER << "key: " << key;
+    TRACE_DBG << TRACE_HEADER << "key: " << key;
 
     const char* value = std::getenv(key.data());
 
@@ -158,12 +158,12 @@ ufa::Result Environment::GetValueFromEnvironment(std::string_view key, std::stri
     {
         toValue = value;
 
-        TRACE_INF << TRACE_HEADER << "Received value: " << toValue;
+        TRACE_DBG << TRACE_HEADER << "Received value: " << toValue;
         return ufa::Result::SUCCESS;
     }
     else
     {
-        TRACE_WRN << TRACE_HEADER << "Couldn't find key";
+        TRACE_DBG << TRACE_HEADER << "Couldn't find key";
         return ufa::Result::NOT_FOUND;
     }
 }

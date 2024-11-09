@@ -90,11 +90,11 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
 {
     using TI = taskmgr::TaskIdentificator;
 
-    if (target == "authorize")
+    if (target == "authorization")
         return TI::Authorize;
 
     CHECK_SUCCESS(ufa::Result::NOT_FOUND,
-        "Couldn't parse task identificator. target: " << target << ", verb" << http::to_string(verb));
+        "Couldn't parse task identificator. target: " << target << ", verb: " << http::to_string(verb));
 }
 
 }  // namespace
@@ -201,6 +201,9 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
         }
     };
 
+    taskInfo.body = std::move(m_request.body());
+    taskInfo.initiativeUserid = initiativeUserId;
+
     const auto result = m_taskManager->AddTask(std::move(taskInfo));
 
     if (result == ufa::Result::WRONG_FORMAT)
@@ -211,7 +214,7 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
 
     if (result == ufa::Result::NOT_FOUND)
     {
-        TRACE_ERR << TRACE_HEADER << "Task not implemented" << target;
+        TRACE_ERR << TRACE_HEADER << "Task not implemented, target: " << target;
         return SendResponse(PrepareResponse("Task not found", http::status::not_found));
     }
 

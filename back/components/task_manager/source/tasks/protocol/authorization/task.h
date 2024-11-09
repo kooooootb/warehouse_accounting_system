@@ -23,7 +23,7 @@ namespace tasks
 class Authorization : public BaseTask
 {
 public:
-    Authorization(std::shared_ptr<srv::ITracer> tracer, TaskInfo&& taskInfo);
+    Authorization(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo);
 
     constexpr static TaskIdentificator GetIdentificator()
     {

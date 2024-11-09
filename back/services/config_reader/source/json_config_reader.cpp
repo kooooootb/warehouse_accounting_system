@@ -104,11 +104,11 @@ JsonConfigReader::JsonConfigReader(const std::shared_ptr<IServiceLocator>& locat
 
 ufa::Result JsonConfigReader::ReadValue(const std::vector<std::string_view>& keys, std::string& value)
 {
-    TRACE_INF << TRACE_HEADER << ToString(keys);
+    TRACE_DBG << TRACE_HEADER << ToString(keys);
 
     if (m_settingMap.empty())
     {
-        TRACE_WRN << TRACE_HEADER << "Json map not initialized";
+        TRACE_ERR << TRACE_HEADER << "Json map not initialized";
         return ufa::Result::NOT_FOUND;
     }
 
@@ -132,14 +132,14 @@ ufa::Result JsonConfigReader::ReadValue(const std::vector<std::string_view>& key
             value = it->dump();
         }
 
-        TRACE_WRN << TRACE_HEADER << "Read value: " << value;
+        TRACE_DBG << TRACE_HEADER << "Read value: " << value;
         return ufa::Result::SUCCESS;
     }
     catch (const std::exception& ex)
     {
     }
 
-    TRACE_WRN << TRACE_HEADER << "Not found";
+    TRACE_DBG << TRACE_HEADER << "Not found";
     return ufa::Result::NOT_FOUND;
 }
 

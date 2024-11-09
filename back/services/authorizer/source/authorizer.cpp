@@ -100,7 +100,7 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
 
         token = jwt::create()
                     .set_issuer(ISSUER.data())
-                    .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(std::string(login)))
+                    .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(string_converters::ToString(userid)))
                     .set_payload_claim(EXP_PAYLOAD_KEY.data(),
                         jwt::claim(string_converters::ToString(
                             m_dateProvider->GetTimestamp() + 30ull * 60ull * 60ull * 1000ull * 1000ull * 1000ull)))
