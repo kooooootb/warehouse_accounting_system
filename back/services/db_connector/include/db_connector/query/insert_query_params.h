@@ -1,18 +1,14 @@
 #ifndef H_C1315910_2E2C_4A8D_967B_407E7CFAF082
 #define H_C1315910_2E2C_4A8D_967B_407E7CFAF082
 
-#include <optional>
+#include <fmt/core.h>
 
-#include <db_connector/value_connector.h>
 #include <instrumental/string_converters.h>
-#include <tracer/tracer.h>
 
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/product_definitions/tables.h>
 #include <db_connector/query/query_options.h>
 
-#include "condition.h"
-#include "join.h"
 #include "utilities.h"
 
 namespace srv

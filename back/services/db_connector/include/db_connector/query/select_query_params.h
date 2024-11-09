@@ -1,10 +1,6 @@
 #ifndef H_62C23D0F_670E_4963_A983_B475CD0B9E87
 #define H_62C23D0F_670E_4963_A983_B475CD0B9E87
 
-#include <optional>
-
-#include <tracer/tracer.h>
-
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/product_definitions/tables.h>
 #include <db_connector/query/query_options.h>
@@ -73,20 +69,8 @@ struct SelectOptions : public IQueryOptions
 
         const auto& selectOptions = static_cast<const SelectOptions&>(options);
 
-        // in most situations this will be enough
-        if (table != selectOptions.table || columns != selectOptions.columns || joins != selectOptions.joins)
-        {
-            return false;
-        }
-
-        placeholder_t ph1;
-        placeholder_t ph2;
-        if (condition->ToString(ph1) != selectOptions.condition->ToString(ph2))  // im too lazy providing this logic
-        {
-            return false;
-        }
-
-        return true;
+        return table == selectOptions.table && columns == selectOptions.columns && joins == selectOptions.joins &&
+               condition->Equals(*selectOptions.condition);
     }
 
     Table table = Table::Invalid;           // e.g. .. FROM this

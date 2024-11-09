@@ -12,6 +12,7 @@
 
 #include "utilities.h"
 
+DEFINE_ENUM_WITH_SERIALIZATION(srv::db, ConditionType, Group, Real, Not);
 DEFINE_ENUM_WITH_SERIALIZATION(srv::db, GroupConditionType, AND, OR);
 
 namespace srv
@@ -85,8 +86,10 @@ namespace db
 
 struct ICondition
 {
+    virtual ConditionType GetType() const = 0;
+
     /**
-     * @param placeholders will be used to generate placeholders
+     * @param placeholders will be used to generate placeholders, serializes only const options part
      */
     virtual std::string ToString(placeholder_t& placeholders) const = 0;
 
@@ -94,11 +97,21 @@ struct ICondition
      * @brief collects all dynamic params from conditions
      */
     virtual void CollectParams(params_t& params) const = 0;
+
+    /**
+     * @brief compare only part used in ToString
+     */
+    virtual bool Equals(const ICondition& condition) const = 0;
 };
 
 // AND OR
 struct GroupCondition : public ICondition
 {
+    ConditionType GetType() const override
+    {
+        return ConditionType::Group;
+    }
+
     std::string ToString(placeholder_t& placeholders) const override
     {
         using namespace std::literals;
@@ -124,6 +137,31 @@ struct GroupCondition : public ICondition
         }
     }
 
+    bool Equals(const ICondition& condition) const override
+    {
+        if (GetType() != condition.GetType())
+        {
+            return false;
+        }
+
+        const auto& groupCondition = static_cast<const GroupCondition&>(condition);
+
+        if (conditions.size() != groupCondition.conditions.size())
+        {
+            return false;
+        }
+
+        for (size_t i = 0; i < conditions.size(); ++i)
+        {
+            if (!conditions[i]->Equals(*groupCondition.conditions[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     GroupConditionType type;
     std::vector<std::unique_ptr<ICondition>> conditions;
 };
@@ -132,6 +170,11 @@ template <typename ValueT>
 struct RealCondition : public ICondition
 {
     RealCondition(Column column_, ValueT value_, RealConditionType type_) : type(type_), column(column_), value(value_) {}
+
+    ConditionType GetType() const override
+    {
+        return ConditionType::Real;
+    }
 
     std::string ToString(placeholder_t& placeholders) const override
     {
@@ -149,6 +192,22 @@ struct RealCondition : public ICondition
         params.Append(value);
     }
 
+    bool Equals(const ICondition& condition) const override
+    {
+        if (GetType() != condition.GetType())
+        {
+            return false;
+        }
+
+        // this can cause problems as we convert to current template type
+        // but value field is last so we shouldn't meet invalid memory fields
+        // and certain column should store value of certain type
+        // and we dont check value here
+        const auto& realCondition = static_cast<const RealCondition&>(condition);
+
+        return type == realCondition.type && column == realCondition.column;
+    }
+
     RealConditionType type;
     Column column;
     ValueT value;
@@ -156,6 +215,11 @@ struct RealCondition : public ICondition
 
 struct NotCondition : public ICondition
 {
+    ConditionType GetType() const override
+    {
+        return ConditionType::Not;
+    }
+
     std::string ToString(placeholder_t& placeholders) const override
     {
         using namespace std::literals;
@@ -169,6 +233,18 @@ struct NotCondition : public ICondition
     void CollectParams(params_t& params) const override
     {
         condition->CollectParams(params);
+    }
+
+    bool Equals(const ICondition& condition) const override
+    {
+        if (GetType() != condition.GetType())
+        {
+            return false;
+        }
+
+        const auto& notCondition = static_cast<const NotCondition&>(condition);
+
+        return condition.Equals(*notCondition.condition);
     }
 
     std::unique_ptr<ICondition> condition;

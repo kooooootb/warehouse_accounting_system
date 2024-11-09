@@ -1,4 +1,3 @@
-#include <db_connector/query/query_identificator.h>
 #include <gtest/gtest.h>
 
 #include <tracer/mock/tracer_mock.h>
@@ -81,20 +80,18 @@ TEST_F(SelectQuerySerializationFixture, WithCondition)
     options->table = Table::User;
     options->columns = {Column::user_id, Column::name};
 
-    auto real1 = std::make_unique<RealCondition<int>>(Column::user_id, 123, RealConditionType::Greater);
-    auto real2 = std::make_unique<RealCondition<std::string_view>>(Column::name, "John", RealConditionType::Equal);
-    auto real3 = std::make_unique<RealCondition<std::string_view>>(Column::login, "Jack", RealConditionType::NotEqual);
+    auto real1 = CreateRealCondition(Column::user_id, 123, RealConditionType::Greater);
+    auto real2 = CreateRealCondition(Column::name, "John", RealConditionType::Equal);
+    auto real3 = CreateRealCondition(Column::login, "Jack", RealConditionType::NotEqual);
 
     auto not1 = std::make_unique<NotCondition>();
     not1->condition = std::move(real3);
 
-    auto group1 = std::make_unique<GroupCondition>();
-    group1->type = GroupConditionType::AND;
+    auto group1 = CreateGroupCondition(GroupConditionType::AND);
     group1->conditions.emplace_back(std::move(real1));
     group1->conditions.emplace_back(std::move(real2));
 
-    auto group2 = std::make_unique<GroupCondition>();
-    group2->type = GroupConditionType::OR;
+    auto group2 = CreateGroupCondition(GroupConditionType::OR);
     group2->conditions.emplace_back(std::move(group1));
     group2->conditions.emplace_back(std::move(not1));
 
