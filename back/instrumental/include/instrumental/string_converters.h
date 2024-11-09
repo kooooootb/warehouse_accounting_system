@@ -2,6 +2,7 @@
 #define H_6850FD1E_2620_4732_9663_03B50CD70AE4
 
 #include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <string>
 #include <type_traits>
@@ -120,16 +121,27 @@ inline bool FromString(const std::string& from)
 template <typename T>
 std::string ToString(T begin, T end, std::string_view separator)
 {
-    std::stringstream result;
+    std::vector<std::string> results;
+    results.reserve(std::distance(begin, end));
+    size_t resultSize = 0;
 
-    for (; begin != std::prev(end); ++begin)
+    for (; begin != end; ++begin)
     {
-        result << string_converters::ToString(*begin) << separator;
+        results.emplace_back(ToString(*begin));
+        resultSize += results.back().size();
     }
 
-    result << string_converters::ToString(*begin);
+    std::string result;
+    result.reserve(resultSize);
 
-    return result.str();
+    for (auto it = std::cbegin(results); it != std::prev(std::cend(results)); ++it)
+    {
+        result.append(*it);
+        result.append(separator);
+    }
+    result.append(*std::prev(std::cend(results)));
+
+    return result;
 }
 
 }  // namespace string_converters
