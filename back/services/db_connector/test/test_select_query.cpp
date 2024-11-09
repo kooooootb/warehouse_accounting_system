@@ -110,6 +110,15 @@ TEST_F(SelectQuerySerializationFixture, WithCondition)
     EXPECT_EQ(query->ExtractParams(), expectedParams);
 }
 
+TEST_F(SelectQuerySerializationFixture, ThrowWithInvalidTableInQueryOptions)
+{
+    auto options = std::make_unique<SelectOptions>();
+
+    options->columns = {Column::login, Column::name, Column::password_hashed, Column::created_by};
+
+    EXPECT_ANY_THROW((static_cast<IQueryOptions&>(*options)).SerializeParametrized());
+}
+
 TEST_F(SelectQuerySerializationFixture, QueryIdentificator)
 {
     auto options = std::make_unique<SelectOptions>();

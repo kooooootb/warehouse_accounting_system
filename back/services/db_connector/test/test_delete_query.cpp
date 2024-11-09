@@ -45,9 +45,11 @@ TEST_F(DeleteQuerySerializationFixture, HP)
 
 TEST_F(DeleteQuerySerializationFixture, ThrowWithoutConditionInQueryOptions)
 {
-    std::unique_ptr<IQueryOptions> options = std::make_unique<DeleteOptions>();
+    auto options = std::make_unique<DeleteOptions>();
 
-    EXPECT_ANY_THROW(options->SerializeParametrized());
+    options->table = Table::Color;
+
+    EXPECT_ANY_THROW((static_cast<IQueryOptions&>(*options)).SerializeParametrized());
 }
 
 TEST_F(DeleteQuerySerializationFixture, ThrowWithoutConditionInQuery)
@@ -55,9 +57,19 @@ TEST_F(DeleteQuerySerializationFixture, ThrowWithoutConditionInQuery)
     auto options = std::make_unique<DeleteOptions>();
     DeleteValues values;
 
-    options->table = Table::User;
+    options->table = Table::Color;
 
     EXPECT_ANY_THROW(QueryFactory::Create(m_tracerMock, std::move(options), std::move(values)));
+}
+
+TEST_F(DeleteQuerySerializationFixture, ThrowWithInvalidTableInQueryOptions)
+{
+    auto options = std::make_unique<DeleteOptions>();
+
+    auto real = CreateRealCondition(Column::user_id, 123, RealConditionType::Equal);
+    options->condition = std::move(real);
+
+    EXPECT_ANY_THROW((static_cast<IQueryOptions&>(*options)).SerializeParametrized());
 }
 
 TEST_F(DeleteQuerySerializationFixture, QueryIdentificator)

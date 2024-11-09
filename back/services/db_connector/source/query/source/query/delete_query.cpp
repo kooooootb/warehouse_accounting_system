@@ -14,7 +14,7 @@ DeleteQuery::DeleteQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<D
 {
     TRACE_INF << TRACE_HEADER;
 
-    CHECK_TRUE(options->condition != nullptr, "Empty condition in DELETE is prohibited");
+    CHECK_TRUE(m_options->condition != nullptr, "Empty condition in DELETE is prohibited");
 
     ExtractParamsFromCondition();
 }
