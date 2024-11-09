@@ -5,12 +5,16 @@
 
 #include <instrumental/check.h>
 #include <instrumental/string_converters.h>
+#include <instrumental/time.h>
 #include <instrumental/types.h>
+#include <instrumental/user.h>
 
 #include <authorizer/authorizer.h>
 #include <date_provider/date_provider.h>
 #include <db_connector/accessor.h>
+#include <db_connector/product_definitions/columns.h>
 #include <db_connector/query/condition.h>
+#include <db_connector/query/insert_query_params.h>
 #include <db_connector/query/query_factory.h>
 #include <db_connector/query/select_query_params.h>
 #include <db_connector/query/utilities.h>
@@ -78,7 +82,7 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, userid_t& userId)
 
 ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_INF << TRACE_HEADER << "login: " << login;
 
     try
     {
@@ -111,6 +115,123 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
     }
 }
 
+ufa::Result Authorizer::CreateUser(auth::UserInfo& userInfo)
+{
+    TRACE_INF << TRACE_HEADER << "User info: " << userInfo;
+
+    userInfo.created_date = m_dateProvider->GetTimestamp();
+
+    // checking necessary fields
+    if (userInfo.login.empty() || userInfo.name.empty() || userInfo.password_hashed.empty() || !userInfo.created_by.has_value())
+    {
+        return ufa::Result::WRONG_FORMAT;
+    }
+
+    try
+    {
+        using namespace srv::db;
+
+        std::unique_ptr<ITransaction> transaction;
+        CHECK_SUCCESS(m_accessor->CreateTransaction(transaction));
+
+        auto& entriesFactory = transaction->GetEntriesFactory();
+
+        auto options = std::make_unique<InsertOptions>();
+        InsertValues values;
+
+        options->table = Table::User;
+        options->columns = {Column::name, Column::password_hashed, Column::login, Column::created_date};
+
+        params_t insertingValues;
+        insertingValues.Append(userInfo.name).Append(userInfo.password_hashed).Append(userInfo.login).Append(userInfo.created_date);
+        values.values.emplace_back(std::move(insertingValues));
+
+        auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+
+        result_t result;
+        auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &result);
+
+        transaction->SetRootEntry(std::move(entry));
+
+        transaction->Execute();
+    }
+    catch (const pqxx::unique_violation& ex)
+    {
+        TRACE_WRN << TRACE_HEADER << "Received unique violation, what(): " << ex.what();
+        return ufa::Result::DUPLICATE;
+    }
+    catch (const std::exception& ex)
+    {
+        TRACE_ERR << TRACE_HEADER << "Received exception while validating, what(): " << ex.what();
+        return ufa::Result::ERROR;
+    }
+
+    return ufa::Result::SUCCESS;
+}
+
+ufa::Result Authorizer::GetUserInfo(userid_t userId, auth::UserInfo& userInfo)
+{
+    TRACE_INF << TRACE_HEADER << "User id: " << userId;
+
+    try
+    {
+        using namespace srv::db;
+
+        std::unique_ptr<ITransaction> transaction;
+        CHECK_SUCCESS(m_accessor->CreateTransaction(transaction));
+
+        auto& entriesFactory = transaction->GetEntriesFactory();
+
+        auto options = std::make_unique<SelectOptions>();
+        SelectValues values;
+
+        options->table = Table::User;
+        options->columns = {Column::login, Column::name, Column::created_by, Column::created_date};
+
+        auto condition = CreateRealCondition(Column::user_id, userId);
+
+        options->condition = std::move(condition);
+
+        auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+
+        result_t result;
+        auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &result);
+
+        transaction->SetRootEntry(std::move(entry));
+
+        transaction->Execute();
+
+        if (result.empty())
+        {
+            return ufa::Result::NOT_FOUND;
+        }
+        else if (result.size() == 1)
+        {
+            CHECK_TRUE(result.columns() == 1);
+
+            const auto& row = result.at(0);
+
+            userInfo.id = userId;
+
+            userInfo.login = row[0].as<std::string>();
+            userInfo.name = row[1].as<std::string>();
+            userInfo.created_by = row[2].as<userid_t>();
+            userInfo.created_date = row[2].as<timestamp_t>();
+        }
+        else
+        {
+            CHECK_SUCCESS(ufa::Result::ERROR, "sane check");
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        TRACE_ERR << TRACE_HEADER << "Received exception while validating, what(): " << ex.what();
+        return ufa::Result::ERROR;
+    }
+
+    return ufa::Result::SUCCESS;
+}
+
 std::string Authorizer::GetSecretKey() const
 {
     return std::string(SECRET);
@@ -122,7 +243,7 @@ ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_
     {
         using namespace srv::db;
 
-        std::unique_ptr<db::ITransaction> transaction;
+        std::unique_ptr<ITransaction> transaction;
         CHECK_SUCCESS(m_accessor->CreateTransaction(transaction));
 
         auto& entriesFactory = transaction->GetEntriesFactory();

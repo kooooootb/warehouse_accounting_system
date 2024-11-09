@@ -12,6 +12,9 @@ namespace dbmgr
 namespace scpts
 {
 
+/**
+ * date are stored in raw numbers, representable by srv::IDateProvider
+ */
 constexpr std::string_view InitializeTables = R"(
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -47,7 +50,7 @@ CREATE TABLE public."Invoice" (
     invoice_id bigint NOT NULL,
     name text NOT NULL,
     description text,
-    created_date timestamp without time zone NOT NULL,
+    created_date bigint NOT NULL,
     created_by bigint NOT NULL,
     company_name text,
     warehouse_to_id bigint,
@@ -67,7 +70,7 @@ CREATE TABLE public."Operation" (
     warehouse_from_id bigint,
     warehouse_to_id bigint,
     count integer NOT NULL,
-    created_date timestamp without time zone NOT NULL
+    created_date bigint NOT NULL
 );
 
 CREATE TABLE public."Product" (
@@ -75,7 +78,7 @@ CREATE TABLE public."Product" (
     name text NOT NULL,
     pretty_name text,
     description text,
-    created_date timestamp without time zone NOT NULL,
+    created_date bigint NOT NULL,
     created_by bigint NOT NULL,
     main_color integer
 );
@@ -85,7 +88,7 @@ CREATE TABLE public."Report" (
     name text NOT NULL,
     report_type integer NOT NULL,
     inner_filename text NOT NULL,
-    created_date timestamp without time zone NOT NULL,
+    created_date bigint NOT NULL,
     warehouse_id bigint NOT NULL
 );
 
@@ -93,8 +96,8 @@ CREATE TABLE public."User" (
     user_id bigint NOT NULL,
     login text NOT NULL,
     password_hashed text NOT NULL,
-    name text,
-    created_date timestamp with time zone NOT NULL,
+    name text UNIQUE,
+    created_date bigint NOT NULL,
     created_by bigint
 );
 
@@ -113,7 +116,7 @@ CREATE TABLE public."Warehouse" (
     pretty_name text,
     description text,
     location text,
-    created_date timestamp without time zone,
+    created_date bigint NOT NULL,
     created_by bigint NOT NULL
 );
 
@@ -204,10 +207,10 @@ ALTER TABLE ONLY public."Warehouse_Item"
 ALTER TABLE ONLY public."Warehouse"
     ADD CONSTRAINT "Warehouse_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
 
-INSERT INTO public."User" (login, password_hashed, name, created_date, created_by) VALUES('superuser', 'C191615151114051D19181D1D1E151F11171918131C1B18181F1F1A141819181', 'Super User', current_timestamp, NULL);
+INSERT INTO public."User" (login, password_hashed, name, created_date, created_by) VALUES('superuser', 'C191615151114051D19181D1D1E151F11171918131C1B18181F1F1A141819181', 'Super User', 0, NULL);
 )";
 
-}
+}  // namespace scpts
 }  // namespace dbmgr
 }  // namespace db
 }  // namespace srv

@@ -1,9 +1,10 @@
 #ifndef H_CC0C686D_89E2_4CB3_9DA6_C0C92EDCBF85
 #define H_CC0C686D_89E2_4CB3_9DA6_C0C92EDCBF85
 
-#include <authorizer/authorizer.h>
 #include <instrumental/interface.h>
 #include <instrumental/types.h>
+
+#include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 
 #include <task_manager/callback.h>

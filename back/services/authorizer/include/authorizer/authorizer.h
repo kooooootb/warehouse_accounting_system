@@ -3,12 +3,18 @@
 
 #include <instrumental/common.h>
 
+#include <instrumental/types.h>
 #include <locator/service.h>
 #include <locator/service_locator.h>
+
+#include "user_info.h"
 
 namespace srv
 {
 
+/**
+ * @brief this service manages all user flow, was made to unload some work from tasks
+ */
 struct IAuthorizer : public srv::IService
 {
     DECLARE_IID(0X5EF435B7);
@@ -31,6 +37,20 @@ struct IAuthorizer : public srv::IService
      * @return ufa::Result SUCCESS on success, UNAUTHORIZED otherwise
      */
     virtual ufa::Result GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid) = 0;
+
+    /**
+     * @brief create new user
+     * @param userInfo new user's info, created_date will be filled
+     * @return ufa::Result SUCCESS on success, DUPLICATE if login duplicated, WRONG_FORMAT if some field is empty, ERROR on internal error
+     */
+    virtual ufa::Result CreateUser(auth::UserInfo& userInfo) = 0;
+
+    /**
+     * @brief get user info for given userid
+     * @param result output result, password will be empty
+     * @return ufa::Result SUCCESS on success, NOT_FOUND if id not found, ERROR on internal error
+     */
+    virtual ufa::Result GetUserInfo(userid_t userId, auth::UserInfo& result) = 0;
 };
 
 }  // namespace srv

@@ -22,6 +22,9 @@ public:
     ufa::Result ValidateToken(std::string_view token, userid_t& userId) override;
     ufa::Result GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid) override;
 
+    ufa::Result CreateUser(auth::UserInfo& userInfo) override;
+    ufa::Result GetUserInfo(userid_t userId, auth::UserInfo& result) override;
+
 private:
     std::string GetSecretKey() const;
     ufa::Result ValidateCredentials(std::string_view login, std::string_view password, userid_t& userid);
