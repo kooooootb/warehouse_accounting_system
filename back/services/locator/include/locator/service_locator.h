@@ -14,7 +14,7 @@ namespace srv
 struct IServiceLocator : ufa::IBase
 {
 public:
-    DECLARE_IID(0x37787C77)
+    DECLARE_IID(0X58ACBAC);  // 92982188
 
     template <class T>
     ufa::Result GetInterface(std::shared_ptr<T>& object) const;

@@ -27,7 +27,7 @@ public:
 
     constexpr static TaskIdentificator GetIdentificator()
     {
-        return TaskIdentificator::Authorize;
+        return TaskIdentificator::Authorization;
     }
 
 protected:
@@ -38,6 +38,7 @@ private:
     static constexpr std::string_view USERNAME_KEY = "login";
     static constexpr std::string_view PASSWORD_KEY = "password";
     static constexpr std::string_view TOKEN_KEY = "token";
+    static constexpr std::string_view USERID_KEY = "user_id";
 
 private:
     std::string m_login;

@@ -9,7 +9,7 @@ namespace srv
 
 struct IEnvironment : public srv::IService
 {
-    DECLARE_IID(0XC0918430);
+    DECLARE_IID(0XC0918430);  // 3230762032
 
     /**
      * @brief retrieve value from environment for given key

@@ -28,7 +28,7 @@ public:
 
 struct IDocumentManager : public srv::IService
 {
-    DECLARE_IID(0X3260C4C8);
+    DECLARE_IID(0X3260C4C8);  // 845202632
 
     /**
      * @brief Restore the Document object using rel path

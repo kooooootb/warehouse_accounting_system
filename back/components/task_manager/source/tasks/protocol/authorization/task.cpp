@@ -30,9 +30,10 @@ ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, 
     if (authResult == ufa::Result::SUCCESS)
     {
         jsonResult[TOKEN_KEY.data()] = token;
-        result = jsonResult.dump();
+        jsonResult[USERID_KEY.data()] = userid;
     }
 
+    result = jsonResult.dump();
     return authResult;
 }
 

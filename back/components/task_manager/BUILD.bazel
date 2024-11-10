@@ -29,3 +29,21 @@ cc_library(
         "@nlohmann_json//:json",
     ],
 )
+
+cc_binary(
+    name = "test",
+    srcs = glob([
+        "test/**/*.h",
+        "test/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        ":lib",
+        "//back/services/authorizer:mock",
+        "//back/services/locator:mock",
+        "//back/services/tracer:mock",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@nlohmann_json//:json",
+    ],
+)

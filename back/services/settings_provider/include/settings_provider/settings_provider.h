@@ -13,7 +13,7 @@ namespace srv
  */
 struct ISettingsProvider : public srv::IService
 {
-    DECLARE_IID(0XB2A6A4FB);
+    DECLARE_IID(0XB2A6A4FB);  // 2997265659
 
     virtual ufa::Result FillSettings(ufa::settings::SettingsBase& settings) const = 0;
 };

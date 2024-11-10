@@ -146,7 +146,7 @@ private:
  */
 struct ITracer : public srv::IService
 {
-    DECLARE_IID(0x37787C77)
+    DECLARE_IID(0x37787C77);  // 930643063
 
     /**
      * @brief public method for casual tracing

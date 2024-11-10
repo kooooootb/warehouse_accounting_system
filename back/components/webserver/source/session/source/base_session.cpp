@@ -91,7 +91,7 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
     using TI = taskmgr::TaskIdentificator;
 
     if (target == "authorization")
-        return TI::Authorize;
+        return TI::Authorization;
 
     CHECK_SUCCESS(ufa::Result::NOT_FOUND,
         "Couldn't parse task identificator. target: " << target << ", verb: " << http::to_string(verb));

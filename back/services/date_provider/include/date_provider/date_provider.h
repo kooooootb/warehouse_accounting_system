@@ -13,7 +13,7 @@ namespace srv
 
 struct IDateProvider : public srv::IService
 {
-    DECLARE_IID(0xEDE6FE29)
+    DECLARE_IID(0xEDE6FE29);  // 3991338537
 
     /**
     * @brief get number that goes up as time goes by

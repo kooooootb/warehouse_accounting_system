@@ -21,7 +21,7 @@ constexpr std::string_view CONFIG_DEFAULT_FILE = "was_settings.cfg";
 
 struct IConfigReader : public srv::IService
 {
-    DECLARE_IID(0XAA0EF280);
+    DECLARE_IID(0XAA0EF280);  // 2853106304
 
     /**
      * @brief reads value identified with series of keys
