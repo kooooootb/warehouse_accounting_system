@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <tracer/mock/tracer_mock.h>
+#include <tracer/tracer_mock.h>
 
 #include <db_connector/settings.h>
 

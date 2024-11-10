@@ -3,7 +3,6 @@
 
 #include <instrumental/common.h>
 
-#include <instrumental/types.h>
 #include <locator/service.h>
 #include <locator/service_locator.h>
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <tracer/mock/tracer_mock.h>
+#include <tracer/tracer_mock.h>
 
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/product_definitions/tables.h>

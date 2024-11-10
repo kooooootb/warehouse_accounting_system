@@ -45,7 +45,6 @@ cc_library(
     hdrs = glob([
         "mock/**/*.h",
     ]),
-    include_prefix = "tracer",
     includes = ["./mock"],
     deps = [
         ":iface",

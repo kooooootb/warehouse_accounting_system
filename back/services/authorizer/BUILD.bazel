@@ -27,3 +27,16 @@ cc_library(
         "//back/services/tracer:iface",
     ],
 )
+
+cc_library(
+    name = "mock",
+    hdrs = glob([
+        "mock/**/*.h",
+    ]),
+    includes = ["./mock"],
+    deps = [
+        ":iface",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
