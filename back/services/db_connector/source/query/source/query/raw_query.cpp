@@ -23,6 +23,7 @@ public:
     RawQueryOptions(std::shared_ptr<srv::ITracer> tracer, std::string parametrizedQuery)
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_parametrizedQuery(std::move(parametrizedQuery))
+        , m_hashValue(std::hash<std::string>{}(m_parametrizedQuery))
     {
         TRACE_INF << TRACE_HEADER;
     }
@@ -99,11 +100,12 @@ public:
         }
         const auto& rawQueryOptions = static_cast<const RawQueryOptions&>(options);
 
-        return m_parametrizedQuery == rawQueryOptions.m_parametrizedQuery;
+        return m_hashValue == rawQueryOptions.m_hashValue && m_parametrizedQuery == rawQueryOptions.m_parametrizedQuery;
     }
 
 private:
-    std::string m_parametrizedQuery;
+    const std::string m_parametrizedQuery;
+    size_t m_hashValue;
 };
 
 RawQuery::RawQuery(std::shared_ptr<srv::ITracer> tracer, std::string parametrizedQuery, params_t params)
