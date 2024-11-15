@@ -21,6 +21,7 @@ enum class Result : int32_t
     UNAUTHORIZED = 8,             // unauthorized access
     NOT_IMPLEMENTED = 9,          // some interface or feature doesn't have implementation yet
     NO_CONNECTION = 10,           // couldn't create connection
+    VIOLATION = 11,               // common rules were violated
 };
 
 }  // namespace ufa
@@ -55,6 +56,8 @@ inline std::string ToString(::ufa::Result result)
             return "NOT_IMPLEMENTED";
         case ::ufa::Result::NO_CONNECTION:
             return "NO_CONNECTION";
+        case ::ufa::Result::VIOLATION:
+            return "VIOLATION";
         default:
             return std::to_string(static_cast<int32_t>(result));
     }
@@ -83,6 +86,8 @@ inline ::ufa::Result FromString(const std::string& string)
         return ::ufa::Result::NOT_IMPLEMENTED;
     if (string == "NO_CONNECTION")
         return ::ufa::Result::NO_CONNECTION;
+    if (string == "VIOLATION")
+        return ::ufa::Result::VIOLATION;
 
     return ::ufa::Result::NO_STRING_CONVERTER;
 }

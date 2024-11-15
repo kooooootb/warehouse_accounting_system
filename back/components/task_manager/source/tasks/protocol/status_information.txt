@@ -1,6 +1,0 @@
-List of available http statuses:
-200 ok
-401 authorization error
-500 server internal error
-404 not found
-400 invalid request

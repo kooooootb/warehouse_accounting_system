@@ -1,0 +1,13 @@
+package(default_visibility = ["//back:__subpackages__"])
+
+cc_library(
+    name = "json",
+    hdrs = glob([
+        "include/**/*.h",
+    ]),
+    includes = ["./include"],
+    deps = [
+        "//back/instrumental:include",
+        "@nlohmann_json//:json",
+    ],
+)

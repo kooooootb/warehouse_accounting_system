@@ -45,7 +45,7 @@ ufa::Result Transaction::Execute()
         return ufa::Result::SUCCESS;
     }
 
-    uint32_t attemptsRemaining = m_commitAttempts;
+    uint32_t attemptsRemaining = m_commitAttempts == 0 ? 1 : m_commitAttempts;
 
     do
     {
@@ -60,6 +60,8 @@ ufa::Result Transaction::Execute()
             }
 
             m_transactionImpl->Get()->commit();
+
+            return ufa::Result::SUCCESS;
         }
         catch (const pqxx::serialization_failure& ex)
         {
@@ -71,6 +73,11 @@ ufa::Result Transaction::Execute()
             {
                 attemptsRemaining -= 1;
             }
+        }
+        catch (const pqxx::integrity_constraint_violation& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Constraint violated, ex.what(): " << ex.what();
+            return ufa::Result::VIOLATION;
         }
         catch (const pqxx::in_doubt_error& ex)
         {
@@ -85,7 +92,8 @@ ufa::Result Transaction::Execute()
         }
     } while (attemptsRemaining > 0);
 
-    return ufa::Result::SUCCESS;
+    // we ran out of attempts
+    return ufa::Result::ERROR;
 }
 
 ITransactionEntryFactory& Transaction::GetEntriesFactory()

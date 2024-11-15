@@ -3,10 +3,12 @@
 
 #include <optional>
 
+#include <db_connector/transaction_entry/transaction_entry.h>
 #include <instrumental/interface.h>
 
 #include "condition_transaction_entry.h"
 #include "query_transaction_entry.h"
+#include "variable_transaction_entry.h"
 
 namespace srv
 {
@@ -27,7 +29,15 @@ struct ITransactionEntryFactory : ufa::IBase
         bool isCached,
         result_t* result) = 0;
 
+    /**
+     * @brief this entry will choose next entry based on condition
+     */
     virtual std::unique_ptr<IConditionTransactionEntry> CreateConditionTransactionEntry(std::function<bool()>&& predicate) = 0;
+
+    /**
+     * @brief this entry will execute function
+     */
+    virtual std::unique_ptr<IVariableTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntryGetter) = 0;
 };
 
 }  // namespace db

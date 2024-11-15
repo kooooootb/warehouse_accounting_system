@@ -21,6 +21,7 @@ public:
 
     uint64_t GetTimestamp() const override;
     std::string GetTimeString() const override;
+    std::string GetISOTimeString() const override;
 
 private:
     std::chrono::high_resolution_clock::duration GetDuration() const;

@@ -4,6 +4,7 @@
 #include "condition_transaction_entry.h"
 #include "raw_query_transaction_entry.h"
 #include "transaction_entry_factory.h"
+#include "variable_transaction_entry.h"
 
 namespace srv
 {
@@ -56,6 +57,13 @@ std::unique_ptr<IConditionTransactionEntry> TransactionEntryFactory::CreateCondi
     TRACE_INF << TRACE_HEADER;
 
     return std::make_unique<ConditionTransactionEntry>(GetTracer(), std::move(predicate));
+}
+
+std::unique_ptr<IVariableTransactionEntry> TransactionEntryFactory::CreateVariableTransactionEntry(std::function<void()>&& lastEntry)
+{
+    TRACE_INF << TRACE_HEADER;
+
+    return std::make_unique<VariableTransactionEntry>(GetTracer(), std::move(lastEntry));
 }
 
 }  // namespace trsct

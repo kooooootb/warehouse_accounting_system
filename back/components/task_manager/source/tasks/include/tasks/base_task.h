@@ -6,6 +6,7 @@
 #include <instrumental/common.h>
 
 #include <authorizer/authorizer.h>
+#include <instrumental/types.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
 #include <tracer/tracer_provider.h>
@@ -53,9 +54,19 @@ public:
         TRACE_INF << TRACE_HEADER;
 
         std::string response;
-        const auto result = ExecuteInternal(locator, response);
+        ufa::Result result;
 
-        TRACE_DBG << TRACE_HEADER << "Calling callback with response: " << response;
+        try
+        {
+            result = ExecuteInternal(locator, response);
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Exception while executing task, waht(): " << ex.what();
+            result = ufa::Result::ERROR;
+        }
+
+        TRACE_DBG << TRACE_HEADER << "Calling callback with response: " << response << ", result = " << result;
         m_callback(std::move(response), result);
     }
 

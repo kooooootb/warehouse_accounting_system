@@ -89,7 +89,6 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
         CHECK_TRUE(!login.empty());
         CHECK_TRUE(!password.empty());
 
-        // const auto res = ufa::Result::SUCCESS;  //= m_accessor->FillUser(user);  // wrong, todo fix after accessor improvements
         const auto res = ValidateCredentials(login, password, userid);
 
         if (res != ufa::Result::SUCCESS)
@@ -127,46 +126,39 @@ ufa::Result Authorizer::CreateUser(auth::UserInfo& userInfo)
         return ufa::Result::WRONG_FORMAT;
     }
 
-    try
+    using namespace srv::db;
+
+    std::unique_ptr<ITransaction> transaction;
+    CHECK_SUCCESS(m_accessor->CreateTransaction(transaction));
+
+    auto& entriesFactory = transaction->GetEntriesFactory();
+
+    auto options = std::make_unique<InsertOptions>();
+    InsertValues values;
+
+    options->table = Table::User;
+    options->columns = {Column::name, Column::password_hashed, Column::login, Column::created_date};
+    options->returning = {Column::user_id};
+
+    params_t insertingValues;
+    insertingValues.Append(userInfo.name).Append(userInfo.password_hashed).Append(userInfo.login).Append(userInfo.created_date);
+    values.values.emplace_back(std::move(insertingValues));
+
+    auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+
+    result_t result;
+    auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &result);
+
+    transaction->SetRootEntry(std::move(entry));
+
+    const auto transactionResult = transaction->Execute();
+
+    if (transactionResult == ufa::Result::SUCCESS)
     {
-        using namespace srv::db;
-
-        std::unique_ptr<ITransaction> transaction;
-        CHECK_SUCCESS(m_accessor->CreateTransaction(transaction));
-
-        auto& entriesFactory = transaction->GetEntriesFactory();
-
-        auto options = std::make_unique<InsertOptions>();
-        InsertValues values;
-
-        options->table = Table::User;
-        options->columns = {Column::name, Column::password_hashed, Column::login, Column::created_date};
-
-        params_t insertingValues;
-        insertingValues.Append(userInfo.name).Append(userInfo.password_hashed).Append(userInfo.login).Append(userInfo.created_date);
-        values.values.emplace_back(std::move(insertingValues));
-
-        auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
-
-        result_t result;
-        auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &result);
-
-        transaction->SetRootEntry(std::move(entry));
-
-        transaction->Execute();
-    }
-    catch (const pqxx::unique_violation& ex)
-    {
-        TRACE_WRN << TRACE_HEADER << "Received unique violation, what(): " << ex.what();
-        return ufa::Result::DUPLICATE;
-    }
-    catch (const std::exception& ex)
-    {
-        TRACE_ERR << TRACE_HEADER << "Received exception while validating, what(): " << ex.what();
-        return ufa::Result::ERROR;
+        userInfo.id = result.at(0, 0).get<int64_t>();
     }
 
-    return ufa::Result::SUCCESS;
+    return transactionResult;
 }
 
 ufa::Result Authorizer::GetUserInfo(userid_t userId, auth::UserInfo& userInfo)

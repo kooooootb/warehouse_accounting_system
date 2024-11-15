@@ -10,6 +10,9 @@ namespace srv
 namespace db
 {
 
+/**
+ * @brief will execute query
+ */
 struct IQueryTransactionEntry : public ITransactionEntry
 {
     virtual void SetNext(std::unique_ptr<ITransactionEntry>&& entry) = 0;

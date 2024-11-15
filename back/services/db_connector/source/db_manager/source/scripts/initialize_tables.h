@@ -57,6 +57,16 @@ CREATE TABLE public."Invoice" (
     warehouse_from_id bigint
 );
 
+ALTER TABLE public."Invoice" ALTER COLUMN invoice_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Invoice_invoice_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
 CREATE TABLE public."Invoice_Item" (
     invoice_id bigint NOT NULL,
     product_id bigint NOT NULL,
@@ -73,6 +83,15 @@ CREATE TABLE public."Operation" (
     created_date bigint NOT NULL
 );
 
+ALTER TABLE public."Operation" ALTER COLUMN operation_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Operation_operation_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
 CREATE TABLE public."Product" (
     product_id bigint NOT NULL,
     name text NOT NULL,
@@ -81,6 +100,15 @@ CREATE TABLE public."Product" (
     created_date bigint NOT NULL,
     created_by bigint NOT NULL,
     main_color integer
+);
+
+ALTER TABLE public."Product" ALTER COLUMN product_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Product_product_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 CREATE TABLE public."Report" (
@@ -92,11 +120,20 @@ CREATE TABLE public."Report" (
     warehouse_id bigint NOT NULL
 );
 
+ALTER TABLE public."Report" ALTER COLUMN report_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Report_report_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
 CREATE TABLE public."User" (
     user_id bigint NOT NULL,
-    login text NOT NULL,
+    login text NOT NULL UNIQUE,
     password_hashed text NOT NULL,
-    name text UNIQUE,
+    name text,
     created_date bigint NOT NULL,
     created_by bigint
 );
@@ -188,9 +225,6 @@ ALTER TABLE ONLY public."Operation"
 
 ALTER TABLE ONLY public."Product"
     ADD CONSTRAINT "Product_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
-
-ALTER TABLE ONLY public."Product"
-    ADD CONSTRAINT "Product_main_color_fkey" FOREIGN KEY (main_color) REFERENCES public."Color"(color_value);
 
 ALTER TABLE ONLY public."Report"
     ADD CONSTRAINT "Report_warehouse_id_fkey" FOREIGN KEY (warehouse_id) REFERENCES public."Warehouse"(warehouse_id);

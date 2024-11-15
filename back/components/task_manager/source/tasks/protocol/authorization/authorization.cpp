@@ -1,10 +1,11 @@
 #include <hash/hash.h>
+#include <json/json_helpers.h>
 
 #include <authorizer/authorizer.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
 
-#include "task.h"
+#include "authorization.h"
 
 namespace taskmgr
 {
@@ -14,10 +15,13 @@ namespace tasks
 Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
     : BaseTask(std::move(tracer), std::move(taskInfo))
 {
+    TRACE_INF << TRACE_HEADER;
 }
 
 ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, std::string& result)
 {
+    TRACE_INF << TRACE_HEADER << "Executing " << GetIdentificator();
+
     json jsonResult;
 
     std::shared_ptr<srv::IAuthorizer> authorizer;
@@ -29,8 +33,8 @@ ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, 
 
     if (authResult == ufa::Result::SUCCESS)
     {
-        jsonResult[TOKEN_KEY.data()] = token;
-        jsonResult[USERID_KEY.data()] = userid;
+        util::json::Put(jsonResult, TOKEN_KEY, token);
+        util::json::Put(jsonResult, USERID_KEY, userid);
     }
 
     result = jsonResult.dump();
@@ -39,8 +43,10 @@ ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, 
 
 void Authorization::ParseInternal(json&& json)
 {
-    m_login = json.at(USERNAME_KEY).get<std::string>();
-    m_hashPassword = util::hash::HashToBase64(json.at(PASSWORD_KEY).get<std::string>());
+    TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
+
+    m_login = util::json::Get<std::string>(json, USERNAME_KEY);
+    m_hashPassword = util::hash::HashToBase64(util::json::Get<std::string>(json, PASSWORD_KEY));
 }
 
 }  // namespace tasks

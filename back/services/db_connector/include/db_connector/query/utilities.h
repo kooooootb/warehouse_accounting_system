@@ -3,7 +3,7 @@
 
 #include <pqxx/pqxx>
 
-#include <db_connector/value_connector.h>
+#include <db_connector/value_collector.h>
 
 namespace srv
 {

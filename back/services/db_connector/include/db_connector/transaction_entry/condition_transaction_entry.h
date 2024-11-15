@@ -8,6 +8,9 @@ namespace srv
 namespace db
 {
 
+/**
+ * @brief will choose next entry based on condition
+ */
 struct IConditionTransactionEntry : public ITransactionEntry
 {
     virtual void SetIfTrue(std::unique_ptr<ITransactionEntry>&& entry) = 0;

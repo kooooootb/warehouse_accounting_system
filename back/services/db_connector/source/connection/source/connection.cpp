@@ -38,7 +38,7 @@ void Connection::RefreshSupportedQueries(qry::IQueryManager& queryManager)
         {
             SupportQuery(queriesIt->id, queriesIt->queryOptions->SerializeParametrized());
             ++queriesIt;
-        } while (queriesIt != queries->rend() && queriesIt->id <= savedLastSupportedId);
+        } while (queriesIt != queries->rend() && queriesIt->id > savedLastSupportedId);
     }
 }
 

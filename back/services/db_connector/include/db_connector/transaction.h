@@ -22,7 +22,7 @@ struct ITransaction : public ufa::IBase
 
     /**
      * @brief execute all entries
-     * @return SUCCESS on success, ERROR on db error, like lost connection
+     * @return SUCCESS on success, ERROR on db error, like lost connection, VIOLATION on constraint violated
      */
     virtual ufa::Result Execute() = 0;
 

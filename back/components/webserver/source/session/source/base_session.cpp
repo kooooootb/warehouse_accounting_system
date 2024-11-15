@@ -80,8 +80,10 @@ http::status ConvertToHttpStatus(ufa::Result result)
             return http::status::not_found;
         case ufa::Result::UNAUTHORIZED:
             return http::status::unauthorized;
+        case ufa::Result::VIOLATION:
+            return http::status::unprocessable_entity;
         default:
-            // unknown error
+            // other errors related to internal errors like ERROR etc
             return http::status::internal_server_error;
     }
 }
@@ -92,6 +94,14 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
 
     if (target == "authorization")
         return TI::Authorization;
+    if (target == "users/create")
+        return TI::CreateUser;
+    if (target == "products/create")
+        return TI::ProductsCreate;
+    if (target == "products/create")
+        return TI::ProductsCreate;
+    if (target == "warehouses/create")
+        return TI::CreateWarehouse;
 
     CHECK_SUCCESS(ufa::Result::NOT_FOUND,
         "Couldn't parse task identificator. target: " << target << ", verb: " << http::to_string(verb));

@@ -25,6 +25,7 @@ DEFINE_ENUM_WITH_SERIALIZATION(srv::db,
     warehouse_to_id,
     warehouse_from_id,
     company_name,
-    operation_id)
+    operation_id,
+    product_id)
 
 #endif  // H_7FCF8B8D_64FB_462B_9D8C_49A8D552F035

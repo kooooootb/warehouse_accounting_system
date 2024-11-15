@@ -13,7 +13,10 @@ cc_library(
         "//back/components/task_manager:iface",
         "//back/instrumental:include",
         "//back/services/authorizer:iface",
+        "//back/services/date_provider:iface",
+        "//back/services/db_connector:iface",
         "//back/services/tracer:iface",
+        "//back/utilities/json",
         "@nlohmann_json//:json",
     ],
 )

@@ -66,6 +66,35 @@ std::string DateProvider::GetTimeString() const
     return result;
 }
 
+std::string DateProvider::GetISOTimeString() const
+{
+    const auto duration = GetDuration();
+
+    std::string result;
+    result.reserve(12);
+
+    auto years = std::to_string(chrono::duration_cast<chrono::hours>(duration).count() % 24);
+    auto hours = std::to_string(chrono::duration_cast<chrono::hours>(duration).count() % 24);
+    auto minutes = std::to_string(chrono::duration_cast<chrono::minutes>(duration).count() % 60);
+    auto seconds = std::to_string(chrono::duration_cast<chrono::seconds>(duration).count() % 60);
+    auto microseconds = std::to_string(chrono::duration_cast<chrono::microseconds>(duration).count() % 1000000);
+
+    PadWithZeroes(hours, 2);
+    PadWithZeroes(minutes, 2);
+    PadWithZeroes(seconds, 2);
+    PadWithZeroes(microseconds, 6);
+
+    result.insert(0, hours.c_str(), 2);
+    result.push_back(':');
+    result.insert(3, minutes.c_str(), 2);
+    result.push_back(':');
+    result.insert(6, seconds.c_str(), 2);
+    result.push_back('.');
+    result.insert(9, microseconds.c_str(), 6);
+
+    return result;
+}
+
 }  // namespace date
 }  // namespace srv
 

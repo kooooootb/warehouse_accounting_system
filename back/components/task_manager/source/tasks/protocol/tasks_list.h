@@ -3,14 +3,17 @@
 
 #include <tuple>
 
-#include "authorization/task.h"
+#include "authorization/authorization.h"
+#include "create_user/create_user.h"
+#include "create_warehouse/create_warehouse.h"
+#include "products_create/products_create.h"
 
 namespace taskmgr
 {
 namespace tasks
 {
 
-using TasksList = std::tuple<Authorization>;
+using TasksList = std::tuple<Authorization, CreateUser, ProductsCreate, CreateWarehouse>;
 
 }  // namespace tasks
 }  // namespace taskmgr

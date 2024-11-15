@@ -58,6 +58,12 @@ struct InsertOptions : public IQueryOptions
         }
         result += string_converters::ToString(std::cbegin(values), std::cend(values), ", "sv);
 
+        if (!returning.empty())
+        {
+            result +=
+                fmt::format(" RETURNING {}"sv, string_converters::ToString(std::cbegin(returning), std::cend(returning), ", "sv));
+        }
+
         result += ';';
 
         return result;
@@ -72,12 +78,14 @@ struct InsertOptions : public IQueryOptions
 
         const auto& insertOptions = static_cast<const InsertOptions&>(options);
 
-        return table == insertOptions.table && columns == insertOptions.columns && valuesCount == insertOptions.valuesCount;
+        return table == insertOptions.table && columns == insertOptions.columns && valuesCount == insertOptions.valuesCount &&
+               returning == insertOptions.returning;
     }
 
-    Table table = Table::Invalid;  // INSERT INTO this
-    std::vector<Column> columns;   // (this)
-    size_t valuesCount = 1;        // count inserting rows, should be calculated in factories
+    Table table = Table::Invalid;   // INSERT INTO this
+    std::vector<Column> columns;    // (this)
+    std::vector<Column> returning;  // RETURNING (this)
+    size_t valuesCount = 1;         // count inserting rows, should be calculated in factories
 };
 
 struct InsertValues

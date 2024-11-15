@@ -22,7 +22,7 @@ public:
     void Execute() override;
     ITransactionEntry* GetNext() override;
 
-    // IQueryTransactionEntry
+    // IConditionTransactionEntry
     void SetIfTrue(std::unique_ptr<ITransactionEntry>&& entry) override;
     void SetIfFalse(std::unique_ptr<ITransactionEntry>&& entry) override;
 

@@ -24,6 +24,11 @@ struct IDateProvider : public srv::IService
      * @brief get string with format: hh:MM:ss.mmmmmm
      */
     virtual std::string GetTimeString() const = 0;
+
+    /**
+     * @brief get string with format: yyyy-MM-dd'T'HH:mm:ss
+     */
+    virtual std::string GetISOTimeString() const = 0;
 };
 
 }  // namespace srv

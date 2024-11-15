@@ -12,7 +12,7 @@
 
 #include "utilities.h"
 
-DEFINE_ENUM_WITH_SERIALIZATION(srv::db, ConditionType, Group, Real, Not);
+DEFINE_ENUM_WITH_SERIALIZATION(srv::db, ConditionType, Group, Real, In, Not);
 DEFINE_ENUM_WITH_SERIALIZATION(srv::db, GroupConditionType, AND, OR);
 
 namespace srv
@@ -213,6 +213,66 @@ struct RealCondition : public ICondition
     ValueT value;
 };
 
+template <typename ValueT>
+struct InCondition : public ICondition  // column IN (...)
+{
+    InCondition(Column column_, std::vector<ValueT> values_) : column(column_), values(std::move(values_)) {}
+
+    ConditionType GetType() const override
+    {
+        return ConditionType::In;
+    }
+
+    std::string ToString(placeholder_t& placeholders) const override
+    {
+        using namespace std::literals;
+
+        CHECK_TRUE(!values.empty());
+
+        std::vector<std::string> placeholdersVector;
+        placeholdersVector.reserve(values.size());
+
+        for (size_t i = 0; i < values.size(); ++i)
+        {
+            placeholdersVector.emplace_back(placeholders.get());
+            placeholders.next();
+        }
+
+        auto result = fmt::format("({} IN ({}))"sv,
+            string_converters::ToString(column),
+            string_converters::ToString(std::cbegin(placeholdersVector), std::cend(placeholdersVector), ", "sv));
+
+        return result;
+    }
+
+    void CollectParams(params_t& params) const override
+    {
+        for (const auto& value : values)
+        {
+            params.Append(value);
+        }
+    }
+
+    bool Equals(const ICondition& condition) const override
+    {
+        if (GetType() != condition.GetType())
+        {
+            return false;
+        }
+
+        // this can cause problems as we convert to current template type
+        // but value field is last so we shouldn't meet invalid memory fields
+        // and certain column should store value of certain type
+        // and we dont check value here
+        const auto& inCondition = static_cast<const InCondition&>(condition);
+
+        return column == inCondition.column && values.size() == inCondition.values.size();
+    }
+
+    Column column;
+    std::vector<ValueT> values;
+};
+
 struct NotCondition : public ICondition
 {
     ConditionType GetType() const override
@@ -263,6 +323,12 @@ inline std::unique_ptr<RealCondition<ValueT>> CreateRealCondition(Column column,
     RealConditionType type = RealConditionType::Equal)
 {
     return std::make_unique<RealCondition<ValueT>>(column, value, type);
+}
+
+template <typename ValueT>
+inline std::unique_ptr<InCondition<ValueT>> CreateInCondition(Column column, std::vector<ValueT> values)
+{
+    return std::make_unique<InCondition<ValueT>>(column, std::move(values));
 }
 
 }  // namespace db

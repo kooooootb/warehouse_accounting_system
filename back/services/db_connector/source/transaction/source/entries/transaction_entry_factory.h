@@ -29,7 +29,10 @@ public:
     std::unique_ptr<IQueryTransactionEntry> CreateQueryTransactionEntry(std::unique_ptr<IQuery>&& query,
         bool isCached,
         result_t* result) override;
+
     std::unique_ptr<IConditionTransactionEntry> CreateConditionTransactionEntry(std::function<bool()>&& predicate) override;
+
+    std::unique_ptr<IVariableTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntry) override;
 
 private:
     std::shared_ptr<qry::IQueryManager> m_queryManager;

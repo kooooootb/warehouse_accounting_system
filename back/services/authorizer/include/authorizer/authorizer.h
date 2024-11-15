@@ -39,7 +39,7 @@ struct IAuthorizer : public srv::IService
 
     /**
      * @brief create new user
-     * @param userInfo new user's info, created_date will be filled
+     * @param userInfo new user's info, created_date will be filled, user_id may be empty
      * @return ufa::Result SUCCESS on success, DUPLICATE if login duplicated, WRONG_FORMAT if some field is empty, ERROR on internal error
      */
     virtual ufa::Result CreateUser(auth::UserInfo& userInfo) = 0;
