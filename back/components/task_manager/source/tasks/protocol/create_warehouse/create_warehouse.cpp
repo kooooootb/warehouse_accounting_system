@@ -39,6 +39,7 @@ ufa::Result CreateWarehouse::ExecuteInternal(const srv::IServiceLocator& locator
         util::json::Put(jsonResult, WAREHOUSE_ID_KEY, m_warehouse.warehouse_id.value());
         util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_warehouse.created_date.value()));
         util::json::Put(jsonResult, CREATED_BY_KEY, m_warehouse.created_by.value());
+        util::json::Put(jsonResult, PRETTY_NAME_KEY, m_warehouse.pretty_name.value());
     }
 
     result = jsonResult.dump();
@@ -75,6 +76,7 @@ ufa::Result CreateWarehouse::ActualCreateWarehouse(srv::IAccessor& accessor, srv
     if (transactionResult == ufa::Result::SUCCESS)
     {
         m_warehouse.warehouse_id = insertionResults.at(0, 0).get<int64_t>();
+        m_warehouse.pretty_name = insertionResults.at(0, 1).get<std::string>();
     }
 
     return transactionResult;

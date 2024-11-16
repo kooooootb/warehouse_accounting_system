@@ -62,6 +62,7 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
             util::json::Put(jsonProduct, ID_KEY, product.id.value());
             util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(product.created_date.value()));
             util::json::Put(jsonProduct, CREATED_BY_KEY, product.created_by.value());
+            util::json::Put(jsonProduct, PRETTY_NAME_KEY, product.pretty_name.value());
 
             products.emplace_back(std::move(jsonProduct));
         }
@@ -117,6 +118,7 @@ ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv:
         for (size_t i = 0; i < productInsertsResults.size(); ++i)
         {
             this->m_products[i].id = productInsertsResults.at(i, 0).get<int64_t>().value();
+            this->m_products[i].pretty_name = productInsertsResults.at(i, 1).get<std::string>().value();
         }
     };
 

@@ -56,6 +56,7 @@ private:
     static constexpr std::string_view ID_KEY = "id";
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";
+    static constexpr std::string_view PRETTY_NAME_KEY = "pretty_name";
 
 private:
     Invoice m_invoice;

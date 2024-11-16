@@ -27,6 +27,7 @@ namespace tasks
 struct Warehouse
 {
     std::optional<std::string> name;
+    std::optional<std::string> pretty_name;
     std::optional<std::string> description;
     std::optional<std::string> location;
     std::optional<int64_t> warehouse_id;
@@ -51,7 +52,7 @@ struct Warehouse
 
         options->table = Table::Warehouse;
         options->columns = {Column::name, Column::created_by, Column::created_date};
-        options->returning = {Column::warehouse_id};
+        options->returning = {Column::warehouse_id, Column::pretty_name};
 
         params_t params;
 

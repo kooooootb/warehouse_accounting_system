@@ -27,6 +27,7 @@ namespace tasks
 struct Product
 {
     std::optional<std::string> name;
+    std::optional<std::string> pretty_name;
     std::optional<std::string> description;
     std::optional<int64_t> main_color;
     std::optional<std::string> main_color_name;
@@ -48,7 +49,7 @@ struct Product
 
         options->table = Table::Product;
         options->columns = {Column::name, Column::created_by, Column::created_date, Column::description, Column::main_color};
-        options->returning = {Column::product_id};
+        options->returning = {Column::product_id, Column::pretty_name};
 
         for (auto& product : products)
         {

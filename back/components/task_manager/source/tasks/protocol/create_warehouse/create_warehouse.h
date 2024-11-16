@@ -44,6 +44,7 @@ private:
     static constexpr std::string_view WAREHOUSE_ID_KEY = "warehouse_id";
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";
+    static constexpr std::string_view PRETTY_NAME_KEY = "pretty_name";
 
 private:
     Warehouse m_warehouse;
