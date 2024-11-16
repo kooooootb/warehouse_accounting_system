@@ -28,7 +28,7 @@ struct IDateProvider : public srv::IService
     /**
      * @brief get string with format: yyyy-MM-dd'T'HH:mm:ss
      */
-    virtual std::string GetISOTimeString() const = 0;
+    virtual std::string ToIsoTimeString(timestamp_t timestamp) const = 0;
 };
 
 }  // namespace srv

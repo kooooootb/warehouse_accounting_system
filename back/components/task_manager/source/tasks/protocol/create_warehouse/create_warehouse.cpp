@@ -37,7 +37,7 @@ ufa::Result CreateWarehouse::ExecuteInternal(const srv::IServiceLocator& locator
         util::json::Put(jsonResult, DESCRIPTION_KEY, m_warehouse.description);
         util::json::Put(jsonResult, LOCATION_KEY, m_warehouse.location);
         util::json::Put(jsonResult, WAREHOUSE_ID_KEY, m_warehouse.warehouse_id.value());
-        util::json::Put(jsonResult, CREATED_DATE_KEY, m_warehouse.created_date.value());
+        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_warehouse.created_date.value()));
         util::json::Put(jsonResult, CREATED_BY_KEY, m_warehouse.created_by.value());
     }
 

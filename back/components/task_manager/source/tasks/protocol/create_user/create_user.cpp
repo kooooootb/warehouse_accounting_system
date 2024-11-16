@@ -3,6 +3,7 @@
 
 #include <authorizer/authorizer.h>
 #include <authorizer/user_info.h>
+#include <date_provider/date_provider.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
 
@@ -27,6 +28,9 @@ ufa::Result CreateUser::ExecuteInternal(const srv::IServiceLocator& locator, std
     std::shared_ptr<srv::IAuthorizer> authorizer;
     CHECK_SUCCESS(locator.GetInterface(authorizer));
 
+    std::shared_ptr<srv::IDateProvider> dateProvider;
+    CHECK_SUCCESS(locator.GetInterface(dateProvider));
+
     const auto createResult = authorizer->CreateUser(m_userInfo);
 
     if (createResult == ufa::Result::SUCCESS)
@@ -35,7 +39,7 @@ ufa::Result CreateUser::ExecuteInternal(const srv::IServiceLocator& locator, std
         util::json::Put(jsonResult, LOGIN_KEY, m_userInfo.login);
         util::json::Put(jsonResult, PASSWORD_KEY, m_userInfo.password_hashed);
         util::json::Put(jsonResult, USER_ID_KEY, m_userInfo.id.value());
-        util::json::Put(jsonResult, CREATED_DATE_KEY, m_userInfo.created_date);
+        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_userInfo.created_date));
         util::json::Put(jsonResult, CREATED_BY_KEY, m_userInfo.created_by.value());
     }
 

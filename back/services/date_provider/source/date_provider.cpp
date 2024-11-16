@@ -1,4 +1,5 @@
 #include <chrono>
+#include <ctime>
 
 #include "date_provider.h"
 
@@ -13,6 +14,14 @@ namespace
 void PadWithZeroes(std::string& value, std::string::size_type resultWidth)
 {
     value = std::string(resultWidth - std::min(resultWidth, value.length()), '0') + value;
+}
+
+template <typename DurationT>
+DurationT Extract(std::chrono::nanoseconds& duration)
+{
+    const auto result = std::chrono::duration_cast<DurationT>(duration);
+    duration -= result;
+    return result;
 }
 
 }  // namespace
@@ -66,32 +75,21 @@ std::string DateProvider::GetTimeString() const
     return result;
 }
 
-std::string DateProvider::GetISOTimeString() const
+std::string DateProvider::ToIsoTimeString(timestamp_t timestamp) const
 {
-    const auto duration = GetDuration();
+    auto duration = chrono::nanoseconds(timestamp);
+    chrono::system_clock::time_point timePoint(chrono::duration_cast<chrono::system_clock::duration>(duration));
+    std::time_t timeT = chrono::system_clock::to_time_t(timePoint);
 
     std::string result;
-    result.reserve(12);
+    result.resize(22);
 
-    auto years = std::to_string(chrono::duration_cast<chrono::hours>(duration).count() % 24);
-    auto hours = std::to_string(chrono::duration_cast<chrono::hours>(duration).count() % 24);
-    auto minutes = std::to_string(chrono::duration_cast<chrono::minutes>(duration).count() % 60);
-    auto seconds = std::to_string(chrono::duration_cast<chrono::seconds>(duration).count() % 60);
-    auto microseconds = std::to_string(chrono::duration_cast<chrono::microseconds>(duration).count() % 1000000);
+    // "yyyy-MM-dd'T'HH:mm:ss"
+    constexpr std::string_view Format = "%F'T'%T";
 
-    PadWithZeroes(hours, 2);
-    PadWithZeroes(minutes, 2);
-    PadWithZeroes(seconds, 2);
-    PadWithZeroes(microseconds, 6);
+    std::strftime(result.data(), result.size(), Format.data(), std::gmtime(&timeT));
 
-    result.insert(0, hours.c_str(), 2);
-    result.push_back(':');
-    result.insert(3, minutes.c_str(), 2);
-    result.push_back(':');
-    result.insert(6, seconds.c_str(), 2);
-    result.push_back('.');
-    result.insert(9, microseconds.c_str(), 6);
-
+    result.resize(result.size() - 1);  // strftime requires 1 extra byte for \0 so we strip it here
     return result;
 }
 

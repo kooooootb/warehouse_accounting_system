@@ -45,6 +45,7 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
         util::json::Put(jsonResult, INVOICE_ID_KEY, m_invoice.invoice_id.value());
         util::json::Put(jsonResult, INVOICE_NAME_KEY, m_invoice.name.value());
         util::json::Put(jsonResult, INVOICE_DESCRIPTION_KEY, m_invoice.description);
+        util::json::Put(jsonResult, INVOICE_CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_invoice.created_date.value()));
         util::json::Put(jsonResult, WAREHOUSE_TO_KEY, m_invoice.warehouse_to_id.value());
 
         json::array_t products;
@@ -59,7 +60,7 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
             util::json::Put(jsonProduct, MAIN_COLOR_NAME_KEY, product.main_color_name);
             util::json::Put(jsonProduct, COUNT_KEY, product.count.value());
             util::json::Put(jsonProduct, ID_KEY, product.id.value());
-            util::json::Put(jsonProduct, CREATED_DATE_KEY, product.created_date.value());
+            util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(product.created_date.value()));
             util::json::Put(jsonProduct, CREATED_BY_KEY, product.created_by.value());
 
             products.emplace_back(std::move(jsonProduct));
