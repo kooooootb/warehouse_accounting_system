@@ -66,7 +66,7 @@ struct Product
 
         auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
 
-        return entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &results);
+        return entriesFactory.CreateQueryTransactionEntry(std::move(query), false, &results);
     }
 };
 

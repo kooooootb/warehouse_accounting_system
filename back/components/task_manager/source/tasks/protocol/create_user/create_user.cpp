@@ -37,7 +37,6 @@ ufa::Result CreateUser::ExecuteInternal(const srv::IServiceLocator& locator, std
     {
         util::json::Put(jsonResult, NAME_KEY, m_userInfo.name);
         util::json::Put(jsonResult, LOGIN_KEY, m_userInfo.login);
-        util::json::Put(jsonResult, PASSWORD_KEY, m_userInfo.password_hashed);
         util::json::Put(jsonResult, USER_ID_KEY, m_userInfo.id.value());
         util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_userInfo.created_date));
         util::json::Put(jsonResult, CREATED_BY_KEY, m_userInfo.created_by.value());

@@ -100,8 +100,9 @@ ufa::Result ProductsRemove::RemoveInvoiceProducts(srv::IAccessor& accessor, srv:
 
     result_t invoiceInsertResults;
 
-    auto invoiceEntry = Invoice::InsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_invoice, dateProvider);
-    // we can remove only part of product so we care about updating rows in Warehouse_Item
+    auto invoiceEntry =
+        Invoice::FullInsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_products, m_invoice, dateProvider);
+    // it is possible to remove only part of product so we care about updating rows in Warehouse_Item
     auto warehouseItemFromEntry =
         WarehouseItem::ChangeCount(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_from_id.value(), true);
 

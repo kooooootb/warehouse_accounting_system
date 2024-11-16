@@ -66,7 +66,6 @@ ALTER TABLE public."Invoice" ALTER COLUMN invoice_id ADD GENERATED ALWAYS AS IDE
     CACHE 1
 );
 
-
 CREATE TABLE public."Invoice_Item" (
     invoice_id bigint NOT NULL,
     product_id bigint NOT NULL,
@@ -175,11 +174,11 @@ ALTER TABLE public."Warehouse" ALTER COLUMN warehouse_id ADD GENERATED ALWAYS AS
 ALTER TABLE ONLY public."Color"
     ADD CONSTRAINT "Color_pkey" PRIMARY KEY (color_value);
 
-ALTER TABLE ONLY public."Invoice_Item"
-    ADD CONSTRAINT "Invoice_Item_pkey" PRIMARY KEY (invoice_id);
-
 ALTER TABLE ONLY public."Invoice"
     ADD CONSTRAINT "Invoice_pkey" PRIMARY KEY (invoice_id);
+
+ALTER TABLE ONLY public."Invoice_Item"
+    ADD CONSTRAINT "Invoice_Item_pkey" PRIMARY KEY (invoice_id, product_id);
 
 ALTER TABLE ONLY public."Operation"
     ADD CONSTRAINT "Operation_pkey" PRIMARY KEY (operation_id);
@@ -201,6 +200,9 @@ ALTER TABLE ONLY public."Warehouse"
 
 ALTER TABLE ONLY public."Invoice_Item"
     ADD CONSTRAINT "Invoice_Item_product_id_fkey" FOREIGN KEY (product_id) REFERENCES public."Product"(product_id);
+
+ALTER TABLE ONLY public."Invoice_Item"
+    ADD CONSTRAINT "Invoice_Item_invoice_id_fkey" FOREIGN KEY (invoice_id) REFERENCES public."Invoice"(invoice_id);
 
 ALTER TABLE ONLY public."Invoice"
     ADD CONSTRAINT "Invoice_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);

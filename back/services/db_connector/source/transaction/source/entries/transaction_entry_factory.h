@@ -34,7 +34,8 @@ public:
 
     std::unique_ptr<IQueryTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntry) override;
 
-    std::unique_ptr<IQueryTransactionEntry> CreateGroupedTransactionEntry(std::list<std::unique_ptr<ITransactionEntry>>&& entries);
+    std::unique_ptr<IQueryTransactionEntry> CreateGroupedTransactionEntry(
+        std::list<std::unique_ptr<ITransactionEntry>>&& entries) override;
 
 private:
     std::shared_ptr<qry::IQueryManager> m_queryManager;

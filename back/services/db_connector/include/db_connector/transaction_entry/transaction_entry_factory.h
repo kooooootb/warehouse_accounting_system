@@ -24,7 +24,7 @@ struct ITransactionEntryFactory : ufa::IBase
     /**
      * @brief this entry will execute query
      * @param isCached if true query will be added to supported and will always be prepared on connections
-     * @param result where to store result, empty if no result
+     * @param result where to store result, empty if no result, pass nullptr to ignore result
      */
     virtual std::unique_ptr<IQueryTransactionEntry> CreateQueryTransactionEntry(std::unique_ptr<IQuery>&& query,
         bool isCached,

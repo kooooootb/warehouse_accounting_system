@@ -29,7 +29,12 @@ void CachedQueryTransactionEntry::Execute()
 {
     TRACE_INF << TRACE_HEADER << "Executing query, id: " << m_queryId << ", params: [" << string_converters::ToString(m_params) << "]";
 
-    *m_result = m_transaction->Get()->exec_prepared(string_converters::ToString(m_queryId), m_params.ToPqxx());
+    result_t result;
+    result = m_transaction->Get()->exec_prepared(string_converters::ToString(m_queryId), m_params.ToPqxx());
+    if (m_result != nullptr)
+    {
+        *m_result = std::move(result);
+    }
 }
 
 ITransactionEntry* CachedQueryTransactionEntry::GetNext()

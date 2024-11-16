@@ -110,50 +110,31 @@ ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv:
 
     result_t invoiceInsertResults;
     result_t productInsertsResults;
-    std::vector<int64_t> productIds;
 
-    const auto idsConverter = [&productInsertsResults, &productIds]() -> void
+    const auto idsConverter = [&productInsertsResults, this]() -> void
     {
-        productIds.reserve(productInsertsResults.size());
+        CHECK_TRUE(productInsertsResults.size() == this->m_products.size());
         for (size_t i = 0; i < productInsertsResults.size(); ++i)
         {
-            productIds.push_back(productInsertsResults.at(i, 0).get<int64_t>().value());
+            this->m_products[i].id = productInsertsResults.at(i, 0).get<int64_t>().value();
         }
     };
 
-    auto invoiceEntry = Invoice::InsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_invoice, dateProvider);
     // as we are 100% creating new products we dont care about updating Warehouse_Item rows and just creating new ones
     auto productsEntry = Product::InsertsEntry(GetTracer(), entriesFactory, productInsertsResults, m_products, dateProvider);
     auto idsConverterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(idsConverter));
-    auto warehouseItemEntry =
-        WarehouseItem::InsertsEntry(GetTracer(), entriesFactory, productIds, m_products, m_invoice.warehouse_to_id.value());
+    auto invoiceEntry =
+        Invoice::FullInsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_products, m_invoice, dateProvider);
+    auto warehouseItemEntry = WarehouseItem::InsertsEntry(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_to_id.value());
 
-    idsConverterEntry->SetNext(std::move(warehouseItemEntry));
+    invoiceEntry->SetNext(std::move(warehouseItemEntry));
+    idsConverterEntry->SetNext(std::move(invoiceEntry));
     productsEntry->SetNext(std::move(idsConverterEntry));
-    invoiceEntry->SetNext(std::move(productsEntry));
-    transaction->SetRootEntry(std::move(invoiceEntry));
+    transaction->SetRootEntry(std::move(productsEntry));
 
     const auto transactionResult = transaction->Execute();
 
-    if (transactionResult == ufa::Result::SUCCESS)
-    {
-        m_invoice.invoice_id = invoiceInsertResults.at(0, 0).get<int64_t>();
-
-        if (productInsertsResults.size() == m_products.size())
-        {
-            for (size_t i = 0; i < m_products.size(); ++i)
-            {
-                m_products[i].id = productInsertsResults.at(i, 0).get<int64_t>();
-            }
-        }
-        else
-        {
-            // this can be reached only as a result of bad coding
-            TRACE_ERR << TRACE_HEADER << "Unmatching product insertion result size: " << productInsertsResults.size()
-                      << " and products size: " << m_products.size();
-        }
-    }
-
+    // all ids are received in entries
     return transactionResult;
 }
 

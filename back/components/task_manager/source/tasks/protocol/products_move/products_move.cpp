@@ -102,7 +102,8 @@ ufa::Result ProductsMove::MoveInvoiceProducts(srv::IAccessor& accessor, srv::IDa
 
     result_t invoiceInsertResults;
 
-    auto invoiceEntry = Invoice::InsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_invoice, dateProvider);
+    auto invoiceEntry =
+        Invoice::FullInsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_products, m_invoice, dateProvider);
     // reduce products from warehouse
     auto warehouseItemFromEntry =
         WarehouseItem::ChangeCount(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_from_id.value(), true);

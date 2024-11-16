@@ -38,17 +38,13 @@ struct WarehouseItem
 
     static inline std::unique_ptr<srv::db::IQueryTransactionEntry> InsertsEntry(std::shared_ptr<srv::ITracer> tracer,
         srv::db::ITransactionEntryFactory& entriesFactory,
-        const std::vector<int64_t>& productIds,
-        std::vector<Product>& products,
+        const std::vector<Product>& products,
         int64_t warehouseId)
     {
         using namespace srv::db;
 
-        const auto function = [tracer = std::move(tracer),
-                                  &entriesFactory = entriesFactory,
-                                  &productIds = productIds,
-                                  &products = products,
-                                  warehouseId = warehouseId]() -> void
+        const auto function =
+            [tracer = std::move(tracer), &entriesFactory = entriesFactory, &products = products, warehouseId = warehouseId]() -> void
         {
             LOCAL_TRACER(tracer);
 
@@ -59,14 +55,11 @@ struct WarehouseItem
             options->columns = {Column::warehouse_id, Column::count, Column::product_id};
             options->returning = {Column::product_id};
 
-            // we take ids from another vector so their sizes should match
-            CHECK_TRUE(products.size() == productIds.size());
-
-            for (size_t i = 0; i < products.size(); ++i)
+            for (const auto& product : products)
             {
                 params_t params;
 
-                params.Append(warehouseId).Append(products[i].count.value()).Append(productIds[i]);
+                params.Append(warehouseId).Append(product.count.value()).Append(product.id.value());
 
                 values.values.emplace_back(std::move(params));
             }
@@ -74,7 +67,7 @@ struct WarehouseItem
             auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
 
             result_t results;
-            auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &results);
+            auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), false, &results);
             entry->Execute();
         };
 
@@ -139,6 +132,11 @@ struct WarehouseItem
                 result_t selectResult;
                 auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &selectResult);
                 entry->Execute();
+
+                if (selectResult.empty())
+                {
+                    throw pqxx::integrity_constraint_violation("WAS: no such Warehouse_Item");
+                }
 
                 if (predicate(products[i], selectResult))
                 {

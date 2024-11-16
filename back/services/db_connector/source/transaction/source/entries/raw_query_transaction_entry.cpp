@@ -29,7 +29,12 @@ void RawQueryTransactionEntry::Execute()
     TRACE_INF << TRACE_HEADER << "Executing query, parametrized: " << m_queryParametrized << ", params: ["
               << string_converters::ToString(m_params) << "]";
 
-    *m_result = m_transaction->Get()->exec_params(m_queryParametrized, m_params.ToPqxx());
+    result_t result;
+    result = m_transaction->Get()->exec_params(m_queryParametrized, m_params.ToPqxx());
+    if (m_result != nullptr)
+    {
+        *m_result = std::move(result);
+    }
 }
 
 ITransactionEntry* RawQueryTransactionEntry::GetNext()
