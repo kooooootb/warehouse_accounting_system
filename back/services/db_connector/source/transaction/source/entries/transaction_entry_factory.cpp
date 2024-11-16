@@ -2,6 +2,7 @@
 
 #include "cached_query_transaction_entry.h"
 #include "condition_transaction_entry.h"
+#include "grouped_transaction_entry.h"
 #include "raw_query_transaction_entry.h"
 #include "transaction_entry_factory.h"
 #include "variable_transaction_entry.h"
@@ -59,11 +60,19 @@ std::unique_ptr<IConditionTransactionEntry> TransactionEntryFactory::CreateCondi
     return std::make_unique<ConditionTransactionEntry>(GetTracer(), std::move(predicate));
 }
 
-std::unique_ptr<IVariableTransactionEntry> TransactionEntryFactory::CreateVariableTransactionEntry(std::function<void()>&& lastEntry)
+std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateVariableTransactionEntry(std::function<void()>&& lastEntry)
 {
     TRACE_INF << TRACE_HEADER;
 
     return std::make_unique<VariableTransactionEntry>(GetTracer(), std::move(lastEntry));
+}
+
+std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateGroupedTransactionEntry(
+    std::list<std::unique_ptr<ITransactionEntry>>&& entries)
+{
+    TRACE_INF << TRACE_HEADER;
+
+    return std::make_unique<GroupedTransactionEntry>(GetTracer(), std::move(entries));
 }
 
 }  // namespace trsct

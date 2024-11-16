@@ -32,7 +32,9 @@ public:
 
     std::unique_ptr<IConditionTransactionEntry> CreateConditionTransactionEntry(std::function<bool()>&& predicate) override;
 
-    std::unique_ptr<IVariableTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntry) override;
+    std::unique_ptr<IQueryTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntry) override;
+
+    std::unique_ptr<IQueryTransactionEntry> CreateGroupedTransactionEntry(std::list<std::unique_ptr<ITransactionEntry>>&& entries);
 
 private:
     std::shared_ptr<qry::IQueryManager> m_queryManager;

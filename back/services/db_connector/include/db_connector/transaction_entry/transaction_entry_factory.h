@@ -6,9 +6,10 @@
 #include <db_connector/transaction_entry/transaction_entry.h>
 #include <instrumental/interface.h>
 
+#include "../query/query.h"
+
 #include "condition_transaction_entry.h"
 #include "query_transaction_entry.h"
-#include "variable_transaction_entry.h"
 
 namespace srv
 {
@@ -37,7 +38,13 @@ struct ITransactionEntryFactory : ufa::IBase
     /**
      * @brief this entry will execute function
      */
-    virtual std::unique_ptr<IVariableTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntryGetter) = 0;
+    virtual std::unique_ptr<IQueryTransactionEntry> CreateVariableTransactionEntry(std::function<void()>&& lastEntryGetter) = 0;
+
+    /**
+     * @brief this entry will execute all entries in given order
+     */
+    virtual std::unique_ptr<IQueryTransactionEntry> CreateGroupedTransactionEntry(
+        std::list<std::unique_ptr<ITransactionEntry>>&& entries) = 0;
 };
 
 }  // namespace db

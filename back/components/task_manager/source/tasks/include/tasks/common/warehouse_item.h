@@ -4,7 +4,6 @@
 #include <optional>
 #include <string>
 
-#include <db_connector/transaction_entry/variable_transaction_entry.h>
 #include <instrumental/time.h>
 #include <instrumental/user.h>
 
@@ -37,7 +36,7 @@ struct WarehouseItem
     std::optional<int64_t> product_id;
     std::optional<int64_t> count;
 
-    static inline std::unique_ptr<srv::db::IVariableTransactionEntry> InsertsEntry(std::shared_ptr<srv::ITracer> tracer,
+    static inline std::unique_ptr<srv::db::IQueryTransactionEntry> InsertsEntry(std::shared_ptr<srv::ITracer> tracer,
         srv::db::ITransactionEntryFactory& entriesFactory,
         const std::vector<int64_t>& productIds,
         std::vector<Product>& products,
@@ -82,7 +81,7 @@ struct WarehouseItem
         return entriesFactory.CreateVariableTransactionEntry(std::move(function));
     }
 
-    static inline std::unique_ptr<srv::db::IVariableTransactionEntry> ChangeCount(std::shared_ptr<srv::ITracer> tracer,
+    static inline std::unique_ptr<srv::db::IQueryTransactionEntry> ChangeCount(std::shared_ptr<srv::ITracer> tracer,
         srv::db::ITransactionEntryFactory& entriesFactory,
         std::vector<Product>& products,
         int64_t warehouseId,

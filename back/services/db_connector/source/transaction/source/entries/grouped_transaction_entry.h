@@ -1,5 +1,7 @@
-#ifndef H_DF934BB2_7786_4FB9_9924_38F9B74C87C6
-#define H_DF934BB2_7786_4FB9_9924_38F9B74C87C6
+#ifndef H_E712926C_249D_445E_A413_1CE3B6115A77
+#define H_E712926C_249D_445E_A413_1CE3B6115A77
+
+#include <list>
 
 #include <tracer/tracer_provider.h>
 
@@ -13,10 +15,10 @@ namespace db
 namespace trsct
 {
 
-class VariableTransactionEntry : public srv::tracer::TracerProvider, public IQueryTransactionEntry
+class GroupedTransactionEntry : public srv::tracer::TracerProvider, public IQueryTransactionEntry
 {
 public:
-    VariableTransactionEntry(std::shared_ptr<srv::ITracer> tracer, std::function<void()>&& lastEntry);
+    GroupedTransactionEntry(std::shared_ptr<srv::ITracer> tracer, std::list<std::unique_ptr<ITransactionEntry>>&& entries);
 
     // ITransactionEntry
     void Execute() override;
@@ -26,7 +28,7 @@ public:
     void SetNext(std::unique_ptr<ITransactionEntry>&& entry) override;
 
 private:
-    std::function<void()> m_function;
+    std::list<std::unique_ptr<ITransactionEntry>> m_entries;
 
     std::unique_ptr<ITransactionEntry> m_nextEntry;
 };
@@ -35,4 +37,4 @@ private:
 }  // namespace db
 }  // namespace srv
 
-#endif  // H_DF934BB2_7786_4FB9_9924_38F9B74C87C6
+#endif  // H_E712926C_249D_445E_A413_1CE3B6115A77
