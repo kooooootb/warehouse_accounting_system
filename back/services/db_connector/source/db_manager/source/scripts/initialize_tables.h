@@ -260,6 +260,31 @@ CREATE TRIGGER add_operation_trigger
 AFTER INSERT ON public."Invoice_Item"
 FOR EACH ROW
 EXECUTE PROCEDURE public."add_operation_function"();
+
+CREATE OR REPLACE FUNCTION public."fill_pretty_name_warehouse"()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.pretty_name := NEW.warehouse_id || '_' || NEW.name;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER fill_pretty_name_warehouse_trigger
+BEFORE INSERT OR UPDATE ON public."Warehouse"
+FOR EACH ROW
+EXECUTE PROCEDURE public."fill_pretty_name_warehouse"();
+
+CREATE OR REPLACE FUNCTION public."fill_pretty_name_product"()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.pretty_name := NEW.product_id || '_' || NEW.name;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER fill_pretty_name_product_trigger
+BEFORE INSERT OR UPDATE ON public."Product"
+FOR EACH ROW
+EXECUTE PROCEDURE public."fill_pretty_name_product"();
+
 )";
 
 }  // namespace scpts
