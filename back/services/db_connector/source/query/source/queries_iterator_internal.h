@@ -130,7 +130,7 @@ inline bool QueriesIteratorInternal<usdtl::reverse_iterator_t>::Less(usdtl::reve
 
     if (it1 == end1)
     {
-        return true;
+        return false;
     }
 
     return it1->first > it2->first;

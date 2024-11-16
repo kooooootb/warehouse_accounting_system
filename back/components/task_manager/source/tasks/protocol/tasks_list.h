@@ -7,13 +7,14 @@
 #include "create_user/create_user.h"
 #include "create_warehouse/create_warehouse.h"
 #include "products_create/products_create.h"
+#include "products_move/products_move.h"
 
 namespace taskmgr
 {
 namespace tasks
 {
 
-using TasksList = std::tuple<Authorization, CreateUser, ProductsCreate, CreateWarehouse>;
+using TasksList = std::tuple<Authorization, CreateUser, ProductsCreate, CreateWarehouse, ProductsMove>;
 
 }  // namespace tasks
 }  // namespace taskmgr

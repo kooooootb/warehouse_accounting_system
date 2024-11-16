@@ -41,7 +41,7 @@ struct UpdateOptions : public IQueryOptions
             placeholders.next();
         }
 
-        std::string result = fmt::format("UPDATE public.\"{}\" SET ({}) WHERE {};"sv,
+        std::string result = fmt::format("UPDATE public.\"{}\" SET {} WHERE {};"sv,
             string_converters::ToString(table),
             string_converters::ToString(std::cbegin(modifications), std::cend(modifications), ", "sv),
             condition->ToString(placeholders));

@@ -98,8 +98,8 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
         return TI::CreateUser;
     if (target == "products/create")
         return TI::ProductsCreate;
-    if (target == "products/create")
-        return TI::ProductsCreate;
+    if (target == "products/move")
+        return TI::ProductsMove;
     if (target == "warehouses/create")
         return TI::CreateWarehouse;
 

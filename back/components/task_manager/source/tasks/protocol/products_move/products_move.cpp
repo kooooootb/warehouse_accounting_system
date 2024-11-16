@@ -14,19 +14,19 @@
 #include <tasks/common/product.h>
 #include <tasks/common/warehouse_item.h>
 
-#include "products_create.h"
+#include "products_move.h"
 
 namespace taskmgr
 {
 namespace tasks
 {
 
-ProductsCreate::ProductsCreate(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
+ProductsMove::ProductsMove(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
     : BaseTask(std::move(tracer), std::move(taskInfo))
 {
 }
 
-ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator, std::string& result)
+ufa::Result ProductsMove::ExecuteInternal(const srv::IServiceLocator& locator, std::string& result)
 {
     TRACE_INF << TRACE_HEADER << "Executing " << GetIdentificator();
 
@@ -38,7 +38,7 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
     std::shared_ptr<srv::IDateProvider> dateProvider;
     CHECK_SUCCESS(locator.GetInterface(dateProvider));
 
-    const auto createResult = CreateInvoiceProducts(*accessor, *dateProvider);
+    const auto createResult = MoveInvoiceProducts(*accessor, *dateProvider);
 
     if (createResult == ufa::Result::SUCCESS)
     {
@@ -47,6 +47,7 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
         util::json::Put(jsonResult, INVOICE_NAME_KEY, m_invoice.name.value());
         util::json::Put(jsonResult, INVOICE_DESCRIPTION_KEY, m_invoice.description);
         util::json::Put(jsonResult, WAREHOUSE_TO_KEY, m_invoice.warehouse_to_id.value());
+        util::json::Put(jsonResult, WAREHOUSE_FROM_KEY, m_invoice.warehouse_from_id.value());
 
         json::array_t products;
 
@@ -54,14 +55,8 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
         {
             json jsonProduct;
 
-            util::json::Put(jsonProduct, NAME_KEY, product.name.value());
-            util::json::Put(jsonProduct, DESCRIPTION_KEY, product.description);
-            util::json::Put(jsonProduct, MAIN_COLOR_KEY, product.main_color);
-            util::json::Put(jsonProduct, MAIN_COLOR_NAME_KEY, product.main_color_name);
-            util::json::Put(jsonProduct, COUNT_KEY, product.count.value());
             util::json::Put(jsonProduct, ID_KEY, product.id.value());
-            util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(product.created_date.value()));
-            util::json::Put(jsonProduct, CREATED_BY_KEY, product.created_by.value());
+            util::json::Put(jsonProduct, COUNT_KEY, product.count.value());
 
             products.emplace_back(std::move(jsonProduct));
         }
@@ -73,13 +68,14 @@ ufa::Result ProductsCreate::ExecuteInternal(const srv::IServiceLocator& locator,
     return createResult;
 }
 
-void ProductsCreate::ParseInternal(json&& json)
+void ProductsMove::ParseInternal(json&& json)
 {
     TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
 
     m_invoice.name = util::json::Get<std::string>(json, INVOICE_NAME_KEY);
     m_invoice.description = util::json::GetOptional<std::string>(json, INVOICE_DESCRIPTION_KEY);
     m_invoice.warehouse_to_id = util::json::Get<int64_t>(json, WAREHOUSE_TO_KEY);
+    m_invoice.warehouse_from_id = util::json::Get<int64_t>(json, WAREHOUSE_FROM_KEY);
     m_invoice.created_by = m_initiativeUserId;
 
     CHECK_TRUE(json.at(PRODUCTS_KEY).is_array());
@@ -88,18 +84,14 @@ void ProductsCreate::ParseInternal(json&& json)
     {
         Product product;
 
-        product.name = util::json::Get<std::string>(productJson, NAME_KEY);
-        product.description = util::json::GetOptional<std::string>(productJson, DESCRIPTION_KEY);
-        product.main_color = util::json::GetOptional<int64_t>(productJson, MAIN_COLOR_KEY);
-        product.main_color_name = util::json::GetOptional<std::string>(productJson, MAIN_COLOR_NAME_KEY);
+        product.id = util::json::Get<int64_t>(productJson, ID_KEY);
         product.count = util::json::Get<int64_t>(productJson, COUNT_KEY);
-        product.created_by = m_initiativeUserId;
 
         m_products.emplace_back(std::move(product));
     }
 }
 
-ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv::IDateProvider& dateProvider)
+ufa::Result ProductsMove::MoveInvoiceProducts(srv::IAccessor& accessor, srv::IDateProvider& dateProvider)
 {
     using namespace srv::db;
 
@@ -109,27 +101,17 @@ ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv:
     auto& entriesFactory = transaction->GetEntriesFactory();
 
     result_t invoiceInsertResults;
-    result_t productInsertsResults;
-    std::vector<int64_t> productIds;
-
-    const auto idsConverter = [&productInsertsResults, &productIds]() -> void
-    {
-        productIds.reserve(productInsertsResults.size());
-        for (size_t i = 0; i < productInsertsResults.size(); ++i)
-        {
-            productIds.push_back(productInsertsResults.at(i, 0).get<int64_t>().value());
-        }
-    };
 
     auto invoiceEntry = Invoice::InsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_invoice, dateProvider);
-    auto productsEntry = Product::InsertsEntry(GetTracer(), entriesFactory, productInsertsResults, m_products, dateProvider);
-    auto idsConverterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(idsConverter));
-    auto warehouseItemEntry =
-        WarehouseItem::InsertsEntry(GetTracer(), entriesFactory, productIds, m_products, m_invoice.warehouse_to_id.value());
+    // reduce products from warehouse
+    auto warehouseItemFromEntry =
+        WarehouseItem::ChangeCount(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_from_id.value(), true);
+    // expand products to warehouse
+    auto warehouseItemToEntry =
+        WarehouseItem::ChangeCount(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_to_id.value(), false);
 
-    idsConverterEntry->SetNext(std::move(warehouseItemEntry));
-    productsEntry->SetNext(std::move(idsConverterEntry));
-    invoiceEntry->SetNext(std::move(productsEntry));
+    warehouseItemFromEntry->SetNext(std::move(warehouseItemToEntry));
+    invoiceEntry->SetNext(std::move(warehouseItemFromEntry));
     transaction->SetRootEntry(std::move(invoiceEntry));
 
     const auto transactionResult = transaction->Execute();
@@ -137,20 +119,6 @@ ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv:
     if (transactionResult == ufa::Result::SUCCESS)
     {
         m_invoice.invoice_id = invoiceInsertResults.at(0, 0).get<int64_t>();
-
-        if (productInsertsResults.size() == m_products.size())
-        {
-            for (size_t i = 0; i < m_products.size(); ++i)
-            {
-                m_products[i].id = productInsertsResults.at(i, 0).get<int64_t>();
-            }
-        }
-        else
-        {
-            // this can be reached only as a result of bad coding
-            TRACE_ERR << TRACE_HEADER << "Unmatching product insertion result size: " << productInsertsResults.size()
-                      << " and products size: " << m_products.size();
-        }
     }
 
     return transactionResult;

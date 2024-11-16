@@ -39,7 +39,7 @@ struct WarehouseItem
 
     static inline std::unique_ptr<srv::db::IVariableTransactionEntry> InsertsEntry(std::shared_ptr<srv::ITracer> tracer,
         srv::db::ITransactionEntryFactory& entriesFactory,
-        const srv::db::result_t& productInsertsResults,
+        const std::vector<int64_t>& productIds,
         std::vector<Product>& products,
         int64_t warehouseId)
     {
@@ -47,7 +47,7 @@ struct WarehouseItem
 
         const auto function = [tracer = std::move(tracer),
                                   &entriesFactory = entriesFactory,
-                                  &productInsertsResults = productInsertsResults,
+                                  &productIds = productIds,
                                   &products = products,
                                   warehouseId = warehouseId]() -> void
         {
@@ -60,16 +60,14 @@ struct WarehouseItem
             options->columns = {Column::warehouse_id, Column::count, Column::product_id};
             options->returning = {Column::product_id};
 
-            // we take ids from insert results so their sizes should match
-            CHECK_TRUE(products.size() == productInsertsResults.size());
+            // we take ids from another vector so their sizes should match
+            CHECK_TRUE(products.size() == productIds.size());
 
             for (size_t i = 0; i < products.size(); ++i)
             {
                 params_t params;
 
-                params.Append(warehouseId)
-                    .Append(products[i].count.value())
-                    .Append(productInsertsResults.at(i, 0).get<int64_t>().value());
+                params.Append(warehouseId).Append(products[i].count.value()).Append(productIds[i]);
 
                 values.values.emplace_back(std::move(params));
             }
@@ -101,7 +99,8 @@ struct WarehouseItem
                 return;
             }
 
-            std::vector<int64_t> toDeleteIds;  // or toCreateIds
+            std::vector<int64_t> toDeleteIds;     // or toCreateIds
+            std::vector<int64_t> toCreateCounts;  // only for inserts
             std::vector<std::pair<int64_t /* product_id */, int64_t /* target */>> toModifyIdsTarget;
 
             const auto predicate = isReducing ? [](Product& product, const result_t& result){
@@ -145,6 +144,7 @@ struct WarehouseItem
                 if (predicate(products[i], selectResult))
                 {
                     toDeleteIds.push_back(products[i].id.value());
+                    toCreateCounts.push_back(products[i].count.value());
                 }
                 else
                 {
@@ -152,7 +152,7 @@ struct WarehouseItem
                 }
             }
 
-            // handle all critical (delete, insert) products
+            // handle all critical decisions (delete, insert products)
             if (!toDeleteIds.empty())
             {
                 if (isReducing)
@@ -189,10 +189,11 @@ struct WarehouseItem
                     options->table = Table::Warehouse_Item;
                     options->columns = {Column::warehouse_id, Column::product_id, Column::count};
 
-                    for (const auto id : toDeleteIds)
+                    CHECK_TRUE(toDeleteIds.size() == toCreateCounts.size());
+                    for (size_t i = 0; i < toDeleteIds.size(); ++i)
                     {
                         params_t params;
-                        params.Append(id);
+                        params.Append(warehouseId).Append(toDeleteIds[i]).Append(toCreateCounts[i]);
                         values.values.emplace_back(std::move(params));
                     }
 
