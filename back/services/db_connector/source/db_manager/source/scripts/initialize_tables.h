@@ -244,6 +244,22 @@ ALTER TABLE ONLY public."Warehouse"
     ADD CONSTRAINT "Warehouse_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
 
 INSERT INTO public."User" (login, password_hashed, name, created_date, created_by) VALUES('superuser', 'C191615151114051D19181D1D1E151F11171918131C1B18181F1F1A141819181', 'Super User', 0, NULL);
+
+CREATE OR REPLACE FUNCTION public."add_operation_function"()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public."Operation" (invoice_id, product_id, warehouse_from_id, warehouse_to_id, count, created_date)
+        SELECT NEW.invoice_id, NEW.product_id, warehouse_from_id, warehouse_to_id, NEW.count, created_date 
+            FROM public."Invoice"
+            WHERE invoice_id = NEW.invoice_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER add_operation_trigger
+AFTER INSERT ON public."Invoice_Item"
+FOR EACH ROW
+EXECUTE PROCEDURE public."add_operation_function"();
 )";
 
 }  // namespace scpts

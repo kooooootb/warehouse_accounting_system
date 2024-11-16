@@ -133,7 +133,7 @@ struct WarehouseItem
                 auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &selectResult);
                 entry->Execute();
 
-                if (selectResult.empty())
+                if (isReducing && selectResult.empty())
                 {
                     throw pqxx::integrity_constraint_violation("WAS: no such Warehouse_Item");
                 }
