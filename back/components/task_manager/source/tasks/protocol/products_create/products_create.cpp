@@ -122,6 +122,7 @@ ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv:
     };
 
     auto invoiceEntry = Invoice::InsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_invoice, dateProvider);
+    // as we are 100% creating new products we dont care about updating Warehouse_Item rows and just creating new ones
     auto productsEntry = Product::InsertsEntry(GetTracer(), entriesFactory, productInsertsResults, m_products, dateProvider);
     auto idsConverterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(idsConverter));
     auto warehouseItemEntry =
