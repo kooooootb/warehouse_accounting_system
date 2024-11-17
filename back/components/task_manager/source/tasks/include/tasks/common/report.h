@@ -57,7 +57,8 @@ struct Report
             InsertValues values;
 
             options->table = Table::Report;
-            options->columns = {Column::name, Column::report_type, Column::filepath, Column::created_date, Column::warehouse_id};
+            options->columns =
+                {Column::name, Column::report_type, Column::filepath, Column::created_date, Column::created_by, Column::warehouse_id};
             options->returning = {Column::report_id};
 
             params_t params;
@@ -65,6 +66,7 @@ struct Report
                 .Append(static_cast<int32_t>(report.report_type.value()))
                 .Append(report.filepath.value())
                 .Append(report.created_date.value())
+                .Append(report.created_by.value())
                 .Append(report.warehouse_id.value());
 
             AppendToQueryOptional(options->columns, params, report.description, Column::description);

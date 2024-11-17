@@ -120,7 +120,8 @@ CREATE TABLE public."Report" (
     report_type integer NOT NULL,
     filepath text NOT NULL,
     created_date bigint NOT NULL,
-    warehouse_id bigint NOT NULL
+    warehouse_id bigint NOT NULL,
+    created_by bigint
 );
 
 ALTER TABLE public."Report" ALTER COLUMN report_id ADD GENERATED ALWAYS AS IDENTITY (
@@ -237,6 +238,9 @@ ALTER TABLE ONLY public."Product"
 
 ALTER TABLE ONLY public."Report"
     ADD CONSTRAINT "Report_warehouse_id_fkey" FOREIGN KEY (warehouse_id) REFERENCES public."Warehouse"(warehouse_id);
+
+ALTER TABLE ONLY public."Report"
+    ADD CONSTRAINT "Report_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
 
 ALTER TABLE ONLY public."User"
     ADD CONSTRAINT "User_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id) NOT VALID;

@@ -8,6 +8,7 @@
 #include "create_warehouse/create_warehouse.h"
 #include "get_invoice/get_invoice.h"
 #include "get_product/get_product.h"
+#include "get_report/get_report.h"
 #include "get_user/get_user.h"
 #include "get_warehouse/get_warehouse.h"
 #include "products_create/products_create.h"
@@ -32,6 +33,7 @@ using TasksList = std::tuple<Authorization,
     GetWarehouse,
     GetInvoice,
     GetUser,
+    GetReport,
     CreateWarehouse>;
 
 }  // namespace tasks
