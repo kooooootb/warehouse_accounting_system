@@ -10,14 +10,15 @@
 #include "products_move/products_move.h"
 #include "products_remove/products_remove.h"
 #include "reports_by_period/reports_by_period.h"
+#include "reports_current/reports_current.h"
 
 namespace taskmgr
 {
 namespace tasks
 {
 
-using TasksList =
-    std::tuple<Authorization, CreateUser, ProductsCreate, ProductsMove, ProductsRemove, ReportsByPeriod, CreateWarehouse>;
+using TasksList = std::
+    tuple<Authorization, CreateUser, ProductsCreate, ProductsMove, ProductsRemove, ReportsByPeriod, ReportsCurrent, CreateWarehouse>;
 
 }  // namespace tasks
 }  // namespace taskmgr

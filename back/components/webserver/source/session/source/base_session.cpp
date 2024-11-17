@@ -104,6 +104,8 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
         return TI::ProductsRemove;
     if (target == "reports/byperiod")
         return TI::ReportsByPeriod;
+    if (target == "reports/current")
+        return TI::ReportsCurrent;
     if (target == "warehouses/create")
         return TI::CreateWarehouse;
 
@@ -246,7 +248,7 @@ void BaseSession::HandleFile()
         firstWordEnd = target.size();
 
     std::filesystem::path file(target.substr(1, firstWordEnd - 1));
-    const auto result = m_documentManager->RestoreDocument(file);
+    const auto result = m_documentManager->RestoreDocument(file, true);
 
     if (result == ufa::Result::WRONG_FORMAT)
     {

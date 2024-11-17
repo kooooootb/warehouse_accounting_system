@@ -10,6 +10,7 @@
 #include <db_connector/accessor.h>
 #include <db_connector/query/utilities.h>
 #include <db_connector/transaction_entry/transaction_entry.h>
+#include <document_manager/document_manager.h>
 #include <locator/service_locator.h>
 #include <tasks/common/invoice.h>
 #include <tasks/common/report.h>
@@ -18,7 +19,6 @@
 #include <tasks/common/product.h>
 #include <tasks/common/warehouse_item.h>
 
-#include "back/services/document_manager/include/document_manager/document_manager.h"
 #include "reports_by_period.h"
 
 namespace taskmgr
@@ -199,8 +199,13 @@ ufa::Result ReportsByPeriod::WriteReportFile(srv::IDateProvider& dateProvider,
     std::ofstream& fstream)
 {
     fstream << "REPORT id: " << m_report.report_id.value() << ", name:\'" << m_report.name.value() << "\'\n\n";
+
+    if (m_report.description.has_value())
+        fstream << "Report's description: " << m_report.description.value() << "\'\n\n";
+
     fstream << "Generated for period: from " << dateProvider.ToIsoTimeString(m_report.period_from.value()) << " to "
             << dateProvider.ToIsoTimeString(m_report.period_to.value()) << '\n';
+    fstream << "Created in " << dateProvider.ToIsoTimeString(m_report.created_date.value()) << '\n';
     fstream << "Warehouse: id: " << m_warehouse.warehouse_id.value() << ", name: " << m_warehouse.name.value() << "\n\n";
     fstream << "Total: " << m_invoices.size() << " invoices\n\n";
 

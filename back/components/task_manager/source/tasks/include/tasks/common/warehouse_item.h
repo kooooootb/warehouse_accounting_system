@@ -237,6 +237,54 @@ struct WarehouseItem
 
         return entriesFactory.CreateVariableTransactionEntry(std::move(function));
     }
+
+    static inline std::unique_ptr<srv::db::IQueryTransactionEntry> SelectByWarehouse(std::shared_ptr<srv::ITracer> tracer,
+        srv::db::ITransactionEntryFactory& entriesFactory,
+        int64_t warehouseId,
+        std::map<int64_t, Product>& products)
+    {
+        using namespace srv::db;
+
+        auto results = std::make_shared<result_t>();
+
+        const auto function = [tracer, &entriesFactory, warehouseId, results]() -> void
+        {
+            auto options = std::make_unique<SelectOptions>();
+            SelectValues values;
+
+            options->table = Table::Warehouse_Item;
+            options->columns = {Column::product_id, Column::count};
+
+            auto condition = CreateRealCondition(Column::warehouse_id, warehouseId);
+
+            options->condition = std::move(condition);
+
+            auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
+
+            auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), false, results.get());
+            entry->Execute();
+        };
+
+        auto selectEntry = entriesFactory.CreateVariableTransactionEntry(std::move(function));
+
+        auto converter = [results = std::move(results), &products]() -> void
+        {
+            for (const auto& row : *results)
+            {
+                auto& product = products[row.at(0).get<int64_t>().value()];  // edit in-place
+
+                product.id = row.at(0).get<int64_t>().value();
+                product.count = row.at(1).get<int64_t>().value();
+            }
+        };
+
+        auto converterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(converter));
+
+        std::list<std::unique_ptr<ITransactionEntry>> entries;
+        entries.emplace_back(std::move(selectEntry));
+        entries.emplace_back(std::move(converterEntry));
+        return entriesFactory.CreateGroupedTransactionEntry(std::move(entries));
+    }
 };
 
 }  // namespace tasks
