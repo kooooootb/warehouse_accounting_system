@@ -34,7 +34,7 @@ ufa::Result GetProduct::ExecuteInternal(std::string& result)
     std::shared_ptr<srv::IDateProvider> dateProvider;
     CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
 
-    const auto createResult = ActualGetProduct(*accessor, *dateProvider);
+    const auto createResult = ActualGetProduct(*accessor);
 
     if (createResult == ufa::Result::SUCCESS)
     {
@@ -56,10 +56,9 @@ void GetProduct::ParseInternal(json&& json)
     TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
 
     m_product.id = util::json::Get<int64_t>(json, ID_KEY);
-    m_product.created_by = m_initiativeUserId;
 }
 
-ufa::Result GetProduct::ActualGetProduct(srv::IAccessor& accessor, srv::IDateProvider& dateProvider)
+ufa::Result GetProduct::ActualGetProduct(srv::IAccessor& accessor)
 {
     using namespace srv::db;
 

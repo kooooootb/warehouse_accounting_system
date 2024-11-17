@@ -116,6 +116,11 @@ struct Invoice
 
         auto converter = [results = std::move(results), &invoices]() -> void
         {
+            if (invoices.size() != results->size())
+            {
+                throw exps::NotFound("didn't receive all invoices");
+            }
+
             invoices.resize(0);
 
             for (const auto& row : *results)

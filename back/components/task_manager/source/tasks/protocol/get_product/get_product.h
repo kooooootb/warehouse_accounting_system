@@ -35,7 +35,7 @@ protected:
     void ParseInternal(json&& json) override;
 
 private:
-    ufa::Result ActualGetProduct(srv::IAccessor& accessor, srv::IDateProvider& dateProvider);
+    ufa::Result ActualGetProduct(srv::IAccessor& accessor);
 
 private:
     static constexpr std::string_view ID_KEY = "id";
