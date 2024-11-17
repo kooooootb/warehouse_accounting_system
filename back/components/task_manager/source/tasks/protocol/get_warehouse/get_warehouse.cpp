@@ -8,6 +8,7 @@
 #include <authorizer/user_info.h>
 #include <db_connector/product_definitions/columns.h>
 #include <locator/service_locator.h>
+#include <tasks/common/warehouse_item.h>
 #include <tracer/tracer.h>
 
 #include "get_warehouse.h"
@@ -36,7 +37,7 @@ ufa::Result GetWarehouse::ExecuteInternal(std::string& result)
     std::shared_ptr<srv::IDateProvider> dateProvider;
     CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
 
-    const auto createResult = ActualGetWarehouse(*accessor, *dateProvider);
+    const auto createResult = ActualGetWarehouse(*accessor);
 
     if (createResult == ufa::Result::SUCCESS)
     {
@@ -46,6 +47,19 @@ ufa::Result GetWarehouse::ExecuteInternal(std::string& result)
         util::json::Put(jsonResult, DESCRIPTION_KEY, m_warehouse.description);
         util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_warehouse.created_date.value()));
         util::json::Put(jsonResult, CREATED_BY_KEY, m_warehouse.created_by.value());
+
+        json::array_t jsonItems;
+        for (const auto& item : m_warehouseItems)
+        {
+            json jsonItem;
+
+            util::json::Put(jsonItem, PRODUCT_ID_KEY, item.product_id.value());
+            util::json::Put(jsonItem, COUNT_KEY, item.count.value());
+
+            jsonItems.emplace_back(std::move(jsonItem));
+        }
+
+        jsonResult[ITEMS_KEY] = std::move(jsonItems);
     }
 
     result = jsonResult.dump();
@@ -60,7 +74,7 @@ void GetWarehouse::ParseInternal(json&& json)
     m_warehouse.created_by = m_initiativeUserId;
 }
 
-ufa::Result GetWarehouse::ActualGetWarehouse(srv::IAccessor& accessor, srv::IDateProvider& dateProvider)
+ufa::Result GetWarehouse::ActualGetWarehouse(srv::IAccessor& accessor)
 {
     using namespace srv::db;
 
@@ -72,8 +86,8 @@ ufa::Result GetWarehouse::ActualGetWarehouse(srv::IAccessor& accessor, srv::IDat
     auto options = std::make_unique<SelectOptions>();
     SelectValues values;
 
-    options->table = Table::Warehouse;
-    options->columns = {Column::name, Column::pretty_name, Column::description, Column::created_date, Column::created_by};
+    options->table = Table::Warehouse_Item;
+    options->columns = {Column::product_id, Column::count};
 
     auto condition = CreateRealCondition(Column::warehouse_id, m_warehouse.warehouse_id.value());
 
@@ -81,26 +95,31 @@ ufa::Result GetWarehouse::ActualGetWarehouse(srv::IAccessor& accessor, srv::IDat
 
     auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
 
-    result_t results;
-    auto selectEntry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &results);
+    result_t itemResults;
+    auto warehouseItemEntry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &itemResults);
 
-    transaction->SetRootEntry(std::move(selectEntry));
+    auto warehouseEntry = Warehouse::SelectEntry(GetTracer(), entriesFactory, m_warehouse);
+
+    warehouseItemEntry->SetNext(std::move(warehouseEntry));
+
+    transaction->SetRootEntry(std::move(warehouseItemEntry));
 
     auto transactionResult = transaction->Execute();
 
-    if (results.empty())
+    if (transactionResult == ufa::Result::SUCCESS)
     {
-        transactionResult = ufa::Result::NOT_FOUND;
-    }
-    else if (transactionResult == ufa::Result::SUCCESS)
-    {
-        int i = 0;
+        m_warehouseItems.reserve(itemResults.size());
+        for (const auto& row : itemResults)
+        {
+            int i = 0;
+            WarehouseItem item;
 
-        m_warehouse.name = results.at(0, i++).get<std::string>();
-        m_warehouse.pretty_name = results.at(0, i++).get<std::string>();
-        m_warehouse.description = results.at(0, i++).get<std::string>();
-        m_warehouse.created_date = results.at(0, i++).get<timestamp_t>();
-        m_warehouse.created_by = results.at(0, i++).get<userid_t>();
+            item.warehouse_id = m_warehouse.warehouse_id.value();
+            item.product_id = row.at(i++).get<int64_t>();
+            item.count = row.at(i++).get<int64_t>();
+
+            m_warehouseItems.emplace_back(std::move(item));
+        }
     }
 
     return transactionResult;

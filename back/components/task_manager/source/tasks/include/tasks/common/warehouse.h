@@ -4,17 +4,18 @@
 #include <optional>
 #include <string>
 
-#include <db_connector/query/condition.h>
-#include <db_connector/query/select_query_params.h>
 #include <instrumental/time.h>
 #include <instrumental/user.h>
 
 #include <date_provider/date_provider.h>
 #include <db_connector/accessor.h>
 #include <db_connector/product_definitions/columns.h>
+#include <db_connector/query/condition.h>
 #include <db_connector/query/insert_query_params.h>
 #include <db_connector/query/query_factory.h>
+#include <db_connector/query/select_query_params.h>
 #include <db_connector/query/utilities.h>
+#include <db_connector/transaction_entry/exceptions/not_found_exception.h>
 #include <db_connector/transaction_entry/query_transaction_entry.h>
 #include <db_connector/transaction_entry/transaction_entry.h>
 #include <db_connector/transaction_entry/transaction_entry_factory.h>
@@ -95,6 +96,11 @@ struct Warehouse
 
         auto converter = [results = std::move(results), &warehouse]() -> void
         {
+            if (results->empty())
+            {
+                throw exps::NotFound("no warehouse with given id");
+            }
+
             warehouse.name = results->at(0, 0).get<std::string>().value();
             warehouse.pretty_name = results->at(0, 1).get<std::string>().value();
             warehouse.description = results->at(0, 2).get<std::string>().value();

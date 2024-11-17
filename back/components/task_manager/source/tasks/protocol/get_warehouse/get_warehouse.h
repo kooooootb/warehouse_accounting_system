@@ -14,6 +14,7 @@
 
 #include <tasks/base_task.h>
 #include <tasks/common/warehouse.h>
+#include <tasks/common/warehouse_item.h>
 
 namespace taskmgr
 {
@@ -35,7 +36,7 @@ protected:
     void ParseInternal(json&& json) override;
 
 private:
-    ufa::Result ActualGetWarehouse(srv::IAccessor& accessor, srv::IDateProvider& dateProvider);
+    ufa::Result ActualGetWarehouse(srv::IAccessor& accessor);
 
 private:
     static constexpr std::string_view ID_KEY = "id";
@@ -45,9 +46,13 @@ private:
     static constexpr std::string_view DESCRIPTION_KEY = "description";
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";
+    static constexpr std::string_view ITEMS_KEY = "items";
+    static constexpr std::string_view PRODUCT_ID_KEY = "product_id";
+    static constexpr std::string_view COUNT_KEY = "count";
 
 private:
     Warehouse m_warehouse;
+    std::vector<WarehouseItem> m_warehouseItems;
 };
 
 }  // namespace tasks
