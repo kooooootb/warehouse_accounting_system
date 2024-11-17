@@ -6,6 +6,7 @@
 #include "authorization/authorization.h"
 #include "create_user/create_user.h"
 #include "create_warehouse/create_warehouse.h"
+#include "get_product/get_product.h"
 #include "products_create/products_create.h"
 #include "products_move/products_move.h"
 #include "products_remove/products_remove.h"
@@ -17,8 +18,15 @@ namespace taskmgr
 namespace tasks
 {
 
-using TasksList = std::
-    tuple<Authorization, CreateUser, ProductsCreate, ProductsMove, ProductsRemove, ReportsByPeriod, ReportsCurrent, CreateWarehouse>;
+using TasksList = std::tuple<Authorization,
+    CreateUser,
+    ProductsCreate,
+    ProductsMove,
+    ProductsRemove,
+    ReportsByPeriod,
+    ReportsCurrent,
+    GetProduct,
+    CreateWarehouse>;
 
 }  // namespace tasks
 }  // namespace taskmgr
