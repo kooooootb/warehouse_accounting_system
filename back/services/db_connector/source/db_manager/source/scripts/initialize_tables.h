@@ -49,6 +49,7 @@ CREATE TABLE public."Color" (
 CREATE TABLE public."Invoice" (
     invoice_id bigint NOT NULL,
     name text NOT NULL,
+    pretty_name text NOT NULL,
     description text,
     created_date bigint NOT NULL,
     created_by bigint NOT NULL,
@@ -75,11 +76,13 @@ CREATE TABLE public."Invoice_Item" (
 CREATE TABLE public."Operation" (
     operation_id bigint NOT NULL,
     invoice_id bigint NOT NULL,
+    invoice_pretty_name text NOT NULL,
     product_id bigint NOT NULL,
     warehouse_from_id bigint,
     warehouse_to_id bigint,
     count integer NOT NULL,
-    created_date bigint NOT NULL
+    created_date bigint NOT NULL,
+    created_by bigint NOT NULL
 );
 
 ALTER TABLE public."Operation" ALTER COLUMN operation_id ADD GENERATED ALWAYS AS IDENTITY (
@@ -94,7 +97,7 @@ ALTER TABLE public."Operation" ALTER COLUMN operation_id ADD GENERATED ALWAYS AS
 CREATE TABLE public."Product" (
     product_id bigint NOT NULL,
     name text NOT NULL,
-    pretty_name text,
+    pretty_name text NOT NULL,
     description text,
     created_date bigint NOT NULL,
     created_by bigint NOT NULL,
@@ -113,8 +116,9 @@ ALTER TABLE public."Product" ALTER COLUMN product_id ADD GENERATED ALWAYS AS IDE
 CREATE TABLE public."Report" (
     report_id bigint NOT NULL,
     name text NOT NULL,
+    description text,
     report_type integer NOT NULL,
-    inner_filename text NOT NULL,
+    filepath text NOT NULL,
     created_date bigint NOT NULL,
     warehouse_id bigint NOT NULL
 );
@@ -149,7 +153,7 @@ ALTER TABLE public."User" ALTER COLUMN user_id ADD GENERATED ALWAYS AS IDENTITY 
 CREATE TABLE public."Warehouse" (
     warehouse_id bigint NOT NULL,
     name text NOT NULL,
-    pretty_name text,
+    pretty_name text NOT NULL,
     description text,
     location text,
     created_date bigint NOT NULL,
@@ -225,6 +229,9 @@ ALTER TABLE ONLY public."Operation"
 ALTER TABLE ONLY public."Operation"
     ADD CONSTRAINT "Operation_warehouse_to_id_fkey" FOREIGN KEY (warehouse_to_id) REFERENCES public."Warehouse"(warehouse_id);
 
+ALTER TABLE ONLY public."Operation"
+    ADD CONSTRAINT "Operation_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
+
 ALTER TABLE ONLY public."Product"
     ADD CONSTRAINT "Product_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
 
@@ -248,8 +255,8 @@ INSERT INTO public."User" (login, password_hashed, name, created_date, created_b
 CREATE OR REPLACE FUNCTION public."add_operation_function"()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public."Operation" (invoice_id, product_id, warehouse_from_id, warehouse_to_id, count, created_date)
-        SELECT NEW.invoice_id, NEW.product_id, warehouse_from_id, warehouse_to_id, NEW.count, created_date 
+    INSERT INTO public."Operation" (invoice_id, invoice_pretty_name, product_id, warehouse_from_id, warehouse_to_id, count, created_date, created_by)
+        SELECT NEW.invoice_id, pretty_name, NEW.product_id, warehouse_from_id, warehouse_to_id, NEW.count, created_date, created_by
             FROM public."Invoice"
             WHERE invoice_id = NEW.invoice_id;
     RETURN NEW;
@@ -285,6 +292,17 @@ BEFORE INSERT OR UPDATE ON public."Product"
 FOR EACH ROW
 EXECUTE PROCEDURE public."fill_pretty_name_product"();
 
+CREATE OR REPLACE FUNCTION public."fill_pretty_name_invoice"()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.pretty_name := NEW.invoice_id || '_' || NEW.name;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER fill_pretty_name_invoice_trigger
+BEFORE INSERT OR UPDATE ON public."Invoice"
+FOR EACH ROW
+EXECUTE PROCEDURE public."fill_pretty_name_invoice"();
 )";
 
 }  // namespace scpts

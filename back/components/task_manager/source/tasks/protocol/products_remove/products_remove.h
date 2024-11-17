@@ -27,7 +27,7 @@ namespace tasks
 class ProductsRemove : public BaseTask
 {
 public:
-    ProductsRemove(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo);
+    ProductsRemove(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo);
 
     constexpr static TaskIdentificator GetIdentificator()
     {
@@ -35,7 +35,7 @@ public:
     }
 
 protected:
-    ufa::Result ExecuteInternal(const srv::IServiceLocator& locator, std::string& result) override;
+    ufa::Result ExecuteInternal(std::string& result) override;
     void ParseInternal(json&& json) override;
 
 private:
@@ -44,8 +44,10 @@ private:
 private:
     static constexpr std::string_view INVOICE_ID_KEY = "invoice_id";
     static constexpr std::string_view INVOICE_NAME_KEY = "invoice_name";
+    static constexpr std::string_view INVOICE_PRETTY_NAME_KEY = "invoice_pretty_name";
     static constexpr std::string_view INVOICE_DESCRIPTION_KEY = "invoice_description";
     static constexpr std::string_view INVOICE_CREATED_DATE_KEY = "invoice_created_date";
+    static constexpr std::string_view INVOICE_CREATED_BY_KEY = "invoice_created_by";
     static constexpr std::string_view WAREHOUSE_FROM_KEY = "warehouse_from";
     static constexpr std::string_view PRODUCTS_KEY = "products";
     static constexpr std::string_view ID_KEY = "id";

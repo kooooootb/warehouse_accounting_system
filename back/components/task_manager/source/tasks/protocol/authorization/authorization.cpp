@@ -12,20 +12,22 @@ namespace taskmgr
 namespace tasks
 {
 
-Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
-    : BaseTask(std::move(tracer), std::move(taskInfo))
+Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer,
+    std::shared_ptr<srv::IServiceLocator> locator,
+    const TaskInfo& taskInfo)
+    : BaseTask(std::move(tracer), std::move(locator), std::move(taskInfo))
 {
     TRACE_INF << TRACE_HEADER;
 }
 
-ufa::Result Authorization::ExecuteInternal(const srv::IServiceLocator& locator, std::string& result)
+ufa::Result Authorization::ExecuteInternal(std::string& result)
 {
     TRACE_INF << TRACE_HEADER << "Executing " << GetIdentificator();
 
     json jsonResult;
 
     std::shared_ptr<srv::IAuthorizer> authorizer;
-    CHECK_SUCCESS(locator.GetInterface(authorizer));
+    CHECK_SUCCESS(m_locator->GetInterface(authorizer));
 
     std::string token;
     userid_t userid;

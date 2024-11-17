@@ -5,6 +5,7 @@
 
 #include <date_provider/date_provider.h>
 
+#include <instrumental/time.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer_lazy_provider.h>
 
@@ -22,12 +23,14 @@ public:
     uint64_t GetTimestamp() const override;
     std::string GetTimeString() const override;
     std::string ToIsoTimeString(timestamp_t timestamp) const override;
+    ufa::Result FromIsoTimeString(std::string_view timeString, timestamp_t& result) const override;
 
 private:
     std::chrono::high_resolution_clock::duration GetDuration() const;
 
 private:
     std::chrono::high_resolution_clock::duration m_epochOffset;
+    timestamp_t m_fromIsoOffset = 0;
 };
 
 }  // namespace date

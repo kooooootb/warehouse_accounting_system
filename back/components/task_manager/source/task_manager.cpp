@@ -25,6 +25,7 @@ namespace
 template <std::size_t index>
 inline typename std::enable_if<index == std::tuple_size_v<tasks::TasksList>, ufa::Result>::type GenerateTask(
     std::shared_ptr<srv::ITracer> tracer,
+    std::shared_ptr<srv::IServiceLocator> locator,
     TaskInfo&& taskInfo,
     std::unique_ptr<tasks::BaseTask>& task)
 {
@@ -37,6 +38,7 @@ inline typename std::enable_if<index == std::tuple_size_v<tasks::TasksList>, ufa
 template <std::size_t index = 0>
 inline typename std::enable_if<std::less<std::size_t>{}(index, std::tuple_size_v<tasks::TasksList>), ufa::Result>::type GenerateTask(
     std::shared_ptr<srv::ITracer> tracer,
+    std::shared_ptr<srv::IServiceLocator> locator,
     TaskInfo&& taskInfo,
     std::unique_ptr<tasks::BaseTask>& task)
 {
@@ -46,19 +48,20 @@ inline typename std::enable_if<std::less<std::size_t>{}(index, std::tuple_size_v
     if (taskInfo.identificator == Task::GetIdentificator())
     {
         TRACE_INF << TRACE_HEADER << "Found task, identificator: " << Task::GetIdentificator();
-        task = std::make_unique<Task>(tracer, taskInfo);
+        task = std::make_unique<Task>(std::move(tracer), std::move(locator), taskInfo);
         return task->Initialize(std::move(taskInfo));
     }
 
-    return GenerateTask<index + 1>(std::move(tracer), std::move(taskInfo), task);
+    return GenerateTask<index + 1>(std::move(tracer), std::move(locator), std::move(taskInfo), task);
 }
 
 }  // namespace
 
 TaskManager::TaskManager(std::shared_ptr<srv::IServiceLocator> locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
-    , m_taskHandler(std::make_shared<TaskHandler>(locator))
-    , m_workersManager(std::make_unique<WorkersManager>(locator, m_taskHandler))
+    , m_locator(std::move(locator))
+    , m_taskHandler(std::make_shared<TaskHandler>(m_locator))
+    , m_workersManager(std::make_unique<WorkersManager>(m_locator, m_taskHandler))
 {
     TRACE_INF << TRACE_HEADER;
 }
@@ -73,7 +76,7 @@ ufa::Result TaskManager::AddTask(TaskInfo&& taskInfo)
     TRACE_INF << TRACE_HEADER;
 
     std::unique_ptr<tasks::BaseTask> task;
-    const auto result = GenerateTask(GetTracer(), std::move(taskInfo), task);
+    const auto result = GenerateTask(GetTracer(), m_locator, std::move(taskInfo), task);
 
     if (result == ufa::Result::SUCCESS)
     {

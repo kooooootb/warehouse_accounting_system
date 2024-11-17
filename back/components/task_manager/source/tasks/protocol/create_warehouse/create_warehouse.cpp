@@ -12,22 +12,24 @@ namespace taskmgr
 namespace tasks
 {
 
-CreateWarehouse::CreateWarehouse(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
-    : BaseTask(std::move(tracer), std::move(taskInfo))
+CreateWarehouse::CreateWarehouse(std::shared_ptr<srv::ITracer> tracer,
+    std::shared_ptr<srv::IServiceLocator> locator,
+    const TaskInfo& taskInfo)
+    : BaseTask(std::move(tracer), std::move(locator), std::move(taskInfo))
 {
 }
 
-ufa::Result CreateWarehouse::ExecuteInternal(const srv::IServiceLocator& locator, std::string& result)
+ufa::Result CreateWarehouse::ExecuteInternal(std::string& result)
 {
     TRACE_INF << TRACE_HEADER << "Executing " << GetIdentificator();
 
     json jsonResult;
 
     std::shared_ptr<srv::IAccessor> accessor;
-    CHECK_SUCCESS(locator.GetInterface(accessor));
+    CHECK_SUCCESS(m_locator->GetInterface(accessor));
 
     std::shared_ptr<srv::IDateProvider> dateProvider;
-    CHECK_SUCCESS(locator.GetInterface(dateProvider));
+    CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
 
     const auto createResult = ActualCreateWarehouse(*accessor, *dateProvider);
 

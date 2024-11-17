@@ -15,6 +15,7 @@ cc_library(
         "//back/services/authorizer:iface",
         "//back/services/date_provider:iface",
         "//back/services/db_connector:iface",
+        "//back/services/document_manager:iface",
         "//back/services/tracer:iface",
         "//back/utilities/json",
         "@nlohmann_json//:json",

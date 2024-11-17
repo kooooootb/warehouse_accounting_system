@@ -1,5 +1,11 @@
 #include <chrono>
+#include <cstdint>
 #include <ctime>
+
+#include <instrumental/check.h>
+#include <instrumental/string_converters.h>
+#include <instrumental/time.h>
+#include <instrumental/types.h>
 
 #include "date_provider.h"
 
@@ -28,12 +34,21 @@ DurationT Extract(std::chrono::nanoseconds& duration)
 
 namespace chrono = std::chrono;
 
+// "yyyy-MM-dd'T'HH:mm:ss"
+constexpr std::string_view Format = "%F'T'%T";
+
 DateProvider::DateProvider(const std::shared_ptr<IServiceLocator>& locator)
 {
     const auto currentTimeFromEpoch = chrono::system_clock::now().time_since_epoch();
     const auto currentTimeHighresolution = chrono::high_resolution_clock::now().time_since_epoch();
 
     m_epochOffset = currentTimeFromEpoch - currentTimeHighresolution;
+
+    // this might be cruel but goes only ones at start and does the job
+    auto original = GetTimestamp();
+    timestamp_t reverted;
+    CHECK_SUCCESS(FromIsoTimeString(ToIsoTimeString(original), reverted));
+    m_fromIsoOffset = reverted - original;
 }
 
 std::chrono::high_resolution_clock::duration DateProvider::GetDuration() const
@@ -84,13 +99,50 @@ std::string DateProvider::ToIsoTimeString(timestamp_t timestamp) const
     std::string result;
     result.resize(22);
 
-    // "yyyy-MM-dd'T'HH:mm:ss"
-    constexpr std::string_view Format = "%F'T'%T";
-
     std::strftime(result.data(), result.size(), Format.data(), std::gmtime(&timeT));
 
     result.resize(result.size() - 1);  // strftime requires 1 extra byte for \0 so we strip it here
     return result;
+}
+
+ufa::Result DateProvider::FromIsoTimeString(std::string_view timeString, timestamp_t& result) const
+{
+    try
+    {
+        constexpr std::string_view Example = "yyyy-MM-dd'T'HH:mm:ss";
+        CHECK_TRUE(timeString.size() == Example.size() && timeString[4] == '-' && timeString[7] == '-' && timeString[10] == '\'' &&
+                   timeString[11] == 'T' && timeString[12] == '\'' && timeString[15] == ':' && timeString[18] == ':');
+
+        // dirty
+        uint32_t years = string_converters::FromString<uint32_t>(std::string(timeString.substr(0, 4)));
+        uint32_t monthes = string_converters::FromString<uint32_t>(std::string(timeString.substr(5, 2)));
+        uint32_t days = string_converters::FromString<uint32_t>(std::string(timeString.substr(8, 2)));
+        uint32_t hours = string_converters::FromString<uint32_t>(std::string(timeString.substr(13, 2)));
+        uint32_t minutes = string_converters::FromString<uint32_t>(std::string(timeString.substr(16, 2)));
+        uint32_t seconds = string_converters::FromString<uint32_t>(std::string(timeString.substr(19, 2)));
+
+        std::tm tm{};
+
+        tm.tm_year = years - 1900;  // since january
+        tm.tm_mon = monthes - 1;    // [0, 11]
+        tm.tm_mday = days;
+        tm.tm_hour = hours;
+        tm.tm_min = minutes;
+        tm.tm_sec = seconds;
+
+        auto timeT = std::mktime(&tm);
+        CHECK_TRUE(timeT != -1);
+
+        auto systemClock = chrono::system_clock::from_time_t(timeT).time_since_epoch();
+        auto duration = chrono::duration_cast<chrono::nanoseconds>(systemClock);
+        result = duration.count() - m_fromIsoOffset;
+
+        return ufa::Result::SUCCESS;
+    }
+    catch (const std::exception& ex)
+    {
+        return ufa::Result::ERROR;
+    }
 }
 
 }  // namespace date

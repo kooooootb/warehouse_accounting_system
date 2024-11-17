@@ -23,7 +23,7 @@ namespace tasks
 class CreateWarehouse : public BaseTask
 {
 public:
-    CreateWarehouse(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo);
+    CreateWarehouse(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo);
 
     constexpr static TaskIdentificator GetIdentificator()
     {
@@ -31,7 +31,7 @@ public:
     }
 
 protected:
-    ufa::Result ExecuteInternal(const srv::IServiceLocator& locator, std::string& result) override;
+    ufa::Result ExecuteInternal(std::string& result) override;
     void ParseInternal(json&& json) override;
 
 private:

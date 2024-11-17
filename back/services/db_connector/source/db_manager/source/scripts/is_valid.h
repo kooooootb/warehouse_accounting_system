@@ -53,7 +53,7 @@ SELECT
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'report_id' ) AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'name' ) AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'report_type' ) AND
-    EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'inner_filename' ) AND
+    EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'filepath' ) AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'created_date' ) AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Report"'::regclass AND attname = 'warehouse_id' ) AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."User"'::regclass AND attname = 'user_id') AND

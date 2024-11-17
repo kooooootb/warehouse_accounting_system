@@ -6,6 +6,7 @@
 
 #include <instrumental/time.h>
 
+#include <instrumental/types.h>
 #include <locator/service.h>
 
 namespace srv
@@ -29,6 +30,11 @@ struct IDateProvider : public srv::IService
      * @brief get string with format: yyyy-MM-dd'T'HH:mm:ss
      */
     virtual std::string ToIsoTimeString(timestamp_t timestamp) const = 0;
+
+    /**
+     * @brief get timestamp_t from format: yyyy-MM-dd'T'HH:mm:ss
+     */
+    virtual ufa::Result FromIsoTimeString(std::string_view timeString, timestamp_t& result) const = 0;
 };
 
 }  // namespace srv

@@ -21,22 +21,24 @@ namespace taskmgr
 namespace tasks
 {
 
-ProductsMove::ProductsMove(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
-    : BaseTask(std::move(tracer), std::move(taskInfo))
+ProductsMove::ProductsMove(std::shared_ptr<srv::ITracer> tracer,
+    std::shared_ptr<srv::IServiceLocator> locator,
+    const TaskInfo& taskInfo)
+    : BaseTask(std::move(tracer), std::move(locator), std::move(taskInfo))
 {
 }
 
-ufa::Result ProductsMove::ExecuteInternal(const srv::IServiceLocator& locator, std::string& result)
+ufa::Result ProductsMove::ExecuteInternal(std::string& result)
 {
     TRACE_INF << TRACE_HEADER << "Executing " << GetIdentificator();
 
     json jsonResult;
 
     std::shared_ptr<srv::IAccessor> accessor;
-    CHECK_SUCCESS(locator.GetInterface(accessor));
+    CHECK_SUCCESS(m_locator->GetInterface(accessor));
 
     std::shared_ptr<srv::IDateProvider> dateProvider;
-    CHECK_SUCCESS(locator.GetInterface(dateProvider));
+    CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
 
     const auto createResult = MoveInvoiceProducts(*accessor, *dateProvider);
 
@@ -44,7 +46,9 @@ ufa::Result ProductsMove::ExecuteInternal(const srv::IServiceLocator& locator, s
     {
         util::json::Put(jsonResult, INVOICE_ID_KEY, m_invoice.invoice_id.value());
         util::json::Put(jsonResult, INVOICE_CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_invoice.created_date.value()));
+        util::json::Put(jsonResult, INVOICE_CREATED_BY_KEY, m_invoice.created_by.value());
         util::json::Put(jsonResult, INVOICE_NAME_KEY, m_invoice.name.value());
+        util::json::Put(jsonResult, INVOICE_PRETTY_NAME_KEY, m_invoice.pretty_name.value());
         util::json::Put(jsonResult, INVOICE_DESCRIPTION_KEY, m_invoice.description);
         util::json::Put(jsonResult, WAREHOUSE_TO_KEY, m_invoice.warehouse_to_id.value());
         util::json::Put(jsonResult, WAREHOUSE_FROM_KEY, m_invoice.warehouse_from_id.value());

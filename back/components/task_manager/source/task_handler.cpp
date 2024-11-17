@@ -16,7 +16,7 @@ TaskHandler::TaskHandler(std::shared_ptr<srv::IServiceLocator> locator)
 void TaskHandler::HandleTask(tasks::BaseTask& task)
 {
     TRACE_INF << TRACE_HEADER << "Executing task";
-    task.Execute(*m_locator);
+    task.Execute();
 }
 
 }  // namespace taskmgr

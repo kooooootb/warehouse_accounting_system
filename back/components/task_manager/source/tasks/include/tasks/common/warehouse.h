@@ -4,6 +4,8 @@
 #include <optional>
 #include <string>
 
+#include <db_connector/query/condition.h>
+#include <db_connector/query/select_query_params.h>
 #include <instrumental/time.h>
 #include <instrumental/user.h>
 
@@ -66,6 +68,46 @@ struct Warehouse
         auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
 
         return entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &results);
+    }
+
+    static inline std::unique_ptr<srv::db::IQueryTransactionEntry> SelectEntry(std::shared_ptr<srv::ITracer> tracer,
+        srv::db::ITransactionEntryFactory& entriesFactory,
+        Warehouse& warehouse)
+    {
+        using namespace srv::db;
+
+        CHECK_TRUE(warehouse.warehouse_id.has_value());
+
+        auto options = std::make_unique<SelectOptions>();
+        SelectValues values;
+
+        options->table = Table::Warehouse;
+        options->columns = {Column::name, Column::pretty_name, Column::description, Column::created_date, Column::created_by};
+
+        auto condition = CreateRealCondition(Column::warehouse_id, warehouse.warehouse_id.value());
+
+        options->condition = std::move(condition);
+
+        auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
+
+        auto results = std::make_shared<result_t>();
+        auto selectEntry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, results.get());
+
+        auto converter = [results = std::move(results), &warehouse]() -> void
+        {
+            warehouse.name = results->at(0, 0).get<std::string>().value();
+            warehouse.pretty_name = results->at(0, 1).get<std::string>().value();
+            warehouse.description = results->at(0, 2).get<std::string>().value();
+            warehouse.created_date = results->at(0, 3).get<timestamp_t>().value();
+            warehouse.created_by = results->at(0, 4).get<userid_t>().value();
+        };
+
+        auto converterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(converter));
+
+        std::list<std::unique_ptr<ITransactionEntry>> entries;
+        entries.emplace_back(std::move(selectEntry));
+        entries.emplace_back(std::move(converterEntry));
+        return entriesFactory.CreateGroupedTransactionEntry(std::move(entries));
     }
 };
 

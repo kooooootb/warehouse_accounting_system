@@ -49,18 +49,18 @@ private:
     void WriteToStream(const ITraceMessage& message, std::ostream& ostream);
 
 private:
-    // writer
-    std::thread m_writer;
-    std::condition_variable m_writerCv;
-    std::atomic<bool> m_stop{false};
+    // trace settings
+    std::filesystem::path m_traceFile;
+    std::mutex m_settingsMutex;
 
     // messages
     std::queue<std::unique_ptr<ITraceMessage>> m_messagesQueue;
     std::mutex m_messagesMutex;
 
-    // trace settings
-    std::mutex m_settingsMutex;
-    std::filesystem::path m_traceFile;
+    // writer
+    std::atomic<bool> m_stop{false};
+    std::condition_variable m_writerCv;
+    std::thread m_writer;
 
     //filters messages from tracer, so if tracer decided no to trace, it will not be printed in console in anyway
     TraceLevel m_maxLevelForConsole = TraceLevel::ERROR;

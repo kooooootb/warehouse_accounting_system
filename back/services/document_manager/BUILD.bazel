@@ -21,5 +21,6 @@ cc_library(
         ":iface",
         "//back/services/settings_provider:iface",
         "//back/services/tracer:iface",
+        "//back/utilities/hash",
     ],
 )

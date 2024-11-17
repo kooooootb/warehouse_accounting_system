@@ -31,13 +31,13 @@
         CHECK_SUCCESS_INTERNAL(CHECK_GENERATOR_MSG(__VA_ARGS__), __VA_ARGS__) \
     } while (false)
 
-#define CHECK_TRUE_INTERNAL(__generator, x, ...)                        \
-    if (!!(x) != true)                                                  \
-    {                                                                   \
-        std::stringstream _message;                                     \
-        _message << "CHECK_TRUE failed, expression: [" #x "], in file"; \
-        __generator(__VA_ARGS__);                                       \
-        throw std::runtime_error(_message.str());                       \
+#define CHECK_TRUE_INTERNAL(__generator, x, ...)                          \
+    if (!!(x) != true)                                                    \
+    {                                                                     \
+        std::stringstream _message;                                       \
+        _message << "CHECK_TRUE failed, expression: [" #x "], in file: "; \
+        __generator(__VA_ARGS__);                                         \
+        throw std::runtime_error(_message.str());                         \
     }
 
 #define CHECK_TRUE(...)                                                    \

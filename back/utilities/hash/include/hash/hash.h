@@ -11,6 +11,8 @@ namespace hash
 {
 
 std::vector<uint8_t> Hash(std::string_view input);
+std::string ToBase64(const std::vector<uint8_t> bytes);
+
 std::string HashToBase64(std::string_view input);
 
 }  // namespace hash

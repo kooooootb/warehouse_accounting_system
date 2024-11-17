@@ -10,6 +10,7 @@ DEFINE_ENUM_WITH_SERIALIZATION(taskmgr,
     ProductsCreate,
     ProductsMove,
     ProductsRemove,
+    ReportsByPeriod,
     CreateWarehouse);
 
 #endif  // H_A2BBD49F_D95D_4915_A21A_9460E4360117

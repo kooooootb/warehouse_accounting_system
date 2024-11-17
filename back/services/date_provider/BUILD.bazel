@@ -24,3 +24,18 @@ cc_library(
         "//back/services/tracer:lazy_provider_iface",
     ],
 )
+
+cc_binary(
+    name = "test",
+    srcs = glob([
+        "test/**/*.h",
+        "test/**/*.cpp",
+    ]),
+    deps = [
+        ":iface",
+        ":lib",
+        "//back/services/locator:mock",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)

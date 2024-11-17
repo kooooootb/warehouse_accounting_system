@@ -79,10 +79,8 @@ std::vector<uint8_t> Hash(std::string_view input)
     return output;
 }
 
-std::string HashToBase64(std::string_view input)
+std::string ToBase64(const std::vector<uint8_t> bytes)
 {
-    const auto bytes = Hash(input);
-
     std::string result;
     result.reserve(bytes.size() * 2);
 
@@ -92,6 +90,12 @@ std::string HashToBase64(std::string_view input)
     }
 
     return result;
+}
+
+std::string HashToBase64(std::string_view input)
+{
+    const auto bytes = Hash(input);
+    return ToBase64(bytes);
 }
 
 }  // namespace hash

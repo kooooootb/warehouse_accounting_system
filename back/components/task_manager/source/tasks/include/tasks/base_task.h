@@ -27,11 +27,9 @@ namespace tasks
 class BaseTask : public srv::tracer::TracerProvider
 {
 public:
-    /**
-     * @throw when body is in wrong format
-     */
-    BaseTask(std::shared_ptr<srv::ITracer> tracer, const TaskInfo& taskInfo)
+    BaseTask(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo)
         : srv::tracer::TracerProvider(std::move(tracer))
+        , m_locator(std::move(locator))
         , m_initiativeUserId(taskInfo.initiativeUserid)
     {
         TRACE_INF << TRACE_HEADER << "Task identificator: " << taskInfo.identificator
@@ -49,7 +47,7 @@ public:
         return Parse(std::move(taskInfo.body));
     }
 
-    void Execute(const srv::IServiceLocator& locator)
+    void Execute()
     {
         TRACE_INF << TRACE_HEADER;
 
@@ -58,7 +56,7 @@ public:
 
         try
         {
-            result = ExecuteInternal(locator, response);
+            result = ExecuteInternal(response);
         }
         catch (const std::exception& ex)
         {
@@ -66,15 +64,22 @@ public:
             result = ufa::Result::ERROR;
         }
 
-        TRACE_DBG << TRACE_HEADER << "Calling callback with response: " << response << ", result = " << result;
+        TRACE_DBG << TRACE_HEADER << "Executed with response: " << response << ", result: " << result;
+
+        if (result != ufa::Result::SUCCESS)
+        {
+            response = "{}";
+        }
+
         m_callback(std::move(response), result);
     }
 
 protected:
-    virtual ufa::Result ExecuteInternal(const srv::IServiceLocator& locator, std::string& result) = 0;
+    virtual ufa::Result ExecuteInternal(std::string& result) = 0;
     virtual void ParseInternal(json&& json) = 0;
 
 protected:
+    std::shared_ptr<srv::IServiceLocator> m_locator;
     userid_t m_initiativeUserId;
 
 private:

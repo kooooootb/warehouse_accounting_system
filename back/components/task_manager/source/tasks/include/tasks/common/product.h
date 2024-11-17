@@ -12,6 +12,7 @@
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/query/insert_query_params.h>
 #include <db_connector/query/query_factory.h>
+#include <db_connector/query/select_query_params.h>
 #include <db_connector/query/utilities.h>
 #include <db_connector/transaction_entry/query_transaction_entry.h>
 #include <db_connector/transaction_entry/transaction_entry.h>
@@ -68,6 +69,73 @@ struct Product
         auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
 
         return entriesFactory.CreateQueryTransactionEntry(std::move(query), false, &results);
+    }
+
+    static inline std::unique_ptr<srv::db::IQueryTransactionEntry> SelectEntry(std::shared_ptr<srv::ITracer> tracer,
+        srv::db::ITransactionEntryFactory& entriesFactory,
+        std::map<int64_t, Product>& products)
+    {
+        using namespace srv::db;
+
+        auto results = std::make_shared<result_t>();
+
+        const auto function = [tracer = tracer, &entriesFactory, &products, results]() -> void
+        {
+            auto options = std::make_unique<SelectOptions>();
+            SelectValues values;
+
+            options->table = Table::Product;
+            options->columns = {Column::product_id,
+                Column::name,
+                Column::pretty_name,
+                Column::description,
+                Column::main_color,
+                Column::created_date,
+                Column::created_by};
+
+            std::vector<int64_t> productIds;
+            productIds.reserve(products.size());
+            for (const auto& product : products)
+            {
+                productIds.push_back(product.first);  // mapped by ids
+            }
+
+            auto condition = CreateInCondition(Column::product_id, productIds);
+
+            options->condition = std::move(condition);
+
+            auto query = QueryFactory::Create(tracer, std::move(options), std::move(values));
+
+            auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), false, results.get());
+            entry->Execute();
+        };
+
+        auto selectEntry = entriesFactory.CreateVariableTransactionEntry(std::move(function));
+
+        auto converter = [results = std::move(results), &products]() -> void
+        {
+            CHECK_TRUE(results->size() == products.size());
+
+            for (const auto& row : *results)
+            {
+                auto& product = products[row.at(0).get<int64_t>().value()];  // edit in-place
+
+                product.id = row.at(0).get<int64_t>().value();
+                product.name = row.at(1).get<std::string>().value();
+                product.pretty_name = row.at(2).get<std::string>().value();
+                product.description = row.at(3).get<std::string>();
+                product.main_color = row.at(4).get<int64_t>();
+                product.created_date = row.at(5).get<timestamp_t>().value();
+                product.created_by = row.at(6).get<userid_t>().value();
+            }
+        };
+
+        auto converterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(converter));
+
+        std::list<std::unique_ptr<ITransactionEntry>> entries;
+        entries.emplace_back(std::move(selectEntry));
+        entries.emplace_back(std::move(converterEntry));
+        return entriesFactory.CreateGroupedTransactionEntry(std::move(entries));
     }
 };
 
