@@ -1,5 +1,7 @@
+#include <db_connector/transaction_entry/exceptions/not_found_exception.h>
+
+#include "raw_transaction.h"
 #include "transaction.h"
-#include "back/services/db_connector/source/transaction/source/raw_transaction.h"
 
 namespace srv
 {
@@ -78,6 +80,11 @@ ufa::Result Transaction::Execute()
         {
             TRACE_ERR << TRACE_HEADER << "Constraint violated, ex.what(): " << ex.what();
             return ufa::Result::VIOLATION;
+        }
+        catch (const exps::NotFound& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Received not found exception, what(): " << ex.what();
+            return ufa::Result::NOT_FOUND;
         }
         catch (const pqxx::in_doubt_error& ex)
         {

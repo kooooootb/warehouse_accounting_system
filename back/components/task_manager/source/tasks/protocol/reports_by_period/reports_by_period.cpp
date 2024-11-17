@@ -169,7 +169,10 @@ ufa::Result ReportsByPeriod::CollectData(srv::IAccessor& accessor,
 
     const auto transactionResult = transaction->Execute();
 
-    WriteReportFile(dateProvider, documentManager, fstream);
+    if (transactionResult == ufa::Result::SUCCESS)
+    {
+        WriteReportFile(dateProvider, documentManager, fstream);
+    }
 
     return transactionResult;
 }

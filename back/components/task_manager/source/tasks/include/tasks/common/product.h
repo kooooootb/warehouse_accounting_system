@@ -14,6 +14,7 @@
 #include <db_connector/query/query_factory.h>
 #include <db_connector/query/select_query_params.h>
 #include <db_connector/query/utilities.h>
+#include <db_connector/transaction_entry/exceptions/not_found_exception.h>
 #include <db_connector/transaction_entry/query_transaction_entry.h>
 #include <db_connector/transaction_entry/transaction_entry.h>
 #include <db_connector/transaction_entry/transaction_entry_factory.h>
@@ -98,6 +99,11 @@ struct Product
             for (const auto& product : products)
             {
                 productIds.push_back(product.first);  // mapped by ids
+            }
+
+            if (productIds.empty())
+            {
+                throw exps::NotFound("received empty product ids");
             }
 
             auto condition = CreateInCondition(Column::product_id, productIds);
