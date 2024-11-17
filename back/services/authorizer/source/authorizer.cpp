@@ -137,11 +137,15 @@ ufa::Result Authorizer::CreateUser(auth::UserInfo& userInfo)
     InsertValues values;
 
     options->table = Table::User;
-    options->columns = {Column::name, Column::password_hashed, Column::login, Column::created_date};
+    options->columns = {Column::name, Column::password_hashed, Column::login, Column::created_date, Column::created_by};
     options->returning = {Column::user_id};
 
     params_t insertingValues;
-    insertingValues.Append(userInfo.name).Append(userInfo.password_hashed).Append(userInfo.login).Append(userInfo.created_date);
+    insertingValues.Append(userInfo.name)
+        .Append(userInfo.password_hashed)
+        .Append(userInfo.login)
+        .Append(userInfo.created_date)
+        .Append(userInfo.created_by.value());
     values.values.emplace_back(std::move(insertingValues));
 
     auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
