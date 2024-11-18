@@ -1,3 +1,4 @@
+#include <db_connector/query/query.h>
 #include <instrumental/time.h>
 #include <instrumental/types.h>
 #include <instrumental/user.h>
@@ -87,23 +88,50 @@ ufa::Result GetInvoice::ActualGetInvoice(srv::IAccessor& accessor)
 
     auto& entriesFactory = transaction->GetEntriesFactory();
 
-    auto options = std::make_unique<SelectOptions>();
-    SelectValues values;
+    std::unique_ptr<IQuery> itemQuery;
 
-    options->table = Table::Invoice_Item;
-    options->columns = {Column::product_id, Column::count};
+    {
+        auto options = std::make_unique<SelectOptions>();
+        SelectValues values;
 
-    auto condition = CreateRealCondition(Column::invoice_id, m_invoice.invoice_id.value());
+        options->table = Table::Invoice_Item;
+        options->columns = {Column::product_id, Column::count};
 
-    options->condition = std::move(condition);
+        auto condition = CreateRealCondition(Column::invoice_id, m_invoice.invoice_id.value());
 
-    auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+        options->condition = std::move(condition);
+
+        itemQuery = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+    }
 
     result_t itemResults;
-    auto invoiceItemEntry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &itemResults);
+    auto invoiceItemEntry = entriesFactory.CreateQueryTransactionEntry(std::move(itemQuery), true, &itemResults);
 
-    std::vector<Invoice> invoices = {m_invoice};
-    auto invoiceEntry = Invoice::SelectEntry(GetTracer(), entriesFactory, invoices);
+    std::unique_ptr<IQuery> invoiceQuery;
+
+    {
+        auto options = std::make_unique<SelectOptions>();
+        SelectValues values;
+
+        options->table = Table::Invoice;
+        options->columns = {Column::invoice_id,
+            Column::warehouse_to_id,
+            Column::warehouse_from_id,
+            Column::name,
+            Column::pretty_name,
+            Column::description,
+            Column::created_date,
+            Column::created_by};
+
+        auto condition = CreateRealCondition(Column::invoice_id, m_invoice.invoice_id.value());
+
+        options->condition = std::move(condition);
+
+        invoiceQuery = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
+    }
+
+    result_t invoiceResults;
+    auto invoiceEntry = entriesFactory.CreateQueryTransactionEntry(std::move(invoiceQuery), true, &invoiceResults);
 
     invoiceItemEntry->SetNext(std::move(invoiceEntry));
 
@@ -111,7 +139,11 @@ ufa::Result GetInvoice::ActualGetInvoice(srv::IAccessor& accessor)
 
     auto transactionResult = transaction->Execute();
 
-    if (transactionResult == ufa::Result::SUCCESS)
+    if (invoiceResults.empty())
+    {
+        transactionResult = ufa::Result::NOT_FOUND;
+    }
+    else if (transactionResult == ufa::Result::SUCCESS)
     {
         m_invoiceItems.reserve(itemResults.size());
         for (const auto& row : itemResults)
@@ -126,7 +158,14 @@ ufa::Result GetInvoice::ActualGetInvoice(srv::IAccessor& accessor)
             m_invoiceItems.emplace_back(std::move(item));
         }
 
-        m_invoice = std::move(invoices.back());
+        m_invoice.invoice_id = invoiceResults.at(0, 0).get<int64_t>();
+        m_invoice.warehouse_to_id = invoiceResults.at(0, 1).get<int64_t>();
+        m_invoice.warehouse_from_id = invoiceResults.at(0, 2).get<int64_t>();
+        m_invoice.name = invoiceResults.at(0, 3).get<std::string>();
+        m_invoice.pretty_name = invoiceResults.at(0, 4).get<std::string>();
+        m_invoice.description = invoiceResults.at(0, 5).get<std::string>();
+        m_invoice.created_date = invoiceResults.at(0, 6).get<timestamp_t>();
+        m_invoice.created_by = invoiceResults.at(0, 7).get<userid_t>();
     }
 
     return transactionResult;

@@ -8,14 +8,19 @@
 #include "create_warehouse/create_warehouse.h"
 #include "get_invoice/get_invoice.h"
 #include "get_invoice_list/get_invoice_list.h"
+#include "get_invoice_size/get_invoice_size.h"
 #include "get_product/get_product.h"
 #include "get_product_list/get_product_list.h"
+#include "get_product_size/get_product_size.h"
 #include "get_report/get_report.h"
 #include "get_report_list/get_report_list.h"
+#include "get_report_size/get_report_size.h"
 #include "get_user/get_user.h"
 #include "get_user_list/get_user_list.h"
+#include "get_user_size/get_user_size.h"
 #include "get_warehouse/get_warehouse.h"
 #include "get_warehouse_list/get_warehouse_list.h"
+#include "get_warehouse_size/get_warehouse_size.h"
 #include "products_create/products_create.h"
 #include "products_move/products_move.h"
 #include "products_remove/products_remove.h"
@@ -44,6 +49,11 @@ using TasksList = std::tuple<Authorization,
     GetInvoiceList,
     GetUserList,
     GetReportList,
+    GetProductSize,
+    GetWarehouseSize,
+    GetInvoiceSize,
+    GetUserSize,
+    GetReportSize,
     CreateWarehouse>;
 
 }  // namespace tasks
