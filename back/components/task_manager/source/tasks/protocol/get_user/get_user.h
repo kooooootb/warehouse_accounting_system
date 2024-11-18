@@ -45,6 +45,7 @@ private:
     static constexpr std::string_view NAME_KEY = "name";
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";
+    static constexpr std::string_view RESULT_KEY = "result";
 
 private:
     User m_user;

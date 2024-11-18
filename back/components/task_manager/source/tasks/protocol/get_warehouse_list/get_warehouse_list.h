@@ -1,11 +1,12 @@
-#ifndef H_1B0BE985_2E18_4AE3_A72F_A0193104586D
-#define H_1B0BE985_2E18_4AE3_A72F_A0193104586D
+#ifndef H_75C3AF7F_B56A_4F9B_B5EB_B64430C39AB1
+#define H_75C3AF7F_B56A_4F9B_B5EB_B64430C39AB1
 
 #include <string_view>
 
 #include <instrumental/common.h>
 
 #include <locator/service_locator.h>
+#include <tasks/common/invoice.h>
 #include <tracer/tracer.h>
 
 #include <task_manager/callback.h>
@@ -21,14 +22,14 @@ namespace taskmgr
 namespace tasks
 {
 
-class GetWarehouse : public BaseTask
+class GetWarehouseList : public BaseTask
 {
 public:
-    GetWarehouse(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo);
+    GetWarehouseList(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo);
 
     constexpr static TaskIdentificator GetIdentificator()
     {
-        return TaskIdentificator::GetWarehouse;
+        return TaskIdentificator::GetWarehouseList;
     }
 
 protected:
@@ -36,7 +37,7 @@ protected:
     void ParseInternal(json&& json) override;
 
 private:
-    ufa::Result ActualGetWarehouse(srv::IAccessor& accessor);
+    ufa::Result ActualGetWarehouseList(srv::IAccessor& accessor);
 
 private:
     static constexpr std::string_view ID_KEY = "id";
@@ -50,13 +51,17 @@ private:
     static constexpr std::string_view PRODUCT_ID_KEY = "product_id";
     static constexpr std::string_view COUNT_KEY = "count";
     static constexpr std::string_view RESULT_KEY = "result";
+    static constexpr std::string_view LIMIT_KEY = "limit";
+    static constexpr std::string_view OFFSET_KEY = "offset";
 
 private:
-    Warehouse m_warehouse;
-    std::vector<WarehouseItem> m_warehouseItems;
+    std::vector<Warehouse> m_warehouses;
+    std::map<int64_t, std::vector<WarehouseItem>> m_warehouseItems;
+    int64_t m_limit;
+    int64_t m_offset;
 };
 
 }  // namespace tasks
 }  // namespace taskmgr
 
-#endif  // H_1B0BE985_2E18_4AE3_A72F_A0193104586D
+#endif  // H_75C3AF7F_B56A_4F9B_B5EB_B64430C39AB1

@@ -40,14 +40,16 @@ ufa::Result GetInvoice::ExecuteInternal(std::string& result)
 
     if (createResult == ufa::Result::SUCCESS)
     {
-        util::json::Put(jsonResult, INVOICE_ID_KEY, m_invoice.invoice_id.value());
-        util::json::Put(jsonResult, WAREHOUSE_TO_KEY, m_invoice.warehouse_to_id);
-        util::json::Put(jsonResult, WAREHOUSE_FROM_KEY, m_invoice.warehouse_from_id);
-        util::json::Put(jsonResult, NAME_KEY, m_invoice.name.value());
-        util::json::Put(jsonResult, PRETTY_NAME_KEY, m_invoice.pretty_name.value());
-        util::json::Put(jsonResult, DESCRIPTION_KEY, m_invoice.description);
-        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_invoice.created_date.value()));
-        util::json::Put(jsonResult, CREATED_BY_KEY, m_invoice.created_by.value());
+        json jsonInvoice;
+
+        util::json::Put(jsonInvoice, INVOICE_ID_KEY, m_invoice.invoice_id.value());
+        util::json::Put(jsonInvoice, WAREHOUSE_TO_KEY, m_invoice.warehouse_to_id);
+        util::json::Put(jsonInvoice, WAREHOUSE_FROM_KEY, m_invoice.warehouse_from_id);
+        util::json::Put(jsonInvoice, NAME_KEY, m_invoice.name.value());
+        util::json::Put(jsonInvoice, PRETTY_NAME_KEY, m_invoice.pretty_name.value());
+        util::json::Put(jsonInvoice, DESCRIPTION_KEY, m_invoice.description);
+        util::json::Put(jsonInvoice, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_invoice.created_date.value()));
+        util::json::Put(jsonInvoice, CREATED_BY_KEY, m_invoice.created_by.value());
 
         json::array_t jsonItems;
         for (const auto& item : m_invoiceItems)
@@ -61,7 +63,8 @@ ufa::Result GetInvoice::ExecuteInternal(std::string& result)
             jsonItems.emplace_back(std::move(jsonItem));
         }
 
-        jsonResult[ITEMS_KEY] = std::move(jsonItems);
+        jsonInvoice[ITEMS_KEY] = std::move(jsonItems);
+        jsonResult[RESULT_KEY] = std::move(jsonInvoice);
     }
 
     result = jsonResult.dump();

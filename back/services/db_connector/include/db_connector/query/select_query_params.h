@@ -4,9 +4,13 @@
 #include <db_connector/product_definitions/columns.h>
 #include <db_connector/product_definitions/tables.h>
 #include <db_connector/query/query_options.h>
+#include <instrumental/serialized_enum.h>
+#include <instrumental/string_converters.h>
 
 #include "condition.h"
 #include "join.h"
+
+DEFINE_ENUM_WITH_SERIALIZATION(srv::db, OrderType, ASC, DESC);
 
 namespace srv
 {
@@ -55,6 +59,22 @@ struct SelectOptions : public IQueryOptions
             result += fmt::format(" WHERE {}"sv, condition->ToString(placeholders));
         }
 
+        if (orderBy.has_value())
+        {
+            result +=
+                fmt::format(" ORDER BY {} {}"sv, string_converters::ToString(orderBy.value()), string_converters::ToString(orderType));
+        }
+
+        if (limit.has_value())
+        {
+            result += fmt::format(" LIMIT {}"sv, limit.value());
+        }
+
+        if (offset.has_value())
+        {
+            result += fmt::format(" OFFSET {}"sv, offset.value());
+        }
+
         result += ';';
 
         return result;
@@ -70,13 +90,18 @@ struct SelectOptions : public IQueryOptions
         const auto& selectOptions = static_cast<const SelectOptions&>(options);
 
         return table == selectOptions.table && columns == selectOptions.columns && joins == selectOptions.joins &&
-               condition->Equals(*selectOptions.condition);
+               orderBy == selectOptions.orderBy && limit == selectOptions.limit && offset == selectOptions.offset &&
+               condition != nullptr && selectOptions.condition != nullptr && condition->Equals(*selectOptions.condition);
     }
 
     Table table = Table::Invalid;           // e.g. .. FROM this
     std::vector<Column> columns;            // e.g. SELECT this FROM ...
     std::vector<Join> joins;                // for all joins
     std::unique_ptr<ICondition> condition;  // can be grouped
+    std::optional<Column> orderBy;          // ORDER BY this
+    OrderType orderType = OrderType::ASC;   // this
+    std::optional<int32_t> limit;           // LIMIT this
+    std::optional<int32_t> offset;          // OFFSET this
 };
 
 struct SelectValues  // for extendability reasons

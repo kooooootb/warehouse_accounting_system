@@ -1,5 +1,5 @@
-#ifndef H_1B0BE985_2E18_4AE3_A72F_A0193104586D
-#define H_1B0BE985_2E18_4AE3_A72F_A0193104586D
+#ifndef H_D756230B_A69E_4E61_96D3_CCF56124A8CA
+#define H_D756230B_A69E_4E61_96D3_CCF56124A8CA
 
 #include <string_view>
 
@@ -13,22 +13,21 @@
 #include <task_manager/task_info.h>
 
 #include <tasks/base_task.h>
-#include <tasks/common/warehouse.h>
-#include <tasks/common/warehouse_item.h>
+#include <tasks/common/product.h>
 
 namespace taskmgr
 {
 namespace tasks
 {
 
-class GetWarehouse : public BaseTask
+class GetProductList : public BaseTask
 {
 public:
-    GetWarehouse(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo);
+    GetProductList(std::shared_ptr<srv::ITracer> tracer, std::shared_ptr<srv::IServiceLocator> locator, const TaskInfo& taskInfo);
 
     constexpr static TaskIdentificator GetIdentificator()
     {
-        return TaskIdentificator::GetWarehouse;
+        return TaskIdentificator::GetProductList;
     }
 
 protected:
@@ -36,27 +35,27 @@ protected:
     void ParseInternal(json&& json) override;
 
 private:
-    ufa::Result ActualGetWarehouse(srv::IAccessor& accessor);
+    ufa::Result ActualGetProductList(srv::IAccessor& accessor);
 
 private:
-    static constexpr std::string_view ID_KEY = "id";
-    static constexpr std::string_view WAREHOUSE_ID_KEY = "warehouse_id";
+    static constexpr std::string_view PRODUCT_ID_KEY = "product_id";
     static constexpr std::string_view NAME_KEY = "name";
     static constexpr std::string_view PRETTY_NAME_KEY = "pretty_name";
     static constexpr std::string_view DESCRIPTION_KEY = "description";
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";
-    static constexpr std::string_view ITEMS_KEY = "items";
-    static constexpr std::string_view PRODUCT_ID_KEY = "product_id";
-    static constexpr std::string_view COUNT_KEY = "count";
+    static constexpr std::string_view MAIN_COLOR_KEY = "main_color";
     static constexpr std::string_view RESULT_KEY = "result";
+    static constexpr std::string_view LIMIT_KEY = "limit";
+    static constexpr std::string_view OFFSET_KEY = "offset";
 
 private:
-    Warehouse m_warehouse;
-    std::vector<WarehouseItem> m_warehouseItems;
+    std::vector<Product> m_products;
+    int64_t m_limit;
+    int64_t m_offset;
 };
 
 }  // namespace tasks
 }  // namespace taskmgr
 
-#endif  // H_1B0BE985_2E18_4AE3_A72F_A0193104586D
+#endif  // H_D756230B_A69E_4E61_96D3_CCF56124A8CA

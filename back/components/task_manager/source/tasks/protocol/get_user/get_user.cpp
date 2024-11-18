@@ -42,11 +42,15 @@ ufa::Result GetUser::ExecuteInternal(std::string& result)
 
     if (createResult == ufa::Result::SUCCESS)
     {
-        util::json::Put(jsonResult, USER_ID_KEY, m_user.user_id.value());
-        util::json::Put(jsonResult, NAME_KEY, m_user.name.value());
-        util::json::Put(jsonResult, LOGIN_KEY, m_user.name.value());
-        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_user.created_date.value()));
-        util::json::Put(jsonResult, CREATED_BY_KEY, m_user.created_by);
+        json jsonUser;
+
+        util::json::Put(jsonUser, USER_ID_KEY, m_user.user_id.value());
+        util::json::Put(jsonUser, NAME_KEY, m_user.name.value());
+        util::json::Put(jsonUser, LOGIN_KEY, m_user.name.value());
+        util::json::Put(jsonUser, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_user.created_date.value()));
+        util::json::Put(jsonUser, CREATED_BY_KEY, m_user.created_by);
+
+        jsonResult[RESULT_KEY] = std::move(jsonUser);
     }
 
     result = jsonResult.dump();

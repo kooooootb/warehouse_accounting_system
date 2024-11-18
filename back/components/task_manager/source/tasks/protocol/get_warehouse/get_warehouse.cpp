@@ -41,12 +41,14 @@ ufa::Result GetWarehouse::ExecuteInternal(std::string& result)
 
     if (createResult == ufa::Result::SUCCESS)
     {
-        util::json::Put(jsonResult, WAREHOUSE_ID_KEY, m_warehouse.warehouse_id.value());
-        util::json::Put(jsonResult, NAME_KEY, m_warehouse.name.value());
-        util::json::Put(jsonResult, PRETTY_NAME_KEY, m_warehouse.pretty_name.value());
-        util::json::Put(jsonResult, DESCRIPTION_KEY, m_warehouse.description);
-        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_warehouse.created_date.value()));
-        util::json::Put(jsonResult, CREATED_BY_KEY, m_warehouse.created_by.value());
+        json jsonWarehouse;
+
+        util::json::Put(jsonWarehouse, WAREHOUSE_ID_KEY, m_warehouse.warehouse_id.value());
+        util::json::Put(jsonWarehouse, NAME_KEY, m_warehouse.name.value());
+        util::json::Put(jsonWarehouse, PRETTY_NAME_KEY, m_warehouse.pretty_name.value());
+        util::json::Put(jsonWarehouse, DESCRIPTION_KEY, m_warehouse.description);
+        util::json::Put(jsonWarehouse, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_warehouse.created_date.value()));
+        util::json::Put(jsonWarehouse, CREATED_BY_KEY, m_warehouse.created_by.value());
 
         json::array_t jsonItems;
         for (const auto& item : m_warehouseItems)
@@ -60,7 +62,8 @@ ufa::Result GetWarehouse::ExecuteInternal(std::string& result)
             jsonItems.emplace_back(std::move(jsonItem));
         }
 
-        jsonResult[ITEMS_KEY] = std::move(jsonItems);
+        jsonWarehouse[ITEMS_KEY] = std::move(jsonItems);
+        jsonResult[RESULT_KEY] = std::move(jsonWarehouse);
     }
 
     result = jsonResult.dump();

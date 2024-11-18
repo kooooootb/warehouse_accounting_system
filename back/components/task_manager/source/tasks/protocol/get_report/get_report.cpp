@@ -44,14 +44,18 @@ ufa::Result GetReport::ExecuteInternal(std::string& result)
 
     if (createResult == ufa::Result::SUCCESS)
     {
-        util::json::Put(jsonResult, REPORT_ID_KEY, m_report.report_id.value());
-        util::json::Put(jsonResult, NAME_KEY, m_report.name.value());
-        util::json::Put(jsonResult, DESCRIPTION_KEY, m_report.description);
-        util::json::Put(jsonResult, REPORT_TYPE_KEY, string_converters::ToString(m_report.report_type.value()));
-        util::json::Put(jsonResult, FILEPATH_KEY, m_report.filepath.value());
-        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_report.created_date.value()));
-        util::json::Put(jsonResult, CREATED_BY_KEY, m_report.created_by);
-        util::json::Put(jsonResult, WAREHOUSE_ID_KEY, m_report.warehouse_id.value());
+        json jsonReport;
+
+        util::json::Put(jsonReport, REPORT_ID_KEY, m_report.report_id.value());
+        util::json::Put(jsonReport, NAME_KEY, m_report.name.value());
+        util::json::Put(jsonReport, DESCRIPTION_KEY, m_report.description);
+        util::json::Put(jsonReport, REPORT_TYPE_KEY, string_converters::ToString(m_report.report_type.value()));
+        util::json::Put(jsonReport, FILEPATH_KEY, m_report.filepath.value());
+        util::json::Put(jsonReport, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_report.created_date.value()));
+        util::json::Put(jsonReport, CREATED_BY_KEY, m_report.created_by);
+        util::json::Put(jsonReport, WAREHOUSE_ID_KEY, m_report.warehouse_id.value());
+
+        jsonResult[RESULT_KEY] = std::move(jsonReport);
     }
 
     result = jsonResult.dump();

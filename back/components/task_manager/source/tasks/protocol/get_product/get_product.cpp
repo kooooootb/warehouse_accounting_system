@@ -38,13 +38,17 @@ ufa::Result GetProduct::ExecuteInternal(std::string& result)
 
     if (createResult == ufa::Result::SUCCESS)
     {
-        util::json::Put(jsonResult, PRODUCT_ID_KEY, m_product.id.value());
-        util::json::Put(jsonResult, NAME_KEY, m_product.name.value());
-        util::json::Put(jsonResult, PRETTY_NAME_KEY, m_product.pretty_name.value());
-        util::json::Put(jsonResult, DESCRIPTION_KEY, m_product.description);
-        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_product.created_date.value()));
-        util::json::Put(jsonResult, CREATED_BY_KEY, m_product.created_by.value());
-        util::json::Put(jsonResult, MAIN_COLOR_KEY, m_product.main_color);
+        json jsonProduct;
+
+        util::json::Put(jsonProduct, PRODUCT_ID_KEY, m_product.id.value());
+        util::json::Put(jsonProduct, NAME_KEY, m_product.name.value());
+        util::json::Put(jsonProduct, PRETTY_NAME_KEY, m_product.pretty_name.value());
+        util::json::Put(jsonProduct, DESCRIPTION_KEY, m_product.description);
+        util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_product.created_date.value()));
+        util::json::Put(jsonProduct, CREATED_BY_KEY, m_product.created_by.value());
+        util::json::Put(jsonProduct, MAIN_COLOR_KEY, m_product.main_color);
+
+        jsonResult[RESULT_KEY] = std::move(jsonProduct);
     }
 
     result = jsonResult.dump();

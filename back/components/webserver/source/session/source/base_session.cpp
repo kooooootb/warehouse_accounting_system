@@ -116,6 +116,16 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
         return TI::GetUser;
     if (target == "report")
         return TI::GetReport;
+    if (target == "products")
+        return TI::GetProductList;
+    if (target == "warehouses")
+        return TI::GetWarehouseList;
+    if (target == "invoices")
+        return TI::GetInvoiceList;
+    if (target == "users")
+        return TI::GetUserList;
+    if (target == "reports")
+        return TI::GetReportList;
     if (target == "warehouses/create")
         return TI::CreateWarehouse;
 
@@ -207,7 +217,7 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
     catch (const std::exception& ex)
     {
         TRACE_ERR << TRACE_HEADER << ex.what();
-        return SendResponse(PrepareResponse("Task not found", http::status::not_found));
+        return SendResponse(PrepareResponse("Task not found", http::status::bad_request));
     }
 
     taskInfo.callback = [this, self = shared_from_this()](std::string&& message, ufa::Result result)
@@ -241,7 +251,7 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
     if (result == ufa::Result::NOT_FOUND)
     {
         TRACE_ERR << TRACE_HEADER << "Task not implemented, target: " << target;
-        return SendResponse(PrepareResponse("Task not found", http::status::not_found));
+        return SendResponse(PrepareResponse("Task not found", http::status::not_implemented));
     }
 
     CHECK_SUCCESS(result, "Error while parsing body: " << string_converters::ToString(result));

@@ -52,6 +52,7 @@ private:
     static constexpr std::string_view ITEMS_KEY = "items";
     static constexpr std::string_view PRODUCT_ID_KEY = "product_id";
     static constexpr std::string_view COUNT_KEY = "count";
+    static constexpr std::string_view RESULT_KEY = "result";
 
 private:
     Invoice m_invoice;
