@@ -12,7 +12,7 @@
 
 #include "utilities.h"
 
-DEFINE_ENUM_WITH_SERIALIZATION(srv::db, ConditionType, Group, Real, In, Not);
+DEFINE_ENUM_WITH_SERIALIZATION(srv::db, ConditionType, Group, Real, In, Not, IsNull);
 DEFINE_ENUM_WITH_SERIALIZATION(srv::db, GroupConditionType, AND, OR);
 
 namespace srv
@@ -310,6 +310,42 @@ struct NotCondition : public ICondition
     std::unique_ptr<ICondition> condition;
 };
 
+struct IsNullCondition : public ICondition
+{
+    IsNullCondition(Column column_) : column(column_) {}
+
+    ConditionType GetType() const override
+    {
+        return ConditionType::IsNull;
+    }
+
+    std::string ToString(placeholder_t& placeholders) const override
+    {
+        using namespace std::literals;
+        CHECK_TRUE(column != Column::Invalid);
+
+        std::string result = fmt::format("({} IS NULL)"sv, string_converters::ToString(column));
+
+        return result;
+    }
+
+    void CollectParams(params_t& params) const override {}
+
+    bool Equals(const ICondition& condition) const override
+    {
+        if (GetType() != condition.GetType())
+        {
+            return false;
+        }
+
+        const auto& isNullCondition = static_cast<const IsNullCondition&>(condition);
+
+        return column == isNullCondition.column;
+    }
+
+    Column column = Column::Invalid;
+};
+
 inline std::unique_ptr<GroupCondition> CreateGroupCondition(GroupConditionType type)
 {
     auto condition = std::make_unique<GroupCondition>();
@@ -329,6 +365,11 @@ template <typename ValueT>
 inline std::unique_ptr<InCondition<ValueT>> CreateInCondition(Column column, std::vector<ValueT> values)
 {
     return std::make_unique<InCondition<ValueT>>(column, std::move(values));
+}
+
+inline std::unique_ptr<IsNullCondition> CreateIsNullCondition(Column column)
+{
+    return std::make_unique<IsNullCondition>(column);
 }
 
 }  // namespace db

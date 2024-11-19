@@ -41,8 +41,11 @@ inline std::unique_ptr<srv::db::ICondition> ParseFilters(std::shared_ptr<srv::IT
             auto type = string_converters::FromString<RealConditionType>(filter.at(TYPE_KEY).get<std::string>());
             auto valueString = filter.at(VALUE_KEY).get<std::string>();
 
-            timestamp_t timestamp;
-            if (dateProvider.FromIsoTimeString(valueString, timestamp) == ufa::Result::SUCCESS)
+            if (type == RealConditionType::Equal && valueString == "NULL")
+            {
+                grouped->conditions.emplace_back(CreateIsNullCondition(column));
+            }
+            else if (timestamp_t timestamp; dateProvider.FromIsoTimeString(valueString, timestamp) == ufa::Result::SUCCESS)
             {
                 grouped->conditions.emplace_back(CreateRealCondition(column, timestamp, type));
             }

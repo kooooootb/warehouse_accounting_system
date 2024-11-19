@@ -5,6 +5,7 @@
 
 DEFINE_ENUM_WITH_SERIALIZATION(srv::db,
     Column,
+    Invalid,
     report_id,
     name,
     report_type,
