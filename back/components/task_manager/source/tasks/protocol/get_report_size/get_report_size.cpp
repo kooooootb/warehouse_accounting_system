@@ -13,6 +13,7 @@
 #include <tasks/common/warehouse_item.h>
 #include <tracer/tracer.h>
 
+#include <tasks/common/filter.h>
 #include "get_report_size.h"
 
 namespace taskmgr
@@ -55,6 +56,15 @@ ufa::Result GetReportSize::ExecuteInternal(std::string& result)
 void GetReportSize::ParseInternal(json&& json)
 {
     TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
+
+    const auto filtersIt = json.find(FILTERS_KEY);
+    if (filtersIt != json.end())
+    {
+        std::shared_ptr<srv::IDateProvider> dateProvider;
+        CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
+
+        m_filter = ParseFilters(GetTracer(), *dateProvider, *filtersIt);
+    }
 }
 
 ufa::Result GetReportSize::ActualGetReportSize(srv::IAccessor& accessor, int32_t& count)
@@ -66,10 +76,22 @@ ufa::Result GetReportSize::ActualGetReportSize(srv::IAccessor& accessor, int32_t
 
     auto& entriesFactory = transaction->GetEntriesFactory();
 
-    auto query = QueryFactory::CreateRaw(GetTracer(), "SELECT COUNT(*) FROM public.\"Report\";", {});
+    std::string queryString = "SELECT COUNT(*) FROM public.\"Report\"";
+    params_t params;
+
+    if (m_filter != nullptr)
+    {
+        queryString += " WHERE ";
+
+        placeholder_t placeholders;
+        queryString += m_filter->ToString(placeholders);
+        m_filter->CollectParams(params);
+    }
+
+    auto query = QueryFactory::CreateRaw(GetTracer(), queryString, std::move(params));
 
     result_t results;
-    auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), true, &results);
+    auto entry = entriesFactory.CreateQueryTransactionEntry(std::move(query), m_filter == nullptr, &results);
 
     transaction->SetRootEntry(std::move(entry));
 

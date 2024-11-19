@@ -39,7 +39,11 @@ private:
     ufa::Result ActualGetProductSize(srv::IAccessor& accessor, int32_t& count);
 
 private:
+    static constexpr std::string_view FILTERS_KEY = "filters";
     static constexpr std::string_view COUNT_KEY = "count";
+
+private:
+    std::unique_ptr<srv::db::ICondition> m_filter;
 };
 
 }  // namespace tasks
