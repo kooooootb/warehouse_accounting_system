@@ -78,16 +78,17 @@ struct Operation
         {
             for (const auto& row : *results)
             {
+                int i = 0;
                 Operation operation;
 
-                operation.invoice_id = row.at(0).get<int64_t>().value();
-                operation.invoice_pretty_name = row.at(1).get<std::string>().value();
-                operation.product_id = row.at(2).get<int64_t>().value();
-                operation.warehouse_from_id = row.at(3).get<int64_t>();
-                operation.warehouse_to_id = row.at(4).get<int64_t>();
-                operation.count = row.at(5).get<int64_t>().value();
-                operation.created_date = row.at(6).get<timestamp_t>().value();
-                operation.created_by = row.at(7).get<userid_t>().value();
+                operation.invoice_id = row.at(i++).get<int64_t>().value();
+                operation.invoice_pretty_name = row.at(i++).get<std::string>().value();
+                operation.product_id = row.at(i++).get<int64_t>().value();
+                operation.warehouse_from_id = row.at(i++).get<int64_t>();
+                operation.warehouse_to_id = row.at(i++).get<int64_t>();
+                operation.count = row.at(i++).get<int64_t>().value();
+                operation.created_date = row.at(i++).get<timestamp_t>().value();
+                operation.created_by = row.at(i++).get<userid_t>().value();
 
                 consumer(std::move(operation));
             }

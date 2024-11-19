@@ -9,6 +9,8 @@
 #include "get_invoice/get_invoice.h"
 #include "get_invoice_list/get_invoice_list.h"
 #include "get_invoice_size/get_invoice_size.h"
+#include "get_operation_list/get_operation_list.h"
+#include "get_operation_size/get_operation_size.h"
 #include "get_product/get_product.h"
 #include "get_product_list/get_product_list.h"
 #include "get_product_size/get_product_size.h"
@@ -54,6 +56,8 @@ using TasksList = std::tuple<Authorization,
     GetInvoiceSize,
     GetUserSize,
     GetReportSize,
+    GetOperationList,
+    GetOperationSize,
     CreateWarehouse>;
 
 }  // namespace tasks
