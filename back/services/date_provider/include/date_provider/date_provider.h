@@ -32,7 +32,7 @@ struct IDateProvider : public srv::IService
     virtual std::string ToIsoTimeString(timestamp_t timestamp) const = 0;
 
     /**
-     * @brief get timestamp_t from format: yyyy-MM-dd'T'HH:mm:ss
+     * @brief get timestamp_t from format: yyyy-MM-dd'T'HH:mm:ss, ERROR on wrong format
      */
     virtual ufa::Result FromIsoTimeString(std::string_view timeString, timestamp_t& result) const = 0;
 };

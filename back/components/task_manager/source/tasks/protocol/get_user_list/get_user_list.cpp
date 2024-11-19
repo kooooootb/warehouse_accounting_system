@@ -11,6 +11,8 @@
 #include <tasks/common/product.h>
 #include <tracer/tracer.h>
 
+#include <tasks/common/filter.h>
+
 #include "get_user_list.h"
 
 namespace taskmgr
@@ -67,6 +69,15 @@ void GetUserList::ParseInternal(json&& json)
 
     m_limit = util::json::Get<int64_t>(json, LIMIT_KEY);
     m_offset = util::json::Get<int64_t>(json, OFFSET_KEY);
+
+    const auto filtersIt = json.find(FILTERS_KEY);
+    if (filtersIt != json.end())
+    {
+        std::shared_ptr<srv::IDateProvider> dateProvider;
+        CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
+
+        m_filter = ParseFilters(GetTracer(), *dateProvider, *filtersIt);
+    }
 }
 
 ufa::Result GetUserList::ActualGetUserList(srv::IAccessor& accessor)
@@ -88,8 +99,10 @@ ufa::Result GetUserList::ActualGetUserList(srv::IAccessor& accessor)
     options->limit = m_limit;
     options->offset = m_offset;
 
-    // auto condition = CreateRealCondition(Column::product_id, m_product.id.value());
-    // options->condition = std::move(condition);
+    if (m_filter != nullptr)
+    {
+        options->condition = std::move(m_filter);
+    }
 
     auto query = QueryFactory::Create(GetTracer(), std::move(options), std::move(values));
 
