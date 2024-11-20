@@ -43,8 +43,7 @@ private:
     static constexpr std::string_view INVOICE_ID_KEY = "invoice_id";
     static constexpr std::string_view INVOICE_PRETTY_NAME_KEY = "invoice_pretty_name";
     static constexpr std::string_view PRODUCT_ID_KEY = "product_id";
-    static constexpr std::string_view WAREHOUSE_FROM_ID_KEY = "warehouse_from_id";
-    static constexpr std::string_view WAREHOUSE_TO_ID_KEY = "warehouse_to_id";
+    static constexpr std::string_view WAREHOUSE_ID_KEY = "warehouse_id";
     static constexpr std::string_view COUNT_KEY = "count";
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";

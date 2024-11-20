@@ -33,8 +33,7 @@ struct Operation
     std::optional<int64_t> invoice_id;
     std::optional<std::string> invoice_pretty_name;
     std::optional<int64_t> product_id;
-    std::optional<int64_t> warehouse_from_id;
-    std::optional<int64_t> warehouse_to_id;
+    std::optional<int64_t> warehouse_id;
     std::optional<int64_t> count;
     std::optional<timestamp_t> created_date;
     std::optional<userid_t> created_by;
@@ -54,8 +53,7 @@ struct Operation
         options->columns = {Column::invoice_id,
             Column::invoice_pretty_name,
             Column::product_id,
-            Column::warehouse_from_id,
-            Column::warehouse_to_id,
+            Column::warehouse_id,
             Column::count,
             Column::created_date,
             Column::created_by};
@@ -84,8 +82,7 @@ struct Operation
                 operation.invoice_id = row.at(i++).get<int64_t>().value();
                 operation.invoice_pretty_name = row.at(i++).get<std::string>().value();
                 operation.product_id = row.at(i++).get<int64_t>().value();
-                operation.warehouse_from_id = row.at(i++).get<int64_t>();
-                operation.warehouse_to_id = row.at(i++).get<int64_t>();
+                operation.warehouse_id = row.at(i++).get<int64_t>();
                 operation.count = row.at(i++).get<int64_t>().value();
                 operation.created_date = row.at(i++).get<timestamp_t>().value();
                 operation.created_by = row.at(i++).get<userid_t>().value();

@@ -78,8 +78,7 @@ CREATE TABLE public."Operation" (
     invoice_id bigint NOT NULL,
     invoice_pretty_name text NOT NULL,
     product_id bigint NOT NULL,
-    warehouse_from_id bigint,
-    warehouse_to_id bigint,
+    warehouse_id bigint,
     count integer NOT NULL,
     created_date bigint NOT NULL,
     created_by bigint NOT NULL
@@ -225,10 +224,7 @@ ALTER TABLE ONLY public."Operation"
     ADD CONSTRAINT "Operation_product_id_fkey" FOREIGN KEY (product_id) REFERENCES public."Product"(product_id);
 
 ALTER TABLE ONLY public."Operation"
-    ADD CONSTRAINT "Operation_warehouse_from_id_fkey" FOREIGN KEY (warehouse_from_id) REFERENCES public."Warehouse"(warehouse_id);
-
-ALTER TABLE ONLY public."Operation"
-    ADD CONSTRAINT "Operation_warehouse_to_id_fkey" FOREIGN KEY (warehouse_to_id) REFERENCES public."Warehouse"(warehouse_id);
+    ADD CONSTRAINT "Operation_warehouse_id_fkey" FOREIGN KEY (warehouse_id) REFERENCES public."Warehouse"(warehouse_id);
 
 ALTER TABLE ONLY public."Operation"
     ADD CONSTRAINT "Operation_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
@@ -256,21 +252,37 @@ ALTER TABLE ONLY public."Warehouse"
 
 INSERT INTO public."User" (login, password_hashed, name, created_date, created_by) VALUES('superuser', 'C191615151114051D19181D1D1E151F11171918131C1B18181F1F1A141819181', 'Super User', 0, NULL);
 
-CREATE OR REPLACE FUNCTION public."add_operation_function"()
+CREATE OR REPLACE FUNCTION public."add_operation_from_function"()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public."Operation" (invoice_id, invoice_pretty_name, product_id, warehouse_from_id, warehouse_to_id, count, created_date, created_by)
-        SELECT NEW.invoice_id, pretty_name, NEW.product_id, warehouse_from_id, warehouse_to_id, NEW.count, created_date, created_by
+    INSERT INTO public."Operation" (invoice_id, invoice_pretty_name, product_id, warehouse_id, count, created_date, created_by)
+        SELECT NEW.invoice_id, pretty_name, NEW.product_id, -warehouse_from_id, NEW.count, created_date, created_by
             FROM public."Invoice"
-            WHERE invoice_id = NEW.invoice_id;
+            WHERE invoice_id = NEW.invoice_id AND warehouse_from_id IS NOT NULL;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER add_operation_trigger
+CREATE OR REPLACE FUNCTION public."add_operation_to_function"()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public."Operation" (invoice_id, invoice_pretty_name, product_id, warehouse_id, count, created_date, created_by)
+        SELECT NEW.invoice_id, pretty_name, NEW.product_id, warehouse_to_id, NEW.count, created_date, created_by
+            FROM public."Invoice"
+            WHERE invoice_id = NEW.invoice_id AND warehouse_to_id IS NOT NULL;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER add_operation_from_trigger
 AFTER INSERT ON public."Invoice_Item"
 FOR EACH ROW
-EXECUTE PROCEDURE public."add_operation_function"();
+EXECUTE PROCEDURE public."add_operation_from_function"();
+
+CREATE TRIGGER add_operation_to_trigger
+AFTER INSERT ON public."Invoice_Item"
+FOR EACH ROW
+EXECUTE PROCEDURE public."add_operation_to_function"();
 
 CREATE OR REPLACE FUNCTION public."fill_pretty_name_warehouse"()
 RETURNS TRIGGER AS $$

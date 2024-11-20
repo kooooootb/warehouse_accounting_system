@@ -53,8 +53,7 @@ ufa::Result GetOperationList::ExecuteInternal(std::string& result)
             util::json::Put(jsonOperation, INVOICE_ID_KEY, operation.invoice_id.value());
             util::json::Put(jsonOperation, INVOICE_PRETTY_NAME_KEY, operation.invoice_pretty_name.value());
             util::json::Put(jsonOperation, PRODUCT_ID_KEY, operation.product_id.value());
-            util::json::Put(jsonOperation, WAREHOUSE_FROM_ID_KEY, operation.warehouse_from_id);
-            util::json::Put(jsonOperation, WAREHOUSE_TO_ID_KEY, operation.warehouse_to_id);
+            util::json::Put(jsonOperation, WAREHOUSE_ID_KEY, operation.warehouse_id);
             util::json::Put(jsonOperation, COUNT_KEY, operation.count.value());
             util::json::Put(jsonOperation, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(operation.created_date.value()));
             util::json::Put(jsonOperation, CREATED_BY_KEY, operation.created_by.value());
@@ -103,8 +102,7 @@ ufa::Result GetOperationList::ActualGetOperationList(srv::IAccessor& accessor)
         Column::invoice_id,
         Column::invoice_pretty_name,
         Column::product_id,
-        Column::warehouse_from_id,
-        Column::warehouse_to_id,
+        Column::warehouse_id,
         Column::count,
         Column::created_date,
         Column::created_by};
@@ -144,8 +142,7 @@ ufa::Result GetOperationList::ActualGetOperationList(srv::IAccessor& accessor)
             operation.invoice_id = row.at(i++).get<int64_t>().value();
             operation.invoice_pretty_name = row.at(i++).get<std::string>().value();
             operation.product_id = row.at(i++).get<int64_t>().value();
-            operation.warehouse_from_id = row.at(i++).get<int64_t>();
-            operation.warehouse_to_id = row.at(i++).get<int64_t>();
+            operation.warehouse_id = row.at(i++).get<int64_t>();
             operation.count = row.at(i++).get<int64_t>().value();
             operation.created_date = row.at(i++).get<timestamp_t>().value();
             operation.created_by = row.at(i++).get<userid_t>().value();

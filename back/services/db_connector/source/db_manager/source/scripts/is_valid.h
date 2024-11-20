@@ -39,8 +39,7 @@ SELECT
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'operation_id') AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'invoice_id') AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'product_id') AND
-    EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'warehouse_from_id') AND
-    EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'warehouse_to_id') AND
+    EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'warehouse_id') AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'count') AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Operation"'::regclass AND attname = 'created_date') AND
     EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'public."Product"'::regclass AND attname = 'product_id') AND
