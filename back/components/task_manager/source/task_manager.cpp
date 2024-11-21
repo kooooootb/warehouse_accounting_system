@@ -63,7 +63,7 @@ TaskManager::TaskManager(std::shared_ptr<srv::IServiceLocator> locator)
     , m_taskHandler(std::make_shared<TaskHandler>(m_locator))
     , m_workersManager(std::make_unique<WorkersManager>(m_locator, m_taskHandler))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 std::unique_ptr<ITaskManager> ITaskManager::Create(std::shared_ptr<srv::IServiceLocator> locator)
@@ -73,7 +73,7 @@ std::unique_ptr<ITaskManager> ITaskManager::Create(std::shared_ptr<srv::IService
 
 ufa::Result TaskManager::AddTask(TaskInfo&& taskInfo)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::unique_ptr<tasks::BaseTask> task;
     const auto result = GenerateTask(GetTracer(), m_locator, std::move(taskInfo), task);

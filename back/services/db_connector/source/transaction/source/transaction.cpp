@@ -38,7 +38,7 @@ void Transaction::SetRootEntry(std::unique_ptr<ITransactionEntry>&& entry)
 
 ufa::Result Transaction::Execute()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     if (m_entry == nullptr)
     {

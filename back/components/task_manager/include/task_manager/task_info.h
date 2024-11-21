@@ -1,6 +1,8 @@
 #ifndef H_0A34CCB5_A237_4DF0_A9C7_0ABA0680D38C
 #define H_0A34CCB5_A237_4DF0_A9C7_0ABA0680D38C
 
+#include <nlohmann/json.hpp>
+
 #include <instrumental/common.h>
 
 #include "callback.h"
@@ -23,7 +25,7 @@ struct TaskInfo
     /**
      * @brief json string with task options
      */
-    std::string body;
+    nlohmann::json body;
 
     /**
      * @brief callback which will called with task results after its execution

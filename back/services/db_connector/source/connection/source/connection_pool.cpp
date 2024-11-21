@@ -26,7 +26,7 @@ ConnectionPool::ConnectionPool(const DBConnectorSettings& settings, const std::s
     , m_connectionOptions(GetTracer())
     , m_connectionAttempts(DEFAULT_CONNECTION_ATTEMPTS)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     SetConnectionsCount(DEFAULT_CONNECTIONS_COUNT);
 
@@ -41,7 +41,7 @@ std::shared_ptr<IConnectionPool> IConnectionPool::Create(const DBConnectorSettin
 
 void ConnectionPool::SetSettings(const DBConnectorSettings& settings)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     if (m_connectionOptions.SetSettings(settings))
     {
@@ -63,7 +63,7 @@ void ConnectionPool::SetSettings(const DBConnectorSettings& settings)
 
 IConnectionPool::ConnectionProxy ConnectionPool::GetConnection()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::lock_guard lock(m_connectionMutex);
 
@@ -101,7 +101,7 @@ IConnectionPool::ConnectionProxy ConnectionPool::GetConnection()
 
 void ConnectionPool::ReturnConnection(std::unique_ptr<IConnection>&& connection)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::lock_guard lock(m_connectionMutex);
 
@@ -160,7 +160,7 @@ void ConnectionPool::SetConnectionsCount(uint32_t connectionsCount)
 
 std::unique_ptr<IConnection> ConnectionPool::CreateConnection()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::chrono::duration Timeout = std::chrono::seconds(2);
 

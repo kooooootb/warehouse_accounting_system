@@ -31,7 +31,7 @@ Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<ta
     , m_ioContext(std::make_shared<asio::io_context>())
     , m_workGuard(boost::asio::make_work_guard(*m_ioContext))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::shared_ptr<srv::ISettingsProvider> settingsProvider;
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));
@@ -45,7 +45,7 @@ Server::Server(std::shared_ptr<srv::IServiceLocator> locator, std::shared_ptr<ta
 
 Server::~Server() noexcept
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     Stop();
 
@@ -63,7 +63,7 @@ std::unique_ptr<IServer> IServer::Create(std::shared_ptr<srv::IServiceLocator> l
 
 void Server::SetSettings(const ServerSettings& settings)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     m_listener->SetSettings(settings);
 
@@ -80,14 +80,14 @@ void Server::SetSettings(const ServerSettings& settings)
 
 ufa::Result Server::Start()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
     // I have a feeling this does nothing
     return ufa::Result::SUCCESS;
 }
 
 ufa::Result Server::Stop()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     try
     {
@@ -148,7 +148,7 @@ void Server::RunWorker()
     {
         try
         {
-            TRACE_INF << TRACE_HEADER;
+            TRACE_DBG << TRACE_HEADER;
 
             m_ioContext->run();
             break;

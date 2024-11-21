@@ -23,7 +23,7 @@ TransactionEntryFactory::TransactionEntryFactory(std::shared_ptr<srv::ITracer> t
     , m_connection(connection)
     , m_transaction(transaction)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateQueryTransactionEntry(std::unique_ptr<IQuery>&& query,
@@ -55,14 +55,14 @@ std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateQueryTran
 
 std::unique_ptr<IConditionTransactionEntry> TransactionEntryFactory::CreateConditionTransactionEntry(std::function<bool()>&& predicate)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     return std::make_unique<ConditionTransactionEntry>(GetTracer(), std::move(predicate));
 }
 
 std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateVariableTransactionEntry(std::function<void()>&& lastEntry)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     return std::make_unique<VariableTransactionEntry>(GetTracer(), std::move(lastEntry));
 }
@@ -70,7 +70,7 @@ std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateVariableT
 std::unique_ptr<IQueryTransactionEntry> TransactionEntryFactory::CreateGroupedTransactionEntry(
     std::list<std::unique_ptr<ITransactionEntry>>&& entries)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     return std::make_unique<GroupedTransactionEntry>(GetTracer(), std::move(entries));
 }

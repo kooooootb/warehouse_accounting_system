@@ -58,8 +58,9 @@ struct UpdateOptions : public IQueryOptions
 
         const auto& updateOptions = static_cast<const UpdateOptions&>(options);
 
-        return table == updateOptions.table && columns == updateOptions.columns && condition != nullptr &&
-               updateOptions.condition != nullptr && condition->Equals(*updateOptions.condition);
+        return table == updateOptions.table && columns == updateOptions.columns &&
+               ((condition == nullptr && updateOptions.condition == nullptr) ||
+                   (condition != nullptr && updateOptions.condition != nullptr && condition->Equals(*updateOptions.condition)));
     }
 
     Table table = Table::Invalid;           // UPDATE this

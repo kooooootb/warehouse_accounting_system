@@ -38,7 +38,7 @@ DbManager::DbManager(const DBConnectorSettings& settings,
     , m_shouldCreateDb(DefaultShouldCreateDb)
     , m_shouldReinitializeDb(DefaultShouldReinitializeDb)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 std::unique_ptr<IDbManager> IDbManager::Create(const DBConnectorSettings& settings,
@@ -50,7 +50,7 @@ std::unique_ptr<IDbManager> IDbManager::Create(const DBConnectorSettings& settin
 
 void DbManager::SetSettings(const DBConnectorSettings& settings)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     {
         std::lock_guard lock(m_settingsMutex);
@@ -69,7 +69,7 @@ void DbManager::SetSettings(const DBConnectorSettings& settings)
 
 void DbManager::PrepareDb()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     try
     {
@@ -107,7 +107,7 @@ ufa::Result DbManager::GetState()
 
 bool DbManager::IsDbValid(conn::IConnection& connection)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     try
     {
@@ -133,7 +133,7 @@ bool DbManager::IsDbValid(conn::IConnection& connection)
 
 bool DbManager::CreateDb()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
     std::lock_guard lock(m_settingsMutex);
 
     if (!m_shouldCreateDb)
@@ -187,7 +187,7 @@ bool DbManager::CreateDb()
 
 bool DbManager::InitializeTables(conn::IConnection& connection)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     try
     {

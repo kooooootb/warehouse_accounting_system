@@ -49,7 +49,7 @@ public:
 
     void Execute()
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         std::string response;
         ufa::Result result;
@@ -87,14 +87,13 @@ private:
      * @brief parse task from json
      * @return ufa::Result SUCCESS on success, WRONG_FORMAT when json is invalid
      */
-    ufa::Result Parse(std::string&& jsonStr)
+    ufa::Result Parse(json&& body)
     {
-        TRACE_DBG << TRACE_HEADER << "Parsing task: " << jsonStr;  // will leak sensitive, todo
+        TRACE_DBG << TRACE_HEADER << "Parsing task: " << body.dump();  // will leak sensitive, todo
 
         try
         {
-            auto json = json::parse(std::move(jsonStr));
-            ParseInternal(std::move(json));
+            ParseInternal(std::move(body));
         }
         catch (const std::exception& ex)
         {

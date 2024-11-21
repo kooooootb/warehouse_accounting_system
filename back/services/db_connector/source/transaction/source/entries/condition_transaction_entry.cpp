@@ -14,12 +14,12 @@ ConditionTransactionEntry::ConditionTransactionEntry(std::shared_ptr<srv::ITrace
     : srv::tracer::TracerProvider(std::move(tracer))
     , m_predicate(std::move(predicate))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void ConditionTransactionEntry::Execute()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     m_predicateResult = m_predicate();
 

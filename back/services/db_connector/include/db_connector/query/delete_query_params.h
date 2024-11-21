@@ -45,8 +45,9 @@ struct DeleteOptions : public IQueryOptions
 
         const auto& deleteOptions = static_cast<const DeleteOptions&>(options);
 
-        return table == deleteOptions.table && condition != nullptr && deleteOptions.condition != nullptr &&
-               condition->Equals(*deleteOptions.condition);
+        return table == deleteOptions.table &&
+               ((condition == nullptr && deleteOptions.condition == nullptr) ||
+                   (condition != nullptr && deleteOptions.condition != nullptr && condition->Equals(*deleteOptions.condition)));
     }
 
     Table table = Table::Invalid;           // DELETE FROM this

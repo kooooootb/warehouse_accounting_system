@@ -32,5 +32,6 @@ cc_library(
         "//back/services/tracer:iface",
         "@boost//:asio_ssl",
         "@boost//:beast",
+        "@nlohmann_json//:json",
     ],
 )

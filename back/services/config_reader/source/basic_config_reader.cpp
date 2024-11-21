@@ -83,7 +83,7 @@ inline std::string ToString(const std::vector<std::string_view>& from)
 
 BasicConfigReader::BasicConfigReader(const std::shared_ptr<IServiceLocator>& locator) : srv::tracer::TracerLazyProvider(locator)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::shared_ptr<srv::IEnvironment> environment;
     CHECK_SUCCESS(locator->GetInterface(environment));

@@ -30,14 +30,14 @@ Listener::Listener(const ServerSettings& settings,
     , m_acceptor(*ioContext)
     , m_sessionFactory(session::ISessionFactory::Create(settings, std::move(locator), std::move(taskManager)))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 Listener::~Listener()
 {
     try
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         boost::system::error_code ec;
 
@@ -80,7 +80,7 @@ void Listener::SetSettings(const ServerSettings& settings)
 
 void Listener::DoAccept()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::lock_guard lock(m_settingsMutex);
 
@@ -89,7 +89,7 @@ void Listener::DoAccept()
 
 void Listener::OnAccept(boost::system::error_code ec, tcp::socket socket)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     // Check error, exception will prevent futher accepting
     CHECK_TRUE(!ec, "async_accept failed with error: " << ec << ", message: " << ec.message());

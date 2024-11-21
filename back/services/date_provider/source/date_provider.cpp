@@ -47,7 +47,7 @@ DateProvider::DateProvider(const std::shared_ptr<IServiceLocator>& locator)
     // this might be cruel but goes only ones at start and does the job
     auto original = GetTimestamp();
     timestamp_t reverted;
-    CHECK_SUCCESS(FromIsoTimeString(ToIsoTimeString(original), reverted));
+    CHECK_SUCCESS(FromIsoTimeString(ToIsoTimeString(original), reverted), "original: " << original << ", reverted: " << reverted);
     m_fromIsoOffset = reverted - original;
 }
 

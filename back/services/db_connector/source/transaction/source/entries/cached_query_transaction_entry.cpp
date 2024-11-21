@@ -22,7 +22,7 @@ CachedQueryTransactionEntry::CachedQueryTransactionEntry(std::shared_ptr<srv::IT
     , m_params(std::move(params))
     , m_result(result)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void CachedQueryTransactionEntry::Execute()

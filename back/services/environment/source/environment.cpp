@@ -54,7 +54,7 @@ std::string ToString(int argc, char* argv[])
 
 Environment::Environment(const std::shared_ptr<IServiceLocator>& locator) : srv::tracer::TracerLazyProvider(locator)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 ufa::Result Environment::GetValue(std::string_view key, std::string& toValue) const

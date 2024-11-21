@@ -17,7 +17,7 @@ Authorization::Authorization(std::shared_ptr<srv::ITracer> tracer,
     const TaskInfo& taskInfo)
     : BaseTask(std::move(tracer), std::move(locator), std::move(taskInfo))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 ufa::Result Authorization::ExecuteInternal(std::string& result)

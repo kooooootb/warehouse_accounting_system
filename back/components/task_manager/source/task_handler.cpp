@@ -10,7 +10,7 @@ TaskHandler::TaskHandler(std::shared_ptr<srv::IServiceLocator> locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_locator(std::move(locator))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void TaskHandler::HandleTask(tasks::BaseTask& task)

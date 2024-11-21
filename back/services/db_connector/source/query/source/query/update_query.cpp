@@ -12,7 +12,7 @@ namespace db
 UpdateQuery::UpdateQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<UpdateOptions>&& options, UpdateValues&& values)
     : BaseQuery(std::move(tracer), std::move(options))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     CHECK_TRUE(values.values.size() == m_options->columns.size(), "Columns count doesn't match values count");
     CHECK_TRUE(m_options->condition != nullptr, "UPDATE query without condition is prohibited");

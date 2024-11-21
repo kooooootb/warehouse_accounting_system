@@ -39,12 +39,12 @@ Authorizer::Authorizer(const std::shared_ptr<srv::IServiceLocator>& locator)
     , m_accessor(locator->GetInterface<srv::IAccessor>())
     , m_dateProvider(locator->GetInterface<srv::IDateProvider>())
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 ufa::Result Authorizer::ValidateToken(std::string_view token, userid_t& userId)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     try
     {

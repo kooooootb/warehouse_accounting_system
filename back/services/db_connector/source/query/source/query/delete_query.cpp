@@ -12,7 +12,7 @@ namespace db
 DeleteQuery::DeleteQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<DeleteOptions>&& options, DeleteValues&& values)
     : BaseQuery(std::move(tracer), std::move(options))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     CHECK_TRUE(m_options->condition != nullptr, "Empty condition in DELETE is prohibited");
 

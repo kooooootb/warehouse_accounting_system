@@ -15,12 +15,12 @@ PlainSession::PlainSession(std::shared_ptr<srv::ITracer> tracer,
     : BaseSession(std::move(tracer), std::move(authorizer), std::move(documentManager), std::move(taskManager))
     , m_stream(std::move(socket))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void PlainSession::Run()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     asio::dispatch(m_stream.get_executor(),
         beast::bind_front_handler(&PlainSession::DoRead, std::static_pointer_cast<PlainSession>(shared_from_this())));
@@ -28,7 +28,7 @@ void PlainSession::Run()
 
 void PlainSession::DoRead()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     m_request = {};
 
@@ -44,7 +44,7 @@ void PlainSession::DoRead()
 
 void PlainSession::OnRead(boost::system::error_code ec, std::size_t bytesTransferred)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     boost::ignore_unused(bytesTransferred);
 
@@ -69,7 +69,7 @@ void PlainSession::OnRead(boost::system::error_code ec, std::size_t bytesTransfe
 
 void PlainSession::SendResponse(http::message_generator&& message)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     bool keepAlive = message.keep_alive();
 
@@ -81,7 +81,7 @@ void PlainSession::SendResponse(http::message_generator&& message)
 
 void PlainSession::OnWrite(bool keepAlive, boost::system::error_code ec, std::size_t bytesTransferred)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     boost::ignore_unused(bytesTransferred);
 
@@ -100,7 +100,7 @@ void PlainSession::OnWrite(bool keepAlive, boost::system::error_code ec, std::si
 
 void PlainSession::DoClose()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     beast::error_code ec;
     m_stream.socket().shutdown(tcp::socket::shutdown_send, ec);

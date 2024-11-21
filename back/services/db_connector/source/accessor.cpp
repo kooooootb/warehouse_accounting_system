@@ -26,7 +26,7 @@ namespace db
 Accessor::Accessor(const std::shared_ptr<srv::IServiceLocator>& locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::shared_ptr<srv::ISettingsProvider> settingsProvider;
     CHECK_SUCCESS(locator->GetInterface(settingsProvider));

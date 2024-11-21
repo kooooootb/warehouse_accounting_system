@@ -25,7 +25,7 @@ TransactionFactory::TransactionFactory(const DBConnectorSettings& settings,
     , m_connectionPool(connectionPool)
     , m_queryManager(queryManager)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     SetSettings(settings);
 }
@@ -54,7 +54,7 @@ std::unique_ptr<ITransaction> TransactionFactory::CreateTransaction(WritePolicy 
 
 void TransactionFactory::SetSettings(const DBConnectorSettings& settings)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     ufa::TryExtractFromOptional(settings.commitAttempts, m_commitAttempts);
 }

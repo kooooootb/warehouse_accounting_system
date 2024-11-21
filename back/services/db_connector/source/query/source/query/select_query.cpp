@@ -12,7 +12,7 @@ namespace db
 SelectQuery::SelectQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<SelectOptions>&& options, SelectValues&& values)
     : BaseQuery(std::move(tracer), std::move(options))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     ExtractParamsFromCondition();
 }

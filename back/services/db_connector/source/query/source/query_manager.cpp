@@ -18,7 +18,7 @@ namespace qry
 QueryManager::QueryManager(const DBConnectorSettings& settings, const std::shared_ptr<srv::IServiceLocator>& locator)
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 std::unique_ptr<IQueryManager> IQueryManager::Create(const DBConnectorSettings& settings,
@@ -29,7 +29,7 @@ std::unique_ptr<IQueryManager> IQueryManager::Create(const DBConnectorSettings& 
 
 void QueryManager::SetSettings(const DBConnectorSettings& settings)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 std::unique_ptr<IQueryManager::IQueriesLock> QueryManager::GetQueries()

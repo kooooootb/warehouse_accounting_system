@@ -91,7 +91,8 @@ struct SelectOptions : public IQueryOptions
 
         return table == selectOptions.table && columns == selectOptions.columns && joins == selectOptions.joins &&
                orderBy == selectOptions.orderBy && limit == selectOptions.limit && offset == selectOptions.offset &&
-               condition != nullptr && selectOptions.condition != nullptr && condition->Equals(*selectOptions.condition);
+               ((condition == nullptr && selectOptions.condition == nullptr) ||
+                   (condition != nullptr && selectOptions.condition != nullptr && condition->Equals(*selectOptions.condition)));
     }
 
     Table table = Table::Invalid;           // e.g. .. FROM this

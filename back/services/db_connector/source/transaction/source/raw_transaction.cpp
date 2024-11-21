@@ -50,21 +50,21 @@ public:
         : srv::tracer::TracerProvider(std::move(tracer))
         , m_connection(connection)
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         ReInitialize(connection);
     }
 
     void ReInitialize(conn::IConnection* connection) override
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         m_transactionImpl = std::make_unique<pqxx::transaction<t_isolationLevel, t_writePolicy>>(m_connection->GetRaw());
     }
 
     pqxx::transaction_base* Get() override
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         return m_transactionImpl.get();
     }

@@ -15,12 +15,12 @@ GroupedTransactionEntry::GroupedTransactionEntry(std::shared_ptr<srv::ITracer> t
     : srv::tracer::TracerProvider(std::move(tracer))
     , m_entries(std::move(entries))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void GroupedTransactionEntry::Execute()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     for (const auto& entry : m_entries)
     {
@@ -30,7 +30,7 @@ void GroupedTransactionEntry::Execute()
 
 ITransactionEntry* GroupedTransactionEntry::GetNext()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     return m_nextEntry.get();
 }

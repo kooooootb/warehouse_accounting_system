@@ -30,7 +30,7 @@ DocumentManager::DocumentManager(const std::shared_ptr<srv::IServiceLocator>& lo
     , m_rootPath(DEFAULT_DOCUMENT_ROOT)
     , m_rng(m_randomDevice())
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     auto settingsProvider = locator->GetInterface<srv::ISettingsProvider>();
 

@@ -46,12 +46,12 @@ public:
         , m_authorizer(locator->GetInterface<srv::IAuthorizer>())
         , m_taskManager(std::move(taskManager))
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
     }
 
     std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) override
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         return std::make_shared<PlainSession>(GetTracer(), m_authorizer, m_documentManager, m_taskManager, std::move(socket));
     }
@@ -73,14 +73,14 @@ public:
         , m_taskManager(std::move(taskManager))
         , m_sslContext(ssl::context::tlsv12)
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         LoadServerCertificate(m_sslContext);
     }
 
     std::shared_ptr<ISession> CreateSession(tcp::socket&& socket) override
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         return std::make_shared<SecuredSession>(GetTracer(),
             m_authorizer,
@@ -109,7 +109,7 @@ SessionFactory::SessionFactory(const ServerSettings& settings,
     , m_locator(std::move(locator))
     , m_taskManager(std::move(taskManager))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void SessionFactory::SetSettings(const ServerSettings& settings)
@@ -130,7 +130,7 @@ void SessionFactory::SetSettings(const ServerSettings& settings)
 
 std::shared_ptr<ISession> SessionFactory::CreateSession(tcp::socket&& socket)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     std::lock_guard lock(m_settingsMutex);
 

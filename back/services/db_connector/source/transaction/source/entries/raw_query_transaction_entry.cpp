@@ -21,7 +21,7 @@ RawQueryTransactionEntry::RawQueryTransactionEntry(std::shared_ptr<srv::ITracer>
     , m_params(std::move(params))
     , m_result(result)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void RawQueryTransactionEntry::Execute()

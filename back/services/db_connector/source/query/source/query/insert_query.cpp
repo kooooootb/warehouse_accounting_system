@@ -13,7 +13,7 @@ namespace db
 InsertQuery::InsertQuery(std::shared_ptr<srv::ITracer> tracer, std::unique_ptr<InsertOptions>&& options, InsertValues&& values)
     : BaseQuery(std::move(tracer), std::move(options))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     // save values count in options from values
     this->m_options->valuesCount = values.values.size();

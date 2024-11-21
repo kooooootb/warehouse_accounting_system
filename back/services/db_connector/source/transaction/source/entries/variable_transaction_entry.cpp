@@ -14,19 +14,19 @@ VariableTransactionEntry::VariableTransactionEntry(std::shared_ptr<srv::ITracer>
     : srv::tracer::TracerProvider(std::move(tracer))
     , m_function(std::move(function))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void VariableTransactionEntry::Execute()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     m_function();
 }
 
 ITransactionEntry* VariableTransactionEntry::GetNext()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     return m_nextEntry.get();
 }

@@ -11,7 +11,7 @@ WorkersManager::WorkersManager(std::shared_ptr<srv::IServiceLocator> locator, st
     : srv::tracer::TracerProvider(locator->GetInterface<srv::ITracer>())
     , m_taskHandler(std::move(taskHandler))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     for (int i = 0; i < DEFAULT_NUM_WORKERS; ++i)
     {
@@ -34,7 +34,7 @@ WorkersManager::~WorkersManager() noexcept
 
 void WorkersManager::AddTask(std::unique_ptr<tasks::BaseTask>&& task)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     {
         std::lock_guard lock(m_queueMtx);
@@ -45,7 +45,7 @@ void WorkersManager::AddTask(std::unique_ptr<tasks::BaseTask>&& task)
 
 void WorkersManager::Run()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     while (!m_stop)
     {

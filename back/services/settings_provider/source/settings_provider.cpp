@@ -53,7 +53,7 @@ SettingsProvider::SettingsProvider(const std::shared_ptr<IServiceLocator>& locat
     , m_environment(locator->GetInterface<srv::IEnvironment>())
     , m_configReader(locator->GetInterface<srv::IConfigReader>())
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 bool SettingsProvider::TryFromEnvironment(std::string_view settingsName, std::string_view name, std::string& value) const

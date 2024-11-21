@@ -35,12 +35,12 @@ SecuredSession::SecuredSession(std::shared_ptr<srv::ITracer> tracer,
     : BaseSession(std::move(tracer), std::move(authorizer), std::move(documentManager), std::move(taskManager))
     , m_sslStream(std::move(socket), sslContext)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void SecuredSession::Run()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     asio::dispatch(m_sslStream.get_executor(),
         beast::bind_front_handler(&SecuredSession::DoHandshake, std::static_pointer_cast<SecuredSession>(shared_from_this())));
@@ -48,7 +48,7 @@ void SecuredSession::Run()
 
 void SecuredSession::SendResponse(http::message_generator&& message)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     bool keepAlive = message.keep_alive();
 
@@ -60,7 +60,7 @@ void SecuredSession::SendResponse(http::message_generator&& message)
 
 void SecuredSession::DoHandshake()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     // Set the timeout.
     beast::get_lowest_layer(m_sslStream).expires_after(std::chrono::seconds(30));
@@ -72,7 +72,7 @@ void SecuredSession::DoHandshake()
 
 void SecuredSession::OnHandshake(beast::error_code ec)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     CHECK_TRUE(!ec, "Handshake failed with error: " << ec << ", message: " << ec.message());
 
@@ -81,7 +81,7 @@ void SecuredSession::OnHandshake(beast::error_code ec)
 
 void SecuredSession::DoRead()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     m_request = {};
 
@@ -97,7 +97,7 @@ void SecuredSession::DoRead()
 
 void SecuredSession::OnRead(boost::system::error_code ec, std::size_t bytesTransferred)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     boost::ignore_unused(bytesTransferred);
 
@@ -121,7 +121,7 @@ void SecuredSession::OnRead(boost::system::error_code ec, std::size_t bytesTrans
 
 void SecuredSession::OnWrite(bool keepAlive, boost::system::error_code ec, std::size_t bytesTransferred)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     boost::ignore_unused(bytesTransferred);
 
@@ -140,7 +140,7 @@ void SecuredSession::OnWrite(bool keepAlive, boost::system::error_code ec, std::
 
 void SecuredSession::DoClose()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     // Set the timeout.
     beast::get_lowest_layer(m_sslStream).expires_after(std::chrono::seconds(30));
@@ -152,7 +152,7 @@ void SecuredSession::DoClose()
 
 void SecuredSession::OnClose(boost::system::error_code ec)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     CHECK_TRUE(!ec, "Shutdown failed with error: " << ec << ", message: " << ec.message());
 }

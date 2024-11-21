@@ -2,6 +2,7 @@
 #include <exception>
 
 #include <authorizer/authorizer.h>
+#include <instrumental/string_converters.h>
 #include <instrumental/types.h>
 #include <task_manager/callback.h>
 #include <task_manager/task_identificator.h>
@@ -14,6 +15,8 @@ namespace ws
 namespace session
 {
 
+using json = nlohmann::json;
+
 namespace
 {
 
@@ -22,6 +25,7 @@ constexpr std::string_view AUTHENTICATE_HEADER = "Authorization";
 constexpr std::string_view API_TARGET = "/api";
 
 constexpr http::verb ALLOWED_VERBS[] = {http::verb::get, http::verb::post};
+constexpr http::verb PARAMS_VERBS[] = {http::verb::get};
 
 std::string_view GetMimeType(const std::filesystem::path& extension)
 {
@@ -92,6 +96,15 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
 {
     using TI = taskmgr::TaskIdentificator;
 
+    // remove /api/
+    target.remove_prefix(API_TARGET.size() + 1);
+
+    // remove query params
+    if (const auto questionIndex = target.find('?'); questionIndex != target.npos)
+    {
+        target = target.substr(0, questionIndex);
+    }
+
     if (target == "authorization")
         return TI::Authorization;
     if (target == "users/create")
@@ -147,6 +160,57 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
         "Couldn't parse task identificator. target: " << target << ", verb: " << http::to_string(verb));
 }
 
+json ConvertFromParams(std::string_view target)
+{
+    auto firstIndex = target.find('?');
+    if (firstIndex++ == target.npos)
+    {
+        return {};
+    }
+
+    auto lastIndex = target.find('#');
+    if (lastIndex == target.npos)
+    {
+        lastIndex = target.size();
+    }
+
+    target = target.substr(firstIndex, lastIndex - firstIndex);
+    json::object_t result;
+
+    const auto handlePair = [&result](std::string_view pair)
+    {
+        auto dividerIndex = pair.find('=');
+
+        if (dividerIndex != pair.npos)
+        {
+            std::string_view key = pair.substr(0, dividerIndex++);
+            std::string_view value = pair.substr(dividerIndex, pair.size() - dividerIndex);
+
+            try
+            {
+                // this is rough but fits our requirements for now
+                int64_t valueInt = string_converters::FromString<int64_t>(std::string(value));
+                result.emplace(key, valueInt);
+            }
+            catch (const std::exception& ex)
+            {
+                result.emplace(key, value);
+            }
+        }
+    };
+
+    size_t separatorIndex;
+    while ((separatorIndex = target.find('&')) != target.npos)
+    {
+        handlePair(target.substr(0, separatorIndex));
+        target = target.substr(++separatorIndex);
+    }
+
+    handlePair(target);
+
+    return result;
+}
+
 }  // namespace
 
 BaseSession::BaseSession(std::shared_ptr<srv::ITracer> tracer,
@@ -158,12 +222,12 @@ BaseSession::BaseSession(std::shared_ptr<srv::ITracer> tracer,
     , m_documentManager(std::move(documentManager))
     , m_taskManager(std::move(taskManager))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 void BaseSession::HandleRequest()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     if (!std::any_of(std::cbegin(ALLOWED_VERBS),
             std::cend(ALLOWED_VERBS),
@@ -217,16 +281,13 @@ void BaseSession::HandleRequest()
 
 void BaseSession::HandleApi(userid_t initiativeUserId)
 {
-    TRACE_INF << TRACE_HEADER;
-
-    auto target = m_request.target();
-    target.remove_prefix(API_TARGET.size() + 1);
+    TRACE_INF << TRACE_HEADER << "target(): " << m_request.target();
 
     taskmgr::TaskInfo taskInfo;
 
     try
     {
-        taskInfo.identificator = ParseTaskIdentificator(target, m_request.method());
+        taskInfo.identificator = ParseTaskIdentificator(m_request.target(), m_request.method());
     }
     catch (const std::exception& ex)
     {
@@ -246,12 +307,22 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
         }
         else
         {
-            TRACE_DBG << TRACE_HEADER << "Responding ok with message: " << message;
+            TRACE_INF << TRACE_HEADER << "Responding ok with message: " << message;
             SendResponse(PrepareResponse(std::move(message), http::status::ok));
         }
     };
 
-    taskInfo.body = std::move(m_request.body());
+    if (std::find(std::cbegin(PARAMS_VERBS), std::cend(PARAMS_VERBS), m_request.method()) != std::cend(PARAMS_VERBS))
+    {
+        taskInfo.body = ConvertFromParams(m_request.target());
+    }
+    else
+    {
+        taskInfo.body = json::parse(std::move(m_request.body()));
+    }
+
+    TRACE_DBG << TRACE_HEADER << "Received: " << taskInfo.body.dump();
+
     taskInfo.initiativeUserid = initiativeUserId;
 
     const auto result = m_taskManager->AddTask(std::move(taskInfo));
@@ -264,7 +335,7 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
 
     if (result == ufa::Result::NOT_FOUND)
     {
-        TRACE_ERR << TRACE_HEADER << "Task not implemented, target: " << target;
+        TRACE_ERR << TRACE_HEADER << "Task not implemented, target: " << m_request.target();
         return SendResponse(PrepareResponse("Task not found", http::status::not_implemented));
     }
 
@@ -273,7 +344,7 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
 
 void BaseSession::HandleFile()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     const auto target = m_request.target();
 
@@ -329,7 +400,7 @@ void BaseSession::HandleFile()
 
 http::message_generator BaseSession::PrepareResponse(std::string body, http::status status)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     // cut on error
     bool keepAlive = status == http::status::ok ? m_request.keep_alive() : false;
@@ -344,7 +415,7 @@ http::message_generator BaseSession::PrepareResponse(std::string body, http::sta
 
 ufa::Result BaseSession::Authenticate(userid_t& userId)
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     const auto token = m_request[AUTHENTICATE_HEADER];
     if (token.empty())

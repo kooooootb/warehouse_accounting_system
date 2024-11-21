@@ -25,7 +25,7 @@ public:
         , m_parametrizedQuery(std::move(parametrizedQuery))
         , m_hashValue(std::hash<std::string>{}(m_parametrizedQuery))
     {
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
     }
 
     QueryIdentificator GetIdentificator() const override
@@ -92,7 +92,7 @@ public:
     bool Equals(const IQueryOptions& options) override
     {
         // this options are not planned to use in QueryManager so Equals is long but can be optimized by calculating hash
-        TRACE_INF << TRACE_HEADER;
+        TRACE_DBG << TRACE_HEADER;
 
         if (GetIdentificator() != options.GetIdentificator())
         {
@@ -113,7 +113,7 @@ RawQuery::RawQuery(std::shared_ptr<srv::ITracer> tracer, std::string parametrize
     , m_queryOptions(std::make_unique<RawQueryOptions>(GetTracer(), std::move(parametrizedQuery)))
     , m_params(std::move(params))
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 }
 
 std::unique_ptr<IQuery> QueryFactory::CreateRaw(std::shared_ptr<srv::ITracer> tracer, std::string parametrizedString, params_t params)

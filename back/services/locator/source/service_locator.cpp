@@ -26,14 +26,14 @@ ufa::Result IServiceLocator::Create(std::shared_ptr<srv::IServiceLocator>& objec
 
 void ServiceLocator::Setup()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     RegisterDefaults();
 }
 
 void ServiceLocator::RegisterDefaults()
 {
-    TRACE_INF << TRACE_HEADER;
+    TRACE_DBG << TRACE_HEADER;
 
     tracer::TracerLazyProvider::SetLocator(weak_from_this());
 
