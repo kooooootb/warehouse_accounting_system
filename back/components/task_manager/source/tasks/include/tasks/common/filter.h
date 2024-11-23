@@ -39,19 +39,23 @@ inline std::unique_ptr<srv::db::ICondition> ParseFilters(std::shared_ptr<srv::IT
         {
             auto column = string_converters::FromString<Column>(filter.at(KEY_KEY).get<std::string>());
             auto type = string_converters::FromString<RealConditionType>(filter.at(TYPE_KEY).get<std::string>());
-            auto valueString = filter.at(VALUE_KEY).get<std::string>();
+            auto valueJson = filter.at(VALUE_KEY);
 
-            if (type == RealConditionType::Equal && valueString == "NULL")
+            if (valueJson.is_string())
             {
-                grouped->conditions.emplace_back(CreateIsNullCondition(column));
-            }
-            else if (timestamp_t timestamp; dateProvider.FromIsoTimeString(valueString, timestamp) == ufa::Result::SUCCESS)
-            {
-                grouped->conditions.emplace_back(CreateRealCondition(column, timestamp, type));
+                const auto valueString = valueJson.get<std::string>();
+                if (type == RealConditionType::Equal && valueString == "NULL")
+                {
+                    grouped->conditions.emplace_back(CreateIsNullCondition(column));
+                }
+                else if (timestamp_t timestamp; dateProvider.FromIsoTimeString(valueString, timestamp) == ufa::Result::SUCCESS)
+                {
+                    grouped->conditions.emplace_back(CreateRealCondition(column, timestamp, type));
+                }
             }
             else
             {
-                auto value = string_converters::FromString<int64_t>(valueString);
+                const auto value = valueJson.get<int64_t>();
                 grouped->conditions.emplace_back(CreateRealCondition(column, value, type));
             }
         }

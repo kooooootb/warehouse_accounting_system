@@ -7,6 +7,8 @@
 #include <authorizer/authorizer.h>
 #include <authorizer/user_info.h>
 #include <db_connector/product_definitions/columns.h>
+#include <db_connector/query/condition.h>
+#include <db_connector/query/join.h>
 #include <locator/service_locator.h>
 #include <tasks/common/product.h>
 #include <tracer/tracer.h>
@@ -19,6 +21,50 @@ namespace taskmgr
 {
 namespace tasks
 {
+
+namespace
+{
+
+bool ConditionHasWarehouseId(const srv::db::ICondition* condition)
+{
+    using namespace srv::db;
+
+    switch (condition->GetType())
+    {
+        case ConditionType::Group:
+        {
+            auto& group = static_cast<const GroupCondition&>(*condition);
+            return std::any_of(std::cbegin(group.conditions),
+                std::cend(group.conditions),
+                [](const auto& condition)
+                {
+                    return ConditionHasWarehouseId(condition.get());
+                });
+        }
+        case ConditionType::In:
+        {
+            auto& in = static_cast<const InCondition<int>&>(*condition);
+            return in.column == Column::warehouse_id;
+        }
+        case ConditionType::Real:
+        {
+            auto& real = static_cast<const RealCondition<int>&>(*condition);
+            return real.column == Column::warehouse_id;
+        }
+        case ConditionType::Not:
+        {
+            auto& notCond = static_cast<const NotCondition&>(*condition);
+            return ConditionHasWarehouseId(notCond.condition.get());
+        }
+        case ConditionType::IsNull:
+        {
+            auto& isNull = static_cast<const IsNullCondition&>(*condition);
+            return isNull.column == Column::warehouse_id;
+        }
+    }
+}
+
+}  // namespace
 
 GetProductList::GetProductList(std::shared_ptr<srv::ITracer> tracer,
     std::shared_ptr<srv::IServiceLocator> locator,
@@ -56,6 +102,8 @@ ufa::Result GetProductList::ExecuteInternal(std::string& result)
             util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(product.created_date.value()));
             util::json::Put(jsonProduct, CREATED_BY_KEY, product.created_by.value());
             util::json::Put(jsonProduct, MAIN_COLOR_KEY, product.main_color);
+            util::json::Put(jsonProduct, WAREHOUSE_ID_KEY, product.warehouse_id);
+            util::json::Put(jsonProduct, COUNT_KEY, product.count);
 
             jsonProducts.emplace_back(jsonProduct);
         }
@@ -81,6 +129,10 @@ void GetProductList::ParseInternal(json&& json)
         CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
 
         m_filter = ParseFilters(GetTracer(), *dateProvider, *filtersIt);
+        if (m_filter != nullptr && ConditionHasWarehouseId(m_filter.get()))
+        {
+            m_extendWarehouse = true;
+        }
     }
 }
 
@@ -111,6 +163,15 @@ ufa::Result GetProductList::ActualGetProductList(srv::IAccessor& accessor)
 
     if (m_filter != nullptr)
     {
+        if (m_extendWarehouse)
+        {
+            options->joins.emplace_back(
+                Join{.leftColumn = Column::product_id, .joiningTable = Table::Warehouse_Item, .joiningColumn = Column::product_id});
+
+            options->columns.push_back(Column::warehouse_id);
+            options->columns.push_back(Column::count);
+        }
+
         options->condition = std::move(m_filter);
     }
 
@@ -143,6 +204,8 @@ ufa::Result GetProductList::ActualGetProductList(srv::IAccessor& accessor)
             product.created_date = row.at(i++).get<timestamp_t>();
             product.created_by = row.at(i++).get<userid_t>();
             product.main_color = row.at(i++).get<int64_t>();
+            product.warehouse_id = row.at(i++).get<int64_t>();
+            product.count = row.at(i++).get<int64_t>();
 
             m_products.emplace_back(product);
         }

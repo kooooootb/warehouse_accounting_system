@@ -37,6 +37,7 @@ struct Product
     std::optional<int64_t> id;
     std::optional<timestamp_t> created_date;
     std::optional<userid_t> created_by;
+    std::optional<int64_t> warehouse_id;
 
     static inline std::unique_ptr<srv::db::IQueryTransactionEntry> InsertsEntry(std::shared_ptr<srv::ITracer> tracer,
         srv::db::ITransactionEntryFactory& entriesFactory,

@@ -318,7 +318,15 @@ void BaseSession::HandleApi(userid_t initiativeUserId)
     }
     else
     {
-        taskInfo.body = json::parse(std::move(m_request.body()));
+        try
+        {
+            taskInfo.body = json::parse(std::move(m_request.body()));
+        }
+        catch (const std::exception& ex)
+        {
+            TRACE_ERR << TRACE_HEADER << "Retrieved body in wrong format, what(): " << ex.what();
+            return SendResponse(PrepareResponse("Invalid body format", http::status::bad_request));
+        }
     }
 
     TRACE_DBG << TRACE_HEADER << "Received: " << taskInfo.body.dump();

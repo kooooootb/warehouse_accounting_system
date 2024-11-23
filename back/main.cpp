@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     }
     catch (const std::exception& ex)
     {
-        std::cout << "Caught exception before main logic, what(): " << ex.what();
+        std::cout << "Caught exception before main logic, what(): " << ex.what() << std::endl;
     }
 
     std::cout << "end" << std::endl;

@@ -38,14 +38,40 @@ struct SelectOptions : public IQueryOptions
         }
         else
         {
+            std::vector<std::string> columnsStrs;
+            columnsStrs.reserve(columns.size());
+
+            for (auto column : columns)
+            {
+                bool localize = false;
+                for (const auto& join : joins)
+                {
+                    if (join.leftColumn == column)
+                    {
+                        localize = true;
+                        break;
+                    }
+                }
+
+                if (localize)
+                {
+                    columnsStrs.emplace_back(
+                        fmt::format("public.\"{}\".{}"sv, string_converters::ToString(table), string_converters::ToString(column)));
+                }
+                else
+                {
+                    columnsStrs.emplace_back(string_converters::ToString(column));
+                }
+            }
+
             result += fmt::format("SELECT {} FROM public.\"{}\""sv,
-                string_converters::ToString(std::begin(columns), std::end(columns), ", "sv),
+                string_converters::ToString(std::begin(columnsStrs), std::end(columnsStrs), ", "sv),
                 string_converters::ToString(table));
         }
 
         for (const auto& join : joins)
         {
-            result += fmt::format(" {} JOIN {} ON {}.{}={}.{}"sv,
+            result += fmt::format(" {} JOIN public.\"{}\" ON public.\"{}\".{}=public.\"{}\".{}"sv,
                 string_converters::ToString(join.type),
                 string_converters::ToString(join.joiningTable),
                 string_converters::ToString(join.leftTable.value_or(table)),

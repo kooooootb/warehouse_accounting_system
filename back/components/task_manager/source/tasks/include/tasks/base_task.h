@@ -89,7 +89,7 @@ private:
      */
     ufa::Result Parse(json&& body)
     {
-        TRACE_DBG << TRACE_HEADER << "Parsing task: " << body.dump();  // will leak sensitive, todo
+        TRACE_INF << TRACE_HEADER << "Parsing task: " << body.dump();  // will leak sensitive, todo
 
         try
         {

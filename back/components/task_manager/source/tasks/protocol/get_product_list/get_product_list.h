@@ -50,12 +50,15 @@ private:
     static constexpr std::string_view LIMIT_KEY = "limit";
     static constexpr std::string_view OFFSET_KEY = "offset";
     static constexpr std::string_view FILTERS_KEY = "filters";
+    static constexpr std::string_view WAREHOUSE_ID_KEY = "warehouse_id";
+    static constexpr std::string_view COUNT_KEY = "count";
 
 private:
     std::vector<Product> m_products;
     int64_t m_limit;
     int64_t m_offset;
     std::unique_ptr<srv::db::ICondition> m_filter;
+    bool m_extendWarehouse = false;
 };
 
 }  // namespace tasks

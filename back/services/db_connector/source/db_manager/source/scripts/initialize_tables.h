@@ -224,9 +224,6 @@ ALTER TABLE ONLY public."Operation"
     ADD CONSTRAINT "Operation_product_id_fkey" FOREIGN KEY (product_id) REFERENCES public."Product"(product_id);
 
 ALTER TABLE ONLY public."Operation"
-    ADD CONSTRAINT "Operation_warehouse_id_fkey" FOREIGN KEY (warehouse_id) REFERENCES public."Warehouse"(warehouse_id);
-
-ALTER TABLE ONLY public."Operation"
     ADD CONSTRAINT "Operation_created_by_fkey" FOREIGN KEY (created_by) REFERENCES public."User"(user_id);
 
 ALTER TABLE ONLY public."Product"

@@ -67,7 +67,8 @@ TEST_F(SelectQuerySerializationFixture, WithJoin)
     const auto query = QueryFactory::Create(m_tracerMock, std::move(options), std::move(values));
 
     std::string_view queryString =
-        "SELECT user_id, name, main_color FROM public.\"User\" INNER JOIN Product ON User.user_id=Product.created_by;";
+        "SELECT user_id, name, main_color FROM public.\"User\" INNER JOIN public.\"Product\" ON "
+        "public.\"User\".user_id=public.\"Product\".created_by;";
 
     EXPECT_EQ(query->ExtractOptions()->SerializeParametrized(), queryString);
 }
