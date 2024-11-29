@@ -54,10 +54,7 @@ private:
 private:
     std::vector<IteratorT> m_endIterators;
     std::vector<IteratorT> m_nextIterators;
-    size_t m_currentIteratorIndex;
     IteratorT m_currentIterator;
-    CurrentIteratorState m_currentIteratorState =  // @unused
-        CurrentIteratorState::Normal;              // marks that currentIterator == m_nextIterators[m_currentIteratorIndex] == end
 };
 
 template <>
@@ -180,33 +177,20 @@ QueriesIteratorInternal<IteratorT>::QueriesIteratorInternal(bool isEnd, const qu
 {
     if (isEnd)
     {
-        // make all iterators pre end
-        m_nextIterators.reserve(queries.size());
+        // make all iterators end
         for (const auto& it : queries)
         {
-            m_nextIterators.emplace_back(std::prev(End(it.second)));
             m_endIterators.emplace_back(End(it.second));
+            m_nextIterators = m_endIterators;
         }
 
-        // get iterator with max value
-        auto maxIt = GetBorderElement(false, m_nextIterators, m_endIterators);
-
-        // get currentIterator as closest post end iterator
-        m_currentIterator = std::next(*maxIt);
-        m_currentIteratorIndex = maxIt - m_nextIterators.begin();
-
-        // make all iterators post end
-        for (auto& it : m_nextIterators)
-        {
-            it = std::next(it);
-        }
-
-        // we can go beyond end so mark current iterator as post end manually
-        m_currentIteratorState = CurrentIteratorState::PostEnd;
+        // get iterator with max value, all post-end logic is embedded in Less function
+        auto minIt = GetBorderElement(true, m_nextIterators, m_endIterators);
+        m_currentIterator = *minIt;
     }
     else
     {
-        // make all iterators begin
+        // make all next iterators begin
         m_nextIterators.reserve(queries.size());
         for (const auto& it : queries)
         {
@@ -218,7 +202,6 @@ QueriesIteratorInternal<IteratorT>::QueriesIteratorInternal(bool isEnd, const qu
         auto minIt = GetBorderElement(true, m_nextIterators, m_endIterators);
 
         m_currentIterator = *minIt;
-        m_currentIteratorIndex = minIt - m_nextIterators.begin();
 
         // bump iterator from nextIterators == current
         *minIt = std::next(*minIt);
@@ -237,7 +220,6 @@ inline void QueriesIteratorInternal<IteratorT>::Next()
     auto minIt = GetBorderElement(true, m_nextIterators, m_endIterators);
 
     m_currentIterator = *minIt;
-    m_currentIteratorIndex = minIt - m_nextIterators.begin();
 
     *minIt = std::next(*minIt);
 }
