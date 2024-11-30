@@ -31,11 +31,14 @@ struct IAuthorizer : public srv::IService
      * @param login given login
      * @param password password for user with given login
      * @param token output string containing a token
-     * @param userId output containing found user_id
+     * @param userInfo output containing all info about found user except password
      * @todo make secure password
      * @return ufa::Result SUCCESS on success, UNAUTHORIZED otherwise
      */
-    virtual ufa::Result GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid) = 0;
+    virtual ufa::Result GenerateToken(std::string_view login,
+        std::string_view password,
+        std::string& token,
+        auth::UserInfo& userInfo) = 0;
 
     /**
      * @brief create new user

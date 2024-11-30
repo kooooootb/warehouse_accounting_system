@@ -10,6 +10,7 @@
 #include <instrumental/user.h>
 
 #include <authorizer/authorizer.h>
+#include <authorizer/user_info.h>
 #include <date_provider/date_provider.h>
 #include <db_connector/accessor.h>
 #include <db_connector/product_definitions/columns.h>
@@ -80,7 +81,7 @@ ufa::Result Authorizer::ValidateToken(std::string_view token, userid_t& userId)
     }
 }
 
-ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token, userid_t& userid)
+ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view password, std::string& token, UserInfo& userInfo)
 {
     TRACE_INF << TRACE_HEADER << "login: " << login;
 
@@ -89,7 +90,7 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
         CHECK_TRUE(!login.empty());
         CHECK_TRUE(!password.empty());
 
-        const auto res = ValidateCredentials(login, password, userid);
+        const auto res = ValidateCredentials(login, password, userInfo);
 
         if (res != ufa::Result::SUCCESS)
         {
@@ -99,7 +100,7 @@ ufa::Result Authorizer::GenerateToken(std::string_view login, std::string_view p
 
         token = jwt::create()
                     .set_issuer(ISSUER.data())
-                    .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(string_converters::ToString(userid)))
+                    .set_payload_claim(USERID_PAYLOAD_KEY.data(), jwt::claim(string_converters::ToString(userInfo.id.value())))
                     .set_payload_claim(EXP_PAYLOAD_KEY.data(),
                         jwt::claim(string_converters::ToString(
                             m_dateProvider->GetTimestamp() + 30ull * 60ull * 60ull * 1000ull * 1000ull * 1000ull)))
@@ -203,7 +204,7 @@ ufa::Result Authorizer::GetUserInfo(userid_t userId, auth::UserInfo& userInfo)
         }
         else if (result.size() == 1)
         {
-            CHECK_TRUE(result.columns() == 1);
+            CHECK_TRUE(result.columns() == 4);
 
             const auto& row = result.at(0);
 
@@ -233,7 +234,7 @@ std::string Authorizer::GetSecretKey() const
     return std::string(SECRET);
 }
 
-ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_view password, userid_t& userid)
+ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_view password, UserInfo& userInfo)
 {
     try
     {
@@ -248,7 +249,7 @@ ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_
         SelectValues values;
 
         options->table = Table::User;
-        options->columns = {Column::user_id};
+        options->columns = {Column::user_id, Column::name, Column::created_by, Column::created_date};
 
         auto loginCondition = CreateRealCondition(Column::login, login);
         auto passwordCondition = CreateRealCondition(Column::password_hashed, password);
@@ -274,8 +275,13 @@ ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_
         }
         else if (result.size() == 1)
         {
-            CHECK_TRUE(result.columns() == 1);
-            userid = result.at(0, 0).as<userid_t>();
+            int i = 0;
+
+            userInfo.id = result.at(0, i++).as<userid_t>();
+            userInfo.name = result.at(0, i++).as<std::string>();
+            userInfo.created_by = result.at(0, i++).as<userid_t>();
+            userInfo.created_date = result.at(0, i++).as<userid_t>();
+            userInfo.login = login;
         }
         else
         {

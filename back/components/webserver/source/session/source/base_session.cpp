@@ -129,6 +129,8 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
         return TI::GetUser;
     if (target == "report")
         return TI::GetReport;
+    if (target == "currentuser")
+        return TI::GetCurrentUser;
     if (target == "products")
         return TI::GetProductList;
     if (target == "warehouses")

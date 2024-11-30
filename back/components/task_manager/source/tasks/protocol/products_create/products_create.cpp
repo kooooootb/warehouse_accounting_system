@@ -58,15 +58,19 @@ ufa::Result ProductsCreate::ExecuteInternal(std::string& result)
         {
             json jsonProduct;
 
-            util::json::Put(jsonProduct, NAME_KEY, product.name.value());
+            util::json::Put(jsonProduct, NAME_KEY, product.name);
             util::json::Put(jsonProduct, DESCRIPTION_KEY, product.description);
             util::json::Put(jsonProduct, MAIN_COLOR_KEY, product.main_color);
             util::json::Put(jsonProduct, MAIN_COLOR_NAME_KEY, product.main_color_name);
             util::json::Put(jsonProduct, COUNT_KEY, product.count.value());
             util::json::Put(jsonProduct, ID_KEY, product.id.value());
-            util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(product.created_date.value()));
-            util::json::Put(jsonProduct, CREATED_BY_KEY, product.created_by.value());
-            util::json::Put(jsonProduct, PRETTY_NAME_KEY, product.pretty_name.value());
+            util::json::Put(jsonProduct, CREATED_BY_KEY, product.created_by);
+            util::json::Put(jsonProduct, PRETTY_NAME_KEY, product.pretty_name);
+
+            if (product.created_date.has_value())
+            {
+                util::json::Put(jsonProduct, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(product.created_date.value()));
+            }
 
             products.emplace_back(std::move(jsonProduct));
         }
@@ -91,16 +95,33 @@ void ProductsCreate::ParseInternal(json&& json)
 
     for (const auto& productJson : json.at(PRODUCTS_KEY))
     {
-        Product product;
+        const auto typeIt = productJson.find(TYPE_KEY);
+        if (typeIt == productJson.end() || *typeIt == "new")
+        {
+            Product product;
 
-        product.name = util::json::Get<std::string>(productJson, NAME_KEY);
-        product.description = util::json::GetOptional<std::string>(productJson, DESCRIPTION_KEY);
-        product.main_color = util::json::GetOptional<int64_t>(productJson, MAIN_COLOR_KEY);
-        product.main_color_name = util::json::GetOptional<std::string>(productJson, MAIN_COLOR_NAME_KEY);
-        product.count = util::json::Get<int64_t>(productJson, COUNT_KEY);
-        product.created_by = m_initiativeUserId;
+            product.name = util::json::Get<std::string>(productJson, NAME_KEY);
+            product.description = util::json::GetOptional<std::string>(productJson, DESCRIPTION_KEY);
+            product.main_color = util::json::GetOptional<int64_t>(productJson, MAIN_COLOR_KEY);
+            product.main_color_name = util::json::GetOptional<std::string>(productJson, MAIN_COLOR_NAME_KEY);
+            product.count = util::json::Get<int64_t>(productJson, COUNT_KEY);
+            product.created_by = m_initiativeUserId;
 
-        m_products.emplace_back(std::move(product));
+            m_productsNew.emplace_back(std::move(product));
+        }
+        else if (*typeIt == "byid")
+        {
+            Product product;
+
+            product.id = util::json::Get<int64_t>(productJson, ID_KEY);
+            product.count = util::json::Get<int64_t>(productJson, COUNT_KEY);
+
+            m_products.emplace_back(std::move(product));
+        }
+        else
+        {
+            CHECK_SUCCESS(ufa::Result::WRONG_FORMAT, "Wrong format on parsing create product");
+        }
     }
 }
 
@@ -118,25 +139,37 @@ ufa::Result ProductsCreate::CreateInvoiceProducts(srv::IAccessor& accessor, srv:
 
     const auto idsConverter = [&productInsertsResults, this]() -> void
     {
-        CHECK_TRUE(productInsertsResults.size() == this->m_products.size());
+        CHECK_TRUE(productInsertsResults.size() == this->m_productsNew.size());
         for (size_t i = 0; i < productInsertsResults.size(); ++i)
         {
-            this->m_products[i].id = productInsertsResults.at(i, 0).get<int64_t>().value();
-            this->m_products[i].pretty_name = productInsertsResults.at(i, 1).get<std::string>().value();
+            this->m_products.emplace_back(std::move(this->m_productsNew[i]));
+
+            this->m_products.back().id = productInsertsResults.at(i, 0).get<int64_t>().value();
+            this->m_products.back().pretty_name = productInsertsResults.at(i, 1).get<std::string>().value();
+
+            this->m_productsNew[i].id = this->m_products.back().id;
+            this->m_productsNew[i].count = this->m_products.back().count;
         }
     };
 
-    // as we are 100% creating new products we dont care about updating Warehouse_Item rows and just creating new ones
-    auto productsEntry = Product::InsertsEntry(GetTracer(), entriesFactory, productInsertsResults, m_products, dateProvider);
+    // handle case when warehouse already has products of this id
+    auto warehouseItemExistingEntry =
+        WarehouseItem::ChangeCount(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_to_id.value(), false);
+
+    auto productsEntry = Product::InsertsEntry(GetTracer(), entriesFactory, productInsertsResults, m_productsNew, dateProvider);
     auto idsConverterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(idsConverter));
     auto invoiceEntry =
         Invoice::FullInsertEntry(GetTracer(), entriesFactory, invoiceInsertResults, m_products, m_invoice, dateProvider);
-    auto warehouseItemEntry = WarehouseItem::InsertsEntry(GetTracer(), entriesFactory, m_products, m_invoice.warehouse_to_id.value());
+
+    // create items only for new products as they are 100% dont exist yet
+    auto warehouseItemEntry =
+        WarehouseItem::InsertsEntry(GetTracer(), entriesFactory, m_productsNew, m_invoice.warehouse_to_id.value());
 
     invoiceEntry->SetNext(std::move(warehouseItemEntry));
     idsConverterEntry->SetNext(std::move(invoiceEntry));
     productsEntry->SetNext(std::move(idsConverterEntry));
-    transaction->SetRootEntry(std::move(productsEntry));
+    warehouseItemExistingEntry->SetNext(std::move(productsEntry));
+    transaction->SetRootEntry(std::move(warehouseItemExistingEntry));
 
     const auto transactionResult = transaction->Execute();
 

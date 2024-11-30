@@ -59,10 +59,12 @@ private:
     static constexpr std::string_view CREATED_DATE_KEY = "created_date";
     static constexpr std::string_view CREATED_BY_KEY = "created_by";
     static constexpr std::string_view PRETTY_NAME_KEY = "pretty_name";
+    static constexpr std::string_view TYPE_KEY = "type";
 
 private:
     Invoice m_invoice;
-    std::vector<Product> m_products;
+    std::vector<Product> m_productsNew;  // will store info for creating new
+    std::vector<Product> m_products;     // will store all products after creating new
 };
 
 }  // namespace tasks

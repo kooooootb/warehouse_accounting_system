@@ -15,7 +15,7 @@ struct AuthorizerMock : public IAuthorizer
     MOCK_METHOD(ufa::Result, ValidateToken, (std::string_view token, userid_t& userId), (override));
     MOCK_METHOD(ufa::Result,
         GenerateToken,
-        (std::string_view login, std::string_view password, std::string& token, userid_t& userid),
+        (std::string_view login, std::string_view password, std::string& token, UserInfo& userInfo),
         (override));
     MOCK_METHOD(ufa::Result, CreateUser, (auth::UserInfo & userInfo), (override));
     MOCK_METHOD(ufa::Result, GetUserInfo, (userid_t userId, auth::UserInfo& result), (override));

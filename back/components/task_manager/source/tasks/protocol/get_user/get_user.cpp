@@ -46,7 +46,7 @@ ufa::Result GetUser::ExecuteInternal(std::string& result)
 
         util::json::Put(jsonUser, USER_ID_KEY, m_user.user_id.value());
         util::json::Put(jsonUser, NAME_KEY, m_user.name.value());
-        util::json::Put(jsonUser, LOGIN_KEY, m_user.name.value());
+        util::json::Put(jsonUser, LOGIN_KEY, m_user.login.value());
         util::json::Put(jsonUser, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_user.created_date.value()));
         util::json::Put(jsonUser, CREATED_BY_KEY, m_user.created_by);
 

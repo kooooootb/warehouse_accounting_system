@@ -6,6 +6,7 @@
 #include "authorization/authorization.h"
 #include "create_user/create_user.h"
 #include "create_warehouse/create_warehouse.h"
+#include "get_current_user/get_current_user.h"
 #include "get_invoice/get_invoice.h"
 #include "get_invoice_list/get_invoice_list.h"
 #include "get_invoice_size/get_invoice_size.h"
@@ -46,6 +47,7 @@ using TasksList = std::tuple<Authorization,
     GetInvoice,
     GetUser,
     GetReport,
+    GetCurrentUser,
     GetProductList,
     GetWarehouseList,
     GetInvoiceList,

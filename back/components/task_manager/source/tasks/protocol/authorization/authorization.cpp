@@ -2,6 +2,8 @@
 #include <json/json_helpers.h>
 
 #include <authorizer/authorizer.h>
+#include <authorizer/user_info.h>
+#include <date_provider/date_provider.h>
 #include <locator/service_locator.h>
 #include <tracer/tracer.h>
 
@@ -29,14 +31,21 @@ ufa::Result Authorization::ExecuteInternal(std::string& result)
     std::shared_ptr<srv::IAuthorizer> authorizer;
     CHECK_SUCCESS(m_locator->GetInterface(authorizer));
 
+    std::shared_ptr<srv::IDateProvider> dateProvider;
+    CHECK_SUCCESS(m_locator->GetInterface(dateProvider));
+
     std::string token;
-    userid_t userid;
-    const auto authResult = authorizer->GenerateToken(m_login, m_hashPassword, token, userid);
+    srv::auth::UserInfo userInfo;
+    const auto authResult = authorizer->GenerateToken(m_login, m_hashPassword, token, userInfo);
 
     if (authResult == ufa::Result::SUCCESS)
     {
         util::json::Put(jsonResult, TOKEN_KEY, token);
-        util::json::Put(jsonResult, USERID_KEY, userid);
+        util::json::Put(jsonResult, USERID_KEY, userInfo.id);
+        util::json::Put(jsonResult, LOGIN_KEY, userInfo.login);
+        util::json::Put(jsonResult, NAME_KEY, userInfo.name);
+        util::json::Put(jsonResult, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(userInfo.created_date));
+        util::json::Put(jsonResult, CREATED_BY_KEY, userInfo.created_by);
     }
 
     result = jsonResult.dump();
@@ -47,7 +56,7 @@ void Authorization::ParseInternal(json&& json)
 {
     TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
 
-    m_login = util::json::Get<std::string>(json, USERNAME_KEY);
+    m_login = util::json::Get<std::string>(json, LOGIN_KEY);
     m_hashPassword = util::hash::HashToBase64(util::json::Get<std::string>(json, PASSWORD_KEY));
 }
 
