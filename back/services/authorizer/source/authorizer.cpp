@@ -212,7 +212,7 @@ ufa::Result Authorizer::GetUserInfo(userid_t userId, auth::UserInfo& userInfo)
 
             userInfo.login = row[0].as<std::string>();
             userInfo.name = row[1].as<std::string>();
-            userInfo.created_by = row[2].as<userid_t>();
+            userInfo.created_by = row[2].get<userid_t>();
             userInfo.created_date = row[2].as<timestamp_t>();
         }
         else
@@ -279,7 +279,7 @@ ufa::Result Authorizer::ValidateCredentials(std::string_view login, std::string_
 
             userInfo.id = result.at(0, i++).as<userid_t>();
             userInfo.name = result.at(0, i++).as<std::string>();
-            userInfo.created_by = result.at(0, i++).as<userid_t>();
+            userInfo.created_by = result.at(0, i++).get<userid_t>();
             userInfo.created_date = result.at(0, i++).as<userid_t>();
             userInfo.login = login;
         }
