@@ -19,7 +19,7 @@
     "TracerSettings": {
         "traceLevel": "DEBUG",
         "traceFolder": "./logs",
-        "maxTraceLevelForConsole": "DEBUG",
+        "maxTraceLevelForConsole": "INF",
         "minMessagesToProcess": 10,
         "processTimeoutMs": 2000
     },

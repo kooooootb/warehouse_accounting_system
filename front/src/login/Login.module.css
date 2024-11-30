@@ -1,0 +1,45 @@
+.authContainer {
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+}
+
+.authContainer h1 {
+    text-align: center;
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.formGroup {
+    margin: 2% auto 5%;
+}
+
+.formGroup label {
+    text-align: center;
+    margin-bottom: 1.5%;
+    display: block;
+}
+
+.formGroup input {
+    width: 97%;
+    padding: 1.5%;
+    font-size: 1rem;
+}
+
+.submitBtn {
+    margin: 0 auto;
+    width: 50%;
+}
+
+.submitBtn button {
+    width: 100%;
+    padding: 1.5%;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+}

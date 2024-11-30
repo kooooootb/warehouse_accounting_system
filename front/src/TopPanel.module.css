@@ -1,0 +1,79 @@
+.topPanel {
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 10vh;
+    background-color: darkmagenta;
+    margin: 0;
+}
+
+.viewName {
+    display: flex;
+    position: relative;
+    top: 50%;
+    align-items: center;
+    float: left;
+    width: 40%;
+    height: 70%;
+    margin-left: 1%;
+    padding-left: 1%;
+    border: 2px black solid;
+    color: aliceblue;
+    font-size: 200%;
+    font-family: Arial, Helvetica, sans-serif;
+    transform: translate(0, -50%);
+}
+
+.toWarehouses {
+    display: flex;
+    position: relative;
+    top: 50%;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    width: 10%;
+    height: 70%;
+    margin-left: 1%;
+    border: 2px black solid;
+    color: aliceblue;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    transform: translate(0, -50%);
+}
+
+.currentUser {
+    display: flex;
+    position: relative;
+    top: 50%;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    width: 10%;
+    height: 70%;
+    margin-left: 1%;
+    border: 2px black solid;
+    color: aliceblue;
+    font-size: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    transform: translate(0, -50%);
+}
+
+.signOut {
+    display: flex;
+    position: relative;
+    top: 50%;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    width: 10%;
+    height: 70%;
+    margin-left: 1%;
+    border: 2px black solid;
+    color: aliceblue;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    transform: translate(0, -50%);
+}
