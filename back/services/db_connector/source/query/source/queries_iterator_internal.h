@@ -36,9 +36,7 @@ private:
     static IteratorT Begin(const queriesStorage_t::mapped_type& quieries);
     static IteratorT End(const queriesStorage_t::mapped_type& quieries);
     static bool Less(IteratorT it1, IteratorT it2, const IteratorT& end1, const IteratorT& end2);
-    static typename std::vector<IteratorT>::iterator GetBorderElement(bool isMin,
-        std::vector<IteratorT>& iterators,
-        std::vector<IteratorT>& ends);
+    static typename std::vector<IteratorT>::iterator GetBorderElement(std::vector<IteratorT>& iterators, std::vector<IteratorT>& ends);
 
 private:
     enum class CurrentIteratorState
@@ -134,7 +132,7 @@ inline bool QueriesIteratorInternal<usdtl::reverse_iterator_t>::Less(usdtl::reve
 }
 
 template <typename IteratorT>
-inline typename std::vector<IteratorT>::iterator QueriesIteratorInternal<IteratorT>::GetBorderElement(bool isMin,
+inline typename std::vector<IteratorT>::iterator QueriesIteratorInternal<IteratorT>::GetBorderElement(
     std::vector<IteratorT>& iterators,
     std::vector<IteratorT>& ends)
 {
@@ -148,28 +146,14 @@ inline typename std::vector<IteratorT>::iterator QueriesIteratorInternal<Iterato
         iteratorPairs.emplace_back(std::make_pair(it, end));
     }
 
-    if (isMin)
-    {
-        const auto minIt = std::min_element(iteratorPairs.begin(),
-            iteratorPairs.end(),
-            [](const auto& a, const auto& b) -> bool
-            {
-                return Less(*(a.first), *(b.first), *(a.second), *(b.second));
-            });
+    const auto minIt = std::min_element(iteratorPairs.begin(),
+        iteratorPairs.end(),
+        [](const auto& a, const auto& b) -> bool
+        {
+            return Less(*(a.first), *(b.first), *(a.second), *(b.second));
+        });
 
-        return (*minIt).first;
-    }
-    else
-    {
-        const auto maxIt = std::max_element(iteratorPairs.begin(),
-            iteratorPairs.end(),
-            [](const auto& a, const auto& b) -> bool
-            {
-                return Less(*(a.first), *(b.first), *(a.second), *(b.second));
-            });
-
-        return (*maxIt).first;
-    }
+    return (*minIt).first;
 }
 
 template <typename IteratorT>
@@ -185,7 +169,7 @@ QueriesIteratorInternal<IteratorT>::QueriesIteratorInternal(bool isEnd, const qu
         }
 
         // get iterator with max value, all post-end logic is embedded in Less function
-        auto minIt = GetBorderElement(true, m_nextIterators, m_endIterators);
+        auto minIt = GetBorderElement(m_nextIterators, m_endIterators);
         m_currentIterator = *minIt;
     }
     else
@@ -199,7 +183,7 @@ QueriesIteratorInternal<IteratorT>::QueriesIteratorInternal(bool isEnd, const qu
         }
 
         // get iterator with min value
-        auto minIt = GetBorderElement(true, m_nextIterators, m_endIterators);
+        auto minIt = GetBorderElement(m_nextIterators, m_endIterators);
 
         m_currentIterator = *minIt;
 
@@ -217,7 +201,7 @@ inline IQueryManager::QueriesIterator::Field QueriesIteratorInternal<IteratorT>:
 template <typename IteratorT>
 inline void QueriesIteratorInternal<IteratorT>::Next()
 {
-    auto minIt = GetBorderElement(true, m_nextIterators, m_endIterators);
+    auto minIt = GetBorderElement(m_nextIterators, m_endIterators);
 
     m_currentIterator = *minIt;
 
