@@ -41,7 +41,7 @@ export default class Warehouse extends React.Component {
                     this.props.setNextRedirect("/warehouse");
                     this.setState({ redirectTo: "/login" });
                 }
-                if (error.status != 404) console.error(error);
+                if (error.status !== 404) console.error(error);
             });
     }
 
@@ -87,7 +87,7 @@ export default class Warehouse extends React.Component {
                     this.props.setNextRedirect("/warehouse");
                     this.setState({ redirectTo: "/login" });
                 }
-                if (error.status != 404) console.error(error);
+                if (error.status !== 404) console.error(error);
             });
 
         this.loadSize();
