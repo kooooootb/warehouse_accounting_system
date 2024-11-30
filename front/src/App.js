@@ -44,7 +44,7 @@ const App = () => {
           {["/", "warehouses"].map(path => <Route key={path} path={path} element={<WarehouseList user={user} setNextRedirect={setNextRedirect} setViewName={setViewName} setCurrentWarehouse={setCurrentWarehouse} />} />)}
           <Route path="login" element={<Login setUser={setUser} nextRedirect={nextRedirect} setViewName={setViewName} />} />
           <Route path="warehouse" element={<Warehouse user={user} setNextRedirect={setNextRedirect} setViewName={setViewName} currentWarehouse={currentWarehouse} setCurrentProduct={setCurrentProduct} />} />
-          <Route path="product" element={<Product user={user} setNextRedirect={setNextRedirect} setViewName={setViewName} currentProduct={currentProduct} />} />
+          <Route path="product" element={<Product user={user} setNextRedirect={setNextRedirect} setViewName={setViewName} currentProduct={currentProduct} currentWarehouse={currentWarehouse} />} />
         </Routes>
       </div>
     </HashRouter>
