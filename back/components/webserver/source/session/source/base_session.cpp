@@ -155,6 +155,8 @@ taskmgr::TaskIdentificator ParseTaskIdentificator(std::string_view target, http:
         return TI::GetReportSize;
     if (target == "operationsize")
         return TI::GetOperationSize;
+    if (target == "productsizebywarehouse")
+        return TI::GetProductSizeByWarehouse;
     if (target == "warehouses/create")
         return TI::CreateWarehouse;
 

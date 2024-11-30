@@ -15,6 +15,7 @@
 #include "get_product/get_product.h"
 #include "get_product_list/get_product_list.h"
 #include "get_product_size/get_product_size.h"
+#include "get_product_size_by_warehouse/get_product_size_by_warehouse.h"
 #include "get_report/get_report.h"
 #include "get_report_list/get_report_list.h"
 #include "get_report_size/get_report_size.h"
@@ -53,13 +54,14 @@ using TasksList = std::tuple<Authorization,
     GetInvoiceList,
     GetUserList,
     GetReportList,
+    GetOperationList,
     GetProductSize,
     GetWarehouseSize,
     GetInvoiceSize,
     GetUserSize,
     GetReportSize,
-    GetOperationList,
     GetOperationSize,
+    GetProductSizeByWarehouse,
     CreateWarehouse>;
 
 }  // namespace tasks
