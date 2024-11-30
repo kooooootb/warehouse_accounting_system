@@ -55,7 +55,7 @@ private:
 
 private:
     std::vector<Product> m_products;
-    int64_t m_limit;
+    std::optional<int64_t> m_limit;
     int64_t m_offset;
     std::unique_ptr<srv::db::ICondition> m_filter;
     bool m_extendWarehouse = false;

@@ -59,7 +59,7 @@ private:
 private:
     std::vector<Warehouse> m_warehouses;
     std::map<int64_t, std::vector<WarehouseItem>> m_warehouseItems;
-    int64_t m_limit;
+    std::optional<int64_t> m_limit;
     int64_t m_offset;
     std::unique_ptr<srv::db::ICondition> m_filter;
 };

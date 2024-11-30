@@ -72,7 +72,9 @@ void GetReportList::ParseInternal(json&& json)
 {
     TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
 
-    m_limit = util::json::Get<int64_t>(json, LIMIT_KEY);
+    m_limit = util::json::GetOptional<int64_t>(json, LIMIT_KEY);
+    m_limit = m_limit.has_value() && m_limit.value() > 0 ? m_limit : std::nullopt;
+
     m_offset = util::json::Get<int64_t>(json, OFFSET_KEY);
 
     const auto filtersIt = json.find(FILTERS_KEY);
@@ -108,7 +110,12 @@ ufa::Result GetReportList::ActualGetReportList(srv::IAccessor& accessor)
         Column::warehouse_id};
 
     options->orderBy = Column::report_id;
-    options->limit = m_limit;
+
+    if (m_limit.has_value())
+    {
+        options->limit = m_limit.value();
+    }
+
     options->offset = m_offset;
 
     if (m_filter != nullptr)

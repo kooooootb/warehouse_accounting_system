@@ -119,7 +119,9 @@ void GetProductList::ParseInternal(json&& json)
 {
     TRACE_INF << TRACE_HEADER << "Parsing " << GetIdentificator();
 
-    m_limit = util::json::Get<int64_t>(json, LIMIT_KEY);
+    m_limit = util::json::GetOptional<int64_t>(json, LIMIT_KEY);
+    m_limit = m_limit.has_value() && m_limit.value() > 0 ? m_limit : std::nullopt;
+
     m_offset = util::json::Get<int64_t>(json, OFFSET_KEY);
 
     const auto filtersIt = json.find(FILTERS_KEY);
@@ -158,7 +160,12 @@ ufa::Result GetProductList::ActualGetProductList(srv::IAccessor& accessor)
         Column::main_color};
 
     options->orderBy = Column::product_id;
-    options->limit = m_limit;
+
+    if (m_limit.has_value())
+    {
+        options->limit = m_limit.value();
+    }
+
     options->offset = m_offset;
 
     if (m_filter != nullptr)
@@ -204,8 +211,12 @@ ufa::Result GetProductList::ActualGetProductList(srv::IAccessor& accessor)
             product.created_date = row.at(i++).get<timestamp_t>();
             product.created_by = row.at(i++).get<userid_t>();
             product.main_color = row.at(i++).get<int64_t>();
-            product.warehouse_id = row.at(i++).get<int64_t>();
-            product.count = row.at(i++).get<int64_t>();
+
+            if (m_extendWarehouse)
+            {
+                product.warehouse_id = row.at(i++).get<int64_t>();
+                product.count = row.at(i++).get<int64_t>();
+            }
 
             m_products.emplace_back(product);
         }

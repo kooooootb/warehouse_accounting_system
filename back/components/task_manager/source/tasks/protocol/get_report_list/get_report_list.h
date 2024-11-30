@@ -54,7 +54,7 @@ private:
 
 private:
     std::vector<Report> m_reports;
-    int64_t m_limit;
+    std::optional<int64_t> m_limit;
     int64_t m_offset;
     std::unique_ptr<srv::db::ICondition> m_filter;
 };

@@ -61,7 +61,7 @@ private:
 private:
     std::vector<Invoice> m_invoices;
     std::map<int64_t, std::vector<InvoiceItem>> m_invoiceItems;
-    int64_t m_limit;
+    std::optional<int64_t> m_limit;
     int64_t m_offset;
     std::unique_ptr<srv::db::ICondition> m_filter;
 };
