@@ -213,7 +213,7 @@ ufa::Result Authorizer::GetUserInfo(userid_t userId, auth::UserInfo& userInfo)
             userInfo.login = row[0].as<std::string>();
             userInfo.name = row[1].as<std::string>();
             userInfo.created_by = row[2].get<userid_t>();
-            userInfo.created_date = row[2].as<timestamp_t>();
+            userInfo.created_date = row[3].as<timestamp_t>();
         }
         else
         {
