@@ -1,8 +1,7 @@
 import React from "react";
 import axios from "axios";
 
-import styles from "./Invoice.module.css";
-import ProductEdit from "./ProductEdit.js";
+import styles from "./CreateWarehouse.module.css";
 
 export default class CreateWarehouse extends React.Component {
     constructor(props) {
@@ -15,6 +14,13 @@ export default class CreateWarehouse extends React.Component {
 
     createWarehouse() {
         const warehouse = this.state.warehouse
+
+        if (!this.isWarehouseGood(warehouse)) {
+            console.error(warehouse)
+            console.error(`tried to create bad warehouse`)
+            return;
+        }
+
         const data = {
             name: warehouse.name,
             ...(warehouse.description && { description: warehouse.description }),
@@ -43,8 +49,6 @@ export default class CreateWarehouse extends React.Component {
 
     isWarehouseGood(wh) {
         if (wh?.name == null) return false
-        if (wh?.description == null) return false
-        if (wh?.location == null) return false
 
         // passed
         return true;
@@ -53,7 +57,10 @@ export default class CreateWarehouse extends React.Component {
     render() {
         return (
             <div className={styles.mainContent}>
-                <div className={styles.invoiceForm}>
+                <div className={styles.form}>
+                    <div className={styles.header}>
+                        Create new warehouse
+                    </div>
                     <div className={styles.inputGroup}>
                         <label>Warehouse name:</label>
                         <input type="text" placeholder="Name" value={this.state.warehouse?.name ?? ""} onChange={(event) => this.setState({ warehouse: { ...this.state.warehouse, name: event.target.value } })} />

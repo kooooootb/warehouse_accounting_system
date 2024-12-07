@@ -7,10 +7,6 @@ export default function TopPanel({ viewName, setUser, user, setMasterMenu }) {
     const navigate = useNavigate()
     const location = useLocation();
 
-    const openInvoiceMaster = () => {
-        ;
-    };
-
     const signOut = () => {
         setUser({ user_id: null, token: null });
         localStorage.removeItem("token");
@@ -31,6 +27,9 @@ export default function TopPanel({ viewName, setUser, user, setMasterMenu }) {
             </div> : null}
             {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("create_warehouse")} >
                 Create warehouse
+            </div> : null}
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("create_user")} >
+                Create user
             </div> : null}
             {location.pathname !== "/login" ? <div className={styles.currentUser} >
                 {user.name ? <p>Currently signed in as: "{user.name}"</p> : <p>not signed</p>}
