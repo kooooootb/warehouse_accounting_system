@@ -16,8 +16,7 @@ export default class CreateUser extends React.Component {
         const user = this.state.user
 
         if (!this.isUserGood(user)) {
-            console.error(user)
-            console.error(`tried to create bad user`)
+            alert("Required fields not filled")
             return;
         }
 

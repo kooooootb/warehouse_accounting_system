@@ -36,6 +36,9 @@ export default class Login extends React.Component {
                 localStorage.setItem("token", user.token);
             })
             .catch((error) => {
+                if (error.status === 401) {
+                    alert("Incorrect credentials, access denied")
+                }
                 console.log(error);
             });
     }

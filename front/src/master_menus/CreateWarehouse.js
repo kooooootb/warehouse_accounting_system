@@ -16,8 +16,7 @@ export default class CreateWarehouse extends React.Component {
         const warehouse = this.state.warehouse
 
         if (!this.isWarehouseGood(warehouse)) {
-            console.error(warehouse)
-            console.error(`tried to create bad warehouse`)
+            alert("Required fields not filled")
             return;
         }
 

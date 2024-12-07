@@ -96,8 +96,7 @@ export default class InvoiceMaster extends React.Component {
 
     saveInvoice() {
         if (!this.isInvoiceGood(this.state.invoice)) {
-            console.error(this.state.invoice)
-            console.error(`tried to save bad invoice`)
+            alert("Required fields not filled")
             return;
         }
 
