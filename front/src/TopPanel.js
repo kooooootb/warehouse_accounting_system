@@ -1,15 +1,21 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import styles from "./TopPanel.module.css"
 
-export default function TopPanel({ viewName, setUser, user }) {
+export default function TopPanel({ viewName, setUser, user, setMasterMenu }) {
     const navigate = useNavigate()
+    const location = useLocation();
+
+    const openInvoiceMaster = () => {
+        setMasterMenu("invoice");
+    };
 
     const signOut = () => {
         setUser({ user_id: null, token: null });
         localStorage.removeItem("token");
         navigate("login");
+        setMasterMenu("");
     };
 
     return (
@@ -17,15 +23,18 @@ export default function TopPanel({ viewName, setUser, user }) {
             <div className={styles.viewName}>
                 {viewName}
             </div>
-            <div className={styles.toWarehouses} onClick={() => navigate("/")} >
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => navigate("/")} >
                 Home
-            </div>
-            <div className={styles.currentUser} >
+            </div> : null}
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={openInvoiceMaster} >
+                Create invoice
+            </div> : null}
+            {location.pathname !== "/login" ? <div className={styles.currentUser} >
                 {user.name ? <p>Currently signed in as: "{user.name}"</p> : <p>not signed</p>}
-            </div>
-            <div className={styles.signOut} onClick={signOut} >
+            </div> : null}
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={signOut} >
                 Sign out
-            </div>
+            </div> : null}
         </div>
     );
 }

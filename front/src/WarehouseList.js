@@ -103,7 +103,7 @@ export default class WarehouseList extends React.Component {
                                 <p className={styles.pageText}>&lt;</p>
                                 <p className={styles.pageText}>{this.state.currentPage - 1 >= 0 ? this.state.currentPage : ""}</p>
                             </div>
-                            <div className={styles.pageEntry} style={{ "backgroundColor": "lightblue" }}>
+                            <div className={styles.pageEntry} style={{ "backgroundColor": "orchid" }}>
                                 <p className={styles.pageText}>current</p>
                                 <p className={styles.pageText}>{this.state.currentPage + 1}</p>
                             </div>

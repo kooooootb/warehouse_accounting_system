@@ -143,6 +143,7 @@ export default class Warehouse extends React.Component {
                             {this.state.products.map((pr) => <div key={pr.product_id} className={styles.productEntry} onClick={() => this.chooseProduct(pr)}>
                                 <p>id: {pr.product_id}</p>
                                 <p>name: {pr.name}</p>
+                                <p>count: {pr.count}</p>
                                 <p>pretty name: {pr.pretty_name}</p>
                                 <p>description: {pr.description}</p>
                                 <p>created in {pr.created_date}</p>
@@ -155,7 +156,7 @@ export default class Warehouse extends React.Component {
                                     <p className={styles.pageText}>&lt;</p>
                                     <p className={styles.pageText}>{this.state.currentPage - 1 >= 0 ? this.state.currentPage : ""}</p>
                                 </div>
-                                <div className={styles.pageEntry} style={{ "backgroundColor": "lightblue" }}>
+                                <div className={styles.pageEntry} style={{ "backgroundColor": "orchid" }}>
                                     <p className={styles.pageText}>current</p>
                                     <p className={styles.pageText}>{this.state.currentPage + 1}</p>
                                 </div>

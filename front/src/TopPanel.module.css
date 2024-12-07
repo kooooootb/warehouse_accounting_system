@@ -24,7 +24,7 @@
     transform: translate(0, -50%);
 }
 
-.toWarehouses {
+.panelButton {
     display: flex;
     position: relative;
     top: 50%;
@@ -55,24 +55,6 @@
     border: 2px black solid;
     color: aliceblue;
     font-size: 100%;
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
-    transform: translate(0, -50%);
-}
-
-.signOut {
-    display: flex;
-    position: relative;
-    top: 50%;
-    justify-content: center;
-    align-items: center;
-    float: left;
-    width: 10%;
-    height: 70%;
-    margin-left: 1%;
-    border: 2px black solid;
-    color: aliceblue;
-    font-size: 150%;
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     transform: translate(0, -50%);

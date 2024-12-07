@@ -12,3 +12,30 @@ body {
     height: 90vh;
     margin: 0;
 }
+
+.masterMenuWindow {
+    position: absolute;
+    z-index: 100;
+    border: 2px black solid;
+    width: 80%;
+    height: 80%;
+    top: 0;
+    margin: 4% 10%;
+    background-color: #faf1ff;
+}
+
+.masterMenuCloseButton {
+    position: absolute;
+    width: 5%;
+    height: 5%;
+    top: 0;
+    right: 0;
+    margin: 1%;
+    transform: translate(150%, 0);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px black solid;
+    background-color: #f4f4f4;
+}
