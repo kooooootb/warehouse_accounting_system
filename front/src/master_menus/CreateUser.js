@@ -14,6 +14,19 @@ export default class CreateUser extends React.Component {
 
     createUser() {
         const user = this.state.user
+
+        if (!this.isUserGood(user)) {
+            console.error(user)
+            console.error(`tried to create bad user`)
+            return;
+        }
+
+        const illegalChars = /[^a-zA-Z0-9]/;
+        if (illegalChars.test(user.login)) {
+            alert("Login contains illegal characters. Only letters and numbers are allowed.");
+            return;
+        }
+
         const data = {
             name: user.name,
             login: user.login,
