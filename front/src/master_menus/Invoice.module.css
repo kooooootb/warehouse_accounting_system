@@ -20,6 +20,7 @@
     font-size: 150%;
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
+    cursor: pointer;
 }
 
 .selectedTypeSwitcher {
@@ -32,6 +33,7 @@
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     background-color: orchid;
+    cursor: pointer;
 }
 
 .invoiceForm {
@@ -153,6 +155,7 @@
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     background-color: #bcf1a3;
+    cursor: pointer;
 }
 
 .productList {
@@ -169,6 +172,7 @@
     margin: 1% 1%;
     border: 1px solid #000;
     background-color: #e7b3ff;
+    cursor: pointer;
 }
 
 .productInfo {
@@ -188,6 +192,7 @@
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     background-color: #f1a3a3;
+    cursor: pointer;
 }
 
 .submitButton {

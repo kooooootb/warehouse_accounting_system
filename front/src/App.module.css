@@ -38,4 +38,5 @@ body {
     align-items: center;
     border: 2px black solid;
     background-color: #f4f4f4;
+    cursor: pointer;
 }

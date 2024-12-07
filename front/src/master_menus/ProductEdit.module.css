@@ -24,6 +24,7 @@
     font-size: 150%;
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
+    cursor: pointer;
 }
 
 .selectedTypeSwitcher {
@@ -36,6 +37,7 @@
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     background-color: orchid;
+    cursor: pointer;
 }
 
 .productForm {
