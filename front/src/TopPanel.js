@@ -8,7 +8,7 @@ export default function TopPanel({ viewName, setUser, user, setMasterMenu }) {
     const location = useLocation();
 
     const openInvoiceMaster = () => {
-        setMasterMenu("invoice");
+        ;
     };
 
     const signOut = () => {
@@ -26,8 +26,11 @@ export default function TopPanel({ viewName, setUser, user, setMasterMenu }) {
             {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => navigate("/")} >
                 Home
             </div> : null}
-            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={openInvoiceMaster} >
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("invoice")} >
                 Create invoice
+            </div> : null}
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("create_warehouse")} >
+                Create warehouse
             </div> : null}
             {location.pathname !== "/login" ? <div className={styles.currentUser} >
                 {user.name ? <p>Currently signed in as: "{user.name}"</p> : <p>not signed</p>}
