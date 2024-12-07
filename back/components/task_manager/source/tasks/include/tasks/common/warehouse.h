@@ -83,7 +83,8 @@ struct Warehouse
         SelectValues values;
 
         options->table = Table::Warehouse;
-        options->columns = {Column::name, Column::pretty_name, Column::description, Column::created_date, Column::created_by};
+        options->columns =
+            {Column::name, Column::pretty_name, Column::description, Column::created_date, Column::created_by, Column::location};
 
         auto condition = CreateRealCondition(Column::warehouse_id, warehouse.warehouse_id.value());
 
@@ -103,9 +104,10 @@ struct Warehouse
 
             warehouse.name = results->at(0, 0).get<std::string>().value();
             warehouse.pretty_name = results->at(0, 1).get<std::string>().value();
-            warehouse.description = results->at(0, 2).get<std::string>().value();
+            warehouse.description = results->at(0, 2).get<std::string>();
             warehouse.created_date = results->at(0, 3).get<timestamp_t>().value();
             warehouse.created_by = results->at(0, 4).get<userid_t>().value();
+            warehouse.location = results->at(0, 2).get<std::string>();
         };
 
         auto converterEntry = entriesFactory.CreateVariableTransactionEntry(std::move(converter));

@@ -58,6 +58,7 @@ ufa::Result GetWarehouseList::ExecuteInternal(std::string& result)
             util::json::Put(jsonWarehouse, DESCRIPTION_KEY, warehouse.description);
             util::json::Put(jsonWarehouse, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(warehouse.created_date.value()));
             util::json::Put(jsonWarehouse, CREATED_BY_KEY, warehouse.created_by.value());
+            util::json::Put(jsonWarehouse, LOCATION_KEY, warehouse.location);
 
             json::array_t jsonItems;
             for (const auto& item : m_warehouseItems[warehouse.warehouse_id.value()])
@@ -114,8 +115,13 @@ ufa::Result GetWarehouseList::ActualGetWarehouseList(srv::IAccessor& accessor)
     SelectValues values;
 
     options->table = Table::Warehouse;
-    options->columns =
-        {Column::warehouse_id, Column::name, Column::pretty_name, Column::description, Column::created_date, Column::created_by};
+    options->columns = {Column::warehouse_id,
+        Column::name,
+        Column::pretty_name,
+        Column::description,
+        Column::created_date,
+        Column::created_by,
+        Column::location};
 
     options->orderBy = Column::warehouse_id;
 
@@ -149,9 +155,10 @@ ufa::Result GetWarehouseList::ActualGetWarehouseList(srv::IAccessor& accessor)
             warehouse.warehouse_id = row.at(i++).get<int64_t>().value();
             warehouse.name = row.at(i++).get<std::string>().value();
             warehouse.pretty_name = row.at(i++).get<std::string>().value();
-            warehouse.description = row.at(i++).get<std::string>().value();
+            warehouse.description = row.at(i++).get<std::string>();
             warehouse.created_date = row.at(i++).get<timestamp_t>().value();
             warehouse.created_by = row.at(i++).get<userid_t>().value();
+            warehouse.location = row.at(i++).get<std::string>();
 
             this->m_warehouses.emplace_back(std::move(warehouse));
         }

@@ -49,6 +49,7 @@ ufa::Result GetWarehouse::ExecuteInternal(std::string& result)
         util::json::Put(jsonWarehouse, DESCRIPTION_KEY, m_warehouse.description);
         util::json::Put(jsonWarehouse, CREATED_DATE_KEY, dateProvider->ToIsoTimeString(m_warehouse.created_date.value()));
         util::json::Put(jsonWarehouse, CREATED_BY_KEY, m_warehouse.created_by.value());
+        util::json::Put(jsonWarehouse, LOCATION_KEY, m_warehouse.location);
 
         json::array_t jsonItems;
         for (const auto& item : m_warehouseItems)
