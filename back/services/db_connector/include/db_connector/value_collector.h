@@ -44,7 +44,17 @@ public:
 
         while (!m_values.empty())
         {
-            result.append(m_values.front());
+            auto value = std::move(m_values.front());
+
+            if (value == "NULL")
+            {
+                result.append();
+            }
+            else
+            {
+                result.append(std::move(value));
+            }
+
             m_values.pop_front();
         }
 
