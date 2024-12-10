@@ -1,0 +1,221 @@
+.mainContent {
+    width: 100%;
+    height: 98%;
+    padding: 2% 0 0;
+}
+
+.typeSwitchHeader {
+    display: flex;
+    width: 90%;
+    height: 9%;
+    margin: 0 auto 2%;
+}
+
+.typeSwitcher {
+    display: inline-block;
+    width: 30%;
+    height: 100%;
+    margin: 0 1.5%;
+    border: 2px black solid;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    cursor: pointer;
+}
+
+.selectedTypeSwitcher {
+    display: inline-block;
+    width: 30%;
+    height: 100%;
+    margin: 0 1.5%;
+    border: 2px black solid;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    background-color: orchid;
+    cursor: pointer;
+}
+
+.reportList {
+    border: 1px solid #000;
+    overflow: auto;
+    margin: auto 2%;
+    height: 85%;
+}
+
+.reportEntry {
+    border: 1px solid #000;
+    width: 98%;
+    height: 30%;
+    display: flex;
+    margin: 2% auto;
+}
+
+.reportBriefInfo {
+    border: 1px solid #000;
+    width: 35%;
+    height: 100%;
+    margin: auto 0;
+}
+
+.reportBriefInfo p {
+    margin: 3%;
+}
+
+.reportDescription {
+    border: 1px solid #000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 40%;
+    height: 100%;
+    margin: auto 0;
+}
+
+
+.reportDescription p {
+    margin: 1% auto;
+    width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.reportDownloadButton {
+    border: 2px solid #000;
+    width: 21%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    margin: 2% auto;
+    border: 2px black solid;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    cursor: pointer;
+}
+
+.reportLoadMore {
+    margin: 0 auto 10%;
+    width: 40%;
+    height: 10%;
+    border: 2px black solid;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    cursor: pointer;
+}
+
+.reportForm {
+    height: 85%;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputGroup {
+    display: flex;
+    align-items: center;
+    width: 95%;
+    height: 7%;
+    margin: 0.5% auto;
+}
+
+.inputGroup label {
+    min-width: 30%;
+    padding: 0 1%;
+    color: #333;
+    font-size: 100%;
+    text-align: right;
+}
+
+.inputGroup input {
+    flex: 1;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 100%;
+}
+
+.inputGroup input:focus {
+    border-color: #8400ff;
+    outline: none;
+    box-shadow: 0 0 5px #6f00ff;
+}
+
+.textareaGroup {
+    display: flex;
+    align-items: center;
+    width: 95%;
+    height: 20%;
+    margin: 0.5% auto;
+}
+
+.textareaGroup label {
+    min-width: 30%;
+    padding: 0 1%;
+    color: #333;
+    font-size: 100%;
+    text-align: right;
+}
+
+.textareaGroup textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: auto 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: auto;
+    font-size: 100%;
+    resize: vertical;
+    resize: none;
+}
+
+.textareaGroup textarea:focus {
+    border-color: #8400ff;
+    outline: none;
+    box-shadow: 0 0 5px #6f00ff;
+}
+
+.warehousesGroup {
+    display: flex;
+    align-items: center;
+    width: 95%;
+    height: 7%;
+    margin: 0.5% auto;
+}
+
+.warehouseSelect {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 5%;
+}
+
+.warehouseSelect label {
+    width: 100%;
+    margin: auto;
+}
+
+.warehouseSelect select {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.submitButton {
+    width: 15%;
+    height: 8%;
+    margin: 1% 3% 0.5% auto;
+}
+
+.submitButton button {
+    width: 100%;
+    height: 100%;
+    font-size: 150%;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}

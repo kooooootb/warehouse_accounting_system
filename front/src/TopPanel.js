@@ -25,6 +25,9 @@ export default function TopPanel({ viewName, setUser, user, setMasterMenu }) {
             {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("invoice")} >
                 Create invoice
             </div> : null}
+            {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("report")} >
+                Manage reports
+            </div> : null}
             {location.pathname !== "/login" ? <div className={styles.panelButton} onClick={() => setMasterMenu("create_warehouse")} >
                 Create warehouse
             </div> : null}

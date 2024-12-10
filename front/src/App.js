@@ -8,6 +8,7 @@ import Login from "./login/Login";
 import Warehouse from "./Warehouse";
 import Product from "./Product";
 import InvoiceMaster from "./master_menus/Invoice";
+import ReportMaster from "./master_menus/Report";
 import CreateWarehouse from "./master_menus/CreateWarehouse";
 import CreateUser from "./master_menus/CreateUser";
 
@@ -43,6 +44,7 @@ const App = () => {
   const switchMasterMenu = () => {
     switch (masterMenu) {
       case "invoice": return <InvoiceMaster user={user} closeMaster={() => setMasterMenu("")} />;
+      case "report": return <ReportMaster user={user} closeMaster={() => setMasterMenu("")} />;
       case "create_warehouse": return <CreateWarehouse user={user} closeMaster={() => setMasterMenu("")} />;
       case "create_user": return <CreateUser user={user} closeMaster={() => setMasterMenu("")} />;
       default: return null;
