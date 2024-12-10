@@ -2,9 +2,6 @@ package(default_visibility = ["//back/components/task_manager:__subpackages__"])
 
 cc_library(
     name = "base",
-    srcs = glob([
-        "include/**/*.cpp",
-    ]),
     hdrs = glob([
         "include/**/*.h",
     ]),
