@@ -123,7 +123,7 @@ ufa::Result DateProvider::FromIsoTimeString(std::string_view timeString, timesta
 
         std::tm tm{};
 
-        CHECK_TRUE(monthes > 0 && monthes <= 12 && days > 0 && days <= 31 && hours > 0 && hours <= 24 && minutes > 0 &&
+        CHECK_TRUE(monthes > 0 && monthes <= 12 && days > 0 && days <= 31 && hours >= 0 && hours < 24 && minutes > 0 &&
                    minutes <= 60 && seconds > 0 && seconds <= 60);
 
         tm.tm_year = years - 1900;  // since january
