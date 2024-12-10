@@ -127,7 +127,7 @@ export default class ReportMaster extends React.Component {
                 authorization: this.props.user.token
             },
             data: { ...this.state.currentReport }
-        })
+        }).then(() => alert("Current report saved"))
             .catch((error) => {
                 if (error.status === 401) {
                     this.props.setNextRedirect("/");
@@ -137,6 +137,34 @@ export default class ReportMaster extends React.Component {
             });
 
         this.setState({ currentReport: {} });
+    }
+
+    saveByPeriodReport() {
+        if (!this.isByPeriodReportGood(this.state.byPeriodReport)) {
+            alert("Required fields not filled")
+            return;
+        }
+
+        const period_from = this.state.byPeriodReport.period_from.replace('T', "'T'")
+        const period_to = this.state.byPeriodReport.period_to.replace('T', "'T'")
+
+        axios({
+            url: "/api/reports/byperiod",
+            method: "POST",
+            headers: {
+                authorization: this.props.user.token
+            },
+            data: { ...this.state.byPeriodReport, period_from, period_to }
+        }).then(() => alert("By period report saved"))
+            .catch((error) => {
+                if (error.status === 401) {
+                    this.props.setNextRedirect("/");
+                    this.setState({ redirectTo: "/login" });
+                }
+                console.error(error);
+            });
+
+        this.setState({ byPeriodReport: {} });
     }
 
     renderSwitch() {
@@ -190,7 +218,7 @@ export default class ReportMaster extends React.Component {
                 <div className={styles.warehousesGroup}>
                     <div className={styles.warehouseSelect}>
                         <label>For warehouse: </label>
-                        <select value={this.state.currentReport.warehouse_id} onChange={(event) => { this.setState({ currentReport: { ...this.state.currentReport, warehouse_id: event.target.value === "" ? undefined : Number(event.target.value) } }) }}>
+                        <select value={this.state.currentReport?.warehouse_id ?? ""} onChange={(event) => { this.setState({ currentReport: { ...this.state.currentReport, warehouse_id: event.target.value === "" ? undefined : Number(event.target.value) } }) }}>
                             <option value={""}>choose warehouse</option>
                             {this.state.warehouses.map((wh) => (
                                 <option key={wh.warehouse_id} value={wh.warehouse_id}>
@@ -208,7 +236,42 @@ export default class ReportMaster extends React.Component {
     }
 
     renderByPeriod() {
-
+        return (
+            <div className={styles.reportForm}>
+                <div className={styles.inputGroup}>
+                    <label>Report name:</label>
+                    <input type="text" placeholder="Name" value={this.state.byPeriodReport?.name ?? ""} onChange={(event) => this.setState({ byPeriodReport: { ...this.state.byPeriodReport, name: event.target.value } })} />
+                </div>
+                <div className={styles.textareaGroup}>
+                    <label>Report description:</label>
+                    <textarea type="text" placeholder="Description" value={this.state.byPeriodReport?.description ?? ""} onChange={(event) => this.setState({ byPeriodReport: { ...this.state.byPeriodReport, description: event.target.value } })} />
+                </div>
+                <div className={styles.inputGroup}>
+                    <label>From this date: </label>
+                    <input type="datetime-local" value={this.state.byPeriodReport?.period_from ?? ""} step="1" onChange={(event) => this.setState({ byPeriodReport: { ...this.state.byPeriodReport, period_from: event.target.value } })} />
+                </div>
+                <div className={styles.inputGroup}>
+                    <label>To this date: </label>
+                    <input type="datetime-local" value={this.state.byPeriodReport?.period_to ?? ""} step="1" onChange={(event) => this.setState({ byPeriodReport: { ...this.state.byPeriodReport, period_to: event.target.value } })} />
+                </div>
+                <div className={styles.warehousesGroup}>
+                    <div className={styles.warehouseSelect}>
+                        <label>For warehouse: </label>
+                        <select value={this.state.byPeriodReport?.warehouse_id ?? ""} onChange={(event) => { this.setState({ byPeriodReport: { ...this.state.byPeriodReport, warehouse_id: event.target.value === "" ? undefined : Number(event.target.value) } }) }}>
+                            <option value={""}>choose warehouse</option>
+                            {this.state.warehouses.map((wh) => (
+                                <option key={wh.warehouse_id} value={wh.warehouse_id}>
+                                    {wh.pretty_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className={styles.submitButton}>
+                    <button type="submit" onClick={() => this.saveByPeriodReport()}>Submit</button>
+                </div>
+            </div>
+        )
     }
 
     render() {
