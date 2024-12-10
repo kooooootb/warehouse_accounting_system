@@ -10,6 +10,7 @@ export default class ReportMaster extends React.Component {
         this.state = {
             type: "current",
             reports: [],
+            warehouses: [],
             reportSize: null,
             reportsBatch: 5,
             currentReport: {},
@@ -18,6 +19,11 @@ export default class ReportMaster extends React.Component {
     }
 
     componentDidMount() {
+        this.loadReportSize();
+        this.loadWarehouses();
+    }
+
+    loadReportSize() {
         if (this.state.reportSize == null) {
             axios.get("/api/reportsize", {
                 headers: {
@@ -36,7 +42,29 @@ export default class ReportMaster extends React.Component {
                     console.error(error);
                 });
         }
+    }
 
+    loadWarehouses() {
+        axios.get("/api/warehouses", {
+            headers: {
+                authorization: this.props.user.token
+            },
+            params: {
+                limit: 0,
+                offset: 0
+            }
+        })
+            .then((response) => {
+                const warehouses = response.data.result.map(({ warehouse_id, pretty_name }) => ({ warehouse_id, pretty_name }));
+                this.setState({ warehouses });
+            })
+            .catch((error) => {
+                if (error.status === 401) {
+                    this.props.setNextRedirect("/");
+                    this.setState({ redirectTo: "/login" });
+                }
+                console.error(error);
+            });
     }
 
     loadNextReports() {
@@ -72,7 +100,7 @@ export default class ReportMaster extends React.Component {
 
     isCurrentReportGood(rep) {
         // check name
-        if (rep?.name != null && rep?.warehouse_id != null) return false
+        if (rep?.name == null || rep?.warehouse_id == null) return false
 
         // passed
         return true;
@@ -80,68 +108,35 @@ export default class ReportMaster extends React.Component {
 
     isByPeriodReportGood(rep) {
         // check name
-        if (rep?.name != null && rep?.period_from != null && rep?.period_to != null && rep?.warehouse_id != null) return false
+        if (rep?.name == null || rep?.period_from == null || rep?.period_to == null || rep?.warehouse_id == null) return false
 
         // passed
         return true;
     }
 
-    saveInvoice() {
-        if (!this.isInvoiceGood(this.state.invoice)) {
+    saveCurrentReport() {
+        if (!this.isCurrentReportGood(this.state.currentReport)) {
             alert("Required fields not filled")
             return;
         }
 
-        const products = this.state.products.map((pr) => {
-            if (pr?.product_id != null) {
-                return { id: pr.product_id, count: pr.count }
-            }
-            else {
-                return pr
-            }
-        })
-
-        let data = {
-            invoice_name: this.state.invoice.invoice_name,
-            ...(this.state.invoice.invoice_description && { invoice_description: this.state.invoice.invoice_description }),
-            products
-        }
-        let url = ""
-
-        switch (this.state.type) {
-            case "new":
-                data = { ...data, warehouse_to: this.state.warehouse_to_id }
-                url = "/api/products/create"
-                break
-            case "move":
-                data = { ...data, warehouse_to: this.state.warehouse_to_id, warehouse_from: this.state.warehouse_from_id }
-                url = "/api/products/move"
-                break
-            case "remove":
-                data = { ...data, warehouse_from: this.state.warehouse_from_id }
-                url = "/api/products/remove"
-                break
-            default: console.error(`wrong type: ${this.state.type}`)
-        }
-
         axios({
-            url,
+            url: "/api/reports/current",
             method: "POST",
             headers: {
                 authorization: this.props.user.token
             },
-            data
+            data: { ...this.state.currentReport }
         })
-            .then((response) => {
-                this.props.closeMaster();
-            })
             .catch((error) => {
                 if (error.status === 401) {
-                    this.props.setNextRedirect("/warehouses");
+                    this.props.setNextRedirect("/");
                     this.setState({ redirectTo: "/login" });
                 }
                 console.error(error);
             });
+
+        this.setState({ currentReport: {} });
     }
 
     renderSwitch() {
@@ -182,9 +177,33 @@ export default class ReportMaster extends React.Component {
     }
 
     renderCurrent() {
-        return (<div className={styles.invoiceForm}>
-
-        </div>
+        return (
+            <div className={styles.reportForm}>
+                <div className={styles.inputGroup}>
+                    <label>Report name:</label>
+                    <input type="text" placeholder="Name" value={this.state.currentReport?.name ?? ""} onChange={(event) => this.setState({ currentReport: { ...this.state.currentReport, name: event.target.value } })} />
+                </div>
+                <div className={styles.textareaGroup}>
+                    <label>Report description:</label>
+                    <textarea type="text" placeholder="Description" value={this.state.currentReport?.description ?? ""} onChange={(event) => this.setState({ currentReport: { ...this.state.currentReport, description: event.target.value } })} />
+                </div>
+                <div className={styles.warehousesGroup}>
+                    <div className={styles.warehouseSelect}>
+                        <label>For warehouse: </label>
+                        <select value={this.state.currentReport.warehouse_id} onChange={(event) => { this.setState({ currentReport: { ...this.state.currentReport, warehouse_id: event.target.value === "" ? undefined : Number(event.target.value) } }) }}>
+                            <option value={""}>choose warehouse</option>
+                            {this.state.warehouses.map((wh) => (
+                                <option key={wh.warehouse_id} value={wh.warehouse_id}>
+                                    {wh.pretty_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className={styles.submitButton}>
+                    <button type="submit" onClick={() => this.saveCurrentReport()}>Submit</button>
+                </div>
+            </div>
         )
     }
 
