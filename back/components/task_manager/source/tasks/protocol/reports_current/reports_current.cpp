@@ -26,6 +26,148 @@ namespace taskmgr
 namespace tasks
 {
 
+namespace
+{
+
+constexpr std::string_view OpenHtml = R"(
+<!DOCTYPE html>
+<html lang="en">
+)";
+
+constexpr std::string_view Head = R"(
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Report - Report 1</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f4f4f9;
+			color: #333;
+			margin: 0;
+			padding: 20px;
+		}
+
+		header {
+			background-color: #333;
+			color: #fff;
+			padding: 20px;
+			text-align: center;
+		}
+
+		section {
+			background-color: #fff;
+			margin: 20px 0;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		h1,
+		h2,
+		h3 {
+			margin: 0 0 10px 0;
+		}
+
+		.invoice {
+			border-top: 2px solid #333;
+			margin-top: 20px;
+			padding-top: 20px;
+		}
+
+		.product {
+			background-color: #f9f9f9;
+			margin-bottom: 10px;
+			padding: 10px;
+			border-radius: 5px;
+		}
+
+		.product-details {
+			margin-left: 20px;
+		}
+	</style>
+</head>
+)";
+
+constexpr std::string_view OpenBody = R"(
+<body>
+)";
+
+void PrintHeader(std::ostream& os, const Report& report, const Warehouse& warehouse, const srv::IDateProvider& dateProvider)
+{
+    constexpr std::string_view HeaderTemplate = R"(
+	<header>
+		<h1>Report #{} - {}</h1>
+		<p>Description: {}</p>
+		<p>Generated for warehouse: {} - {}</p>
+		<p>Created on: {}</p>
+	</header>
+    )";
+
+    os << fmt::format(HeaderTemplate,
+        report.report_id.value(),
+        report.name.value(),
+        report.description.value_or(""),
+        report.warehouse_id.value(),
+        warehouse.name.value(),
+        dateProvider.ToReadableTimeString(report.created_date.value()));
+}
+
+void PrintSummary(std::ostream& os, size_t productsTotal)
+{
+    constexpr std::string_view SummaryTemplate = R"(
+	<section>
+		<h2>Summary</h2>
+		<p>Total Products: {}</p>
+	</section>
+    )";
+
+    os << fmt::format(SummaryTemplate, productsTotal);
+}
+
+constexpr std::string_view OpenProducts = R"(
+	<section>
+		<h2>Products</h2>
+)";
+
+void PrintProduct(std::ostream& os, const Product& product, const srv::IDateProvider& dateProvider)
+{
+    constexpr std::string_view ProductTemplate = R"(
+			<div class="product">
+				<strong>Product ID:</strong> {}
+				<div class="product-details">
+					<p><strong>Name:</strong> {}</p>
+					<p><strong>Pretty Name:</strong> {}</p>
+					<p><strong>Description:</strong> {}</p>
+					<p><strong>Count:</strong> {}</p>
+					<p><strong>Created Date:</strong> {}</p>
+				</div>
+			</div>
+    )";
+
+    os << fmt::format(ProductTemplate,
+        product.id.value(),
+        product.name.value(),
+        product.pretty_name.value(),
+        product.description.value_or(""),
+        product.count.value(),
+        dateProvider.ToReadableTimeString(product.created_date.value()));
+}
+
+constexpr std::string_view CloseProducts = R"(
+	</section>
+)";
+
+constexpr std::string_view CloseBody = R"(
+</body>
+)";
+
+constexpr std::string_view CloseHtml = R"(
+</html>
+)";
+
+}  // namespace
+
 ReportsCurrent::ReportsCurrent(std::shared_ptr<srv::ITracer> tracer,
     std::shared_ptr<srv::IServiceLocator> locator,
     const TaskInfo& taskInfo)
@@ -146,7 +288,7 @@ ufa::Result ReportsCurrent::CreateReportFile(srv::IDateProvider& dateProvider,
 
     std::filesystem::path reportPath = ReportsFolder;
     reportPath.append(string_converters::ToString(m_report.report_type.value()));
-    reportPath.append(dateProvider.ToIsoTimeString(m_report.created_date.value()));
+    reportPath.append(dateProvider.ToIsoTimeString(m_report.created_date.value()) + ".html");
 
     CHECK_SUCCESS(documentManager.EscapePath(reportPath));
 
@@ -162,29 +304,27 @@ ufa::Result ReportsCurrent::WriteReportFile(srv::IDateProvider& dateProvider,
     srv::IDocumentManager& documentManager,
     std::ofstream& fstream)
 {
-    fstream << "REPORT id: " << m_report.report_id.value() << ", name:\'" << m_report.name.value() << "\'\n\n";
+    fstream << OpenHtml;
+    fstream << Head;
+    fstream << OpenBody;
 
-    if (m_report.description.has_value())
-        fstream << "Report's description: " << m_report.description.value() << "\'\n\n";
+    PrintHeader(fstream, m_report, m_warehouse, dateProvider);
 
-    fstream << "Generated for warehouse: id: " << m_warehouse.warehouse_id.value() << ", name: " << m_warehouse.name.value() << "\n\n";
-    fstream << "Created in " << dateProvider.ToIsoTimeString(m_report.created_date.value()) << '\n';
-    fstream << "Total: " << m_products.size() << " products\n\n";
+    PrintSummary(fstream, m_products.size());
+
+    fstream << OpenProducts;
 
     for (const auto& productPair : m_products)
     {
         const auto& product = productPair.second;
 
-        fstream << "\tId : " << product.id.value() << '\n';
-        fstream << "\t\tName : " << product.name.value() << '\n';
-        fstream << "\t\tPretty_name : " << product.pretty_name.value() << '\n';
-        if (product.description.has_value())
-            fstream << "\t\tDescription : " << product.description.value() << '\n';
-        if (product.main_color.has_value())
-            fstream << "\t\tMain_color : " << product.main_color.value() << '\n';
-        fstream << "\t\tCount : " << product.count.value() << '\n';
-        fstream << "\t\tCreated_date : " << dateProvider.ToIsoTimeString(product.created_date.value()) << '\n';
+        PrintProduct(fstream, product, dateProvider);
     }
+
+    fstream << CloseProducts;
+
+    fstream << CloseBody;
+    fstream << CloseHtml;
 
     return ufa::Result::SUCCESS;
 }

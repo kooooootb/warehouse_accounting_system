@@ -34,9 +34,6 @@ DurationT Extract(std::chrono::nanoseconds& duration)
 
 namespace chrono = std::chrono;
 
-// "yyyy-MM-dd'T'HH:mm:ss"
-constexpr std::string_view Format = "%F'T'%T";
-
 DateProvider::DateProvider(const std::shared_ptr<IServiceLocator>& locator)
 {
     const auto currentTimeFromEpoch = chrono::system_clock::now().time_since_epoch();
@@ -92,6 +89,27 @@ std::string DateProvider::GetTimeString() const
 
 std::string DateProvider::ToIsoTimeString(timestamp_t timestamp) const
 {
+    // "yyyy-MM-dd'T'HH:mm:ss"
+    constexpr std::string_view Format = "%F'T'%T";
+
+    auto duration = chrono::nanoseconds(timestamp);
+    chrono::system_clock::time_point timePoint(chrono::duration_cast<chrono::system_clock::duration>(duration));
+    std::time_t timeT = chrono::system_clock::to_time_t(timePoint);
+
+    std::string result;
+    result.resize(22);
+
+    std::strftime(result.data(), result.size(), Format.data(), std::gmtime(&timeT));
+
+    result.resize(result.size() - 1);  // strftime requires 1 extra byte for \0 so we strip it here
+    return result;
+}
+
+std::string DateProvider::ToReadableTimeString(timestamp_t timestamp) const
+{
+    // "yyyy-MM-dd'T'HH:mm:ss"
+    constexpr std::string_view Format = "%F %T";
+
     auto duration = chrono::nanoseconds(timestamp);
     chrono::system_clock::time_point timePoint(chrono::duration_cast<chrono::system_clock::duration>(duration));
     std::time_t timeT = chrono::system_clock::to_time_t(timePoint);

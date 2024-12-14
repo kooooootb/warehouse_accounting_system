@@ -23,6 +23,7 @@ public:
     uint64_t GetTimestamp() const override;
     std::string GetTimeString() const override;
     std::string ToIsoTimeString(timestamp_t timestamp) const override;
+    std::string ToReadableTimeString(timestamp_t timestamp) const override;
     ufa::Result FromIsoTimeString(std::string_view timeString, timestamp_t& result) const override;
 
 private:

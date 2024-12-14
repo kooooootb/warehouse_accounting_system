@@ -1,5 +1,7 @@
 #include <exception>
 
+#include <fmt/core.h>
+
 #include <instrumental/string_converters.h>
 #include <instrumental/time.h>
 #include <instrumental/types.h>
@@ -25,6 +27,195 @@ namespace taskmgr
 {
 namespace tasks
 {
+
+namespace
+{
+
+constexpr std::string_view OpenHtml = R"(
+<!DOCTYPE html>
+<html lang="en">
+)";
+
+constexpr std::string_view Head = R"(
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Report - Report 1</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f4f4f9;
+			color: #333;
+			margin: 0;
+			padding: 20px;
+		}
+
+		header {
+			background-color: #333;
+			color: #fff;
+			padding: 20px;
+			text-align: center;
+		}
+
+		section {
+			background-color: #fff;
+			margin: 20px 0;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		h1,
+		h2,
+		h3 {
+			margin: 0 0 10px 0;
+		}
+
+		.invoice {
+			border-top: 2px solid #333;
+			margin-top: 20px;
+			padding-top: 20px;
+		}
+
+		.product {
+			background-color: #f9f9f9;
+			margin-bottom: 10px;
+			padding: 10px;
+			border-radius: 5px;
+		}
+
+		.product-details {
+			margin-left: 20px;
+		}
+	</style>
+</head>
+)";
+
+constexpr std::string_view OpenBody = R"(
+<body>
+)";
+
+void PrintHeader(std::ostream& os, const Report& report, const Warehouse& warehouse, const srv::IDateProvider& dateProvider)
+{
+    constexpr std::string_view HeaderTemplate = R"(
+	<header>
+		<h1>Report #{} - {}</h1>
+		<p>Description: {}</p>
+		<p>Generated for period: {} to {}</p>
+		<p>Created on: {}</p>
+		<p>Warehouse: {} - {}</p>
+	</header>
+    )";
+
+    os << fmt::format(HeaderTemplate,
+        report.report_id.value(),
+        report.name.value(),
+        report.description.value_or(""),
+        dateProvider.ToReadableTimeString(report.period_from.value()),
+        dateProvider.ToReadableTimeString(report.period_to.value()),
+        dateProvider.ToReadableTimeString(report.created_date.value()),
+        report.warehouse_id.value(),
+        warehouse.name.value());
+}
+
+void PrintSummary(std::ostream& os, const std::vector<Invoice>& invoices)
+{
+    constexpr std::string_view SummaryTemplate = R"(
+	<section>
+		<h2>Summary</h2>
+		<p>Total Invoices: {}</p>
+	</section>
+    )";
+
+    os << fmt::format(SummaryTemplate, invoices.size());
+}
+
+constexpr std::string_view OpenInvoices = R"(
+	<section>
+		<h2>Invoices</h2>
+)";
+
+void OpenInvoice(std::ostream& os, const Invoice& invoice, const srv::IDateProvider& dateProvider)
+{
+    constexpr std::string_view InvoiceTemplateBegin = R"(
+		<div class="invoice">
+			<h3>Invoice #{} - {}</h3>
+			<p>Description: {}</p>
+			<p>Created on: {}</p>
+    )";
+
+    constexpr std::string_view InvoiceTemplateTo = R"(
+			<p>Products shipped to warehouse {}</p>
+    )";
+
+    constexpr std::string_view InvoiceTemplateFrom = R"(
+			<p>Products shipped from warehouse {}</p>
+    )";
+
+    constexpr std::string_view InvoiceTemplateEnd = R"(
+			<h4>Products</h4>
+    )";
+
+    os << fmt::format(InvoiceTemplateBegin,
+        invoice.invoice_id.value(),
+        invoice.name.value(),
+        invoice.description.value_or(""),
+        dateProvider.ToReadableTimeString(invoice.created_date.value()));
+
+    if (invoice.warehouse_from_id.has_value())
+    {
+        os << fmt::format(InvoiceTemplateFrom, invoice.warehouse_from_id.value());
+    }
+
+    if (invoice.warehouse_to_id.has_value())
+    {
+        os << fmt::format(InvoiceTemplateTo, invoice.warehouse_to_id.value());
+    }
+
+    os << InvoiceTemplateEnd;
+}
+
+void PrintProduct(std::ostream& os, const Product& product, const srv::IDateProvider& dateProvider)
+{
+    constexpr std::string_view ProductTemplate = R"(
+			<div class="product">
+				<strong>Product ID:</strong> {}
+				<div class="product-details">
+					<p><strong>Name:</strong> {}</p>
+					<p><strong>Pretty Name:</strong> {}</p>
+					<p><strong>Description:</strong> {}</p>
+					<p><strong>Count:</strong> {}</p>
+					<p><strong>Created Date:</strong> {}</p>
+				</div>
+			</div>
+    )";
+
+    os << fmt::format(ProductTemplate,
+        product.id.value(),
+        product.name.value(),
+        product.pretty_name.value(),
+        product.description.value_or(""),
+        product.count.value(),
+        dateProvider.ToReadableTimeString(product.created_date.value()));
+}
+
+constexpr std::string_view CloseInvoice = R"(
+		</div>
+)";
+
+constexpr std::string_view CloseInvoices = R"(
+	</section>
+)";
+
+constexpr std::string_view CloseBody = R"(
+</body>
+)";
+
+constexpr std::string_view CloseHtml = R"(
+</html>
+)";
+
+}  // namespace
 
 ReportsByPeriod::ReportsByPeriod(std::shared_ptr<srv::ITracer> tracer,
     std::shared_ptr<srv::IServiceLocator> locator,
@@ -185,7 +376,7 @@ ufa::Result ReportsByPeriod::CreateReportFile(srv::IDateProvider& dateProvider,
 
     std::filesystem::path reportPath = ReportsFolder;
     reportPath.append(string_converters::ToString(m_report.report_type.value()));
-    reportPath.append(dateProvider.ToIsoTimeString(m_report.created_date.value()));
+    reportPath.append(dateProvider.ToIsoTimeString(m_report.created_date.value()) + ".html");
 
     CHECK_SUCCESS(documentManager.EscapePath(reportPath));
 
@@ -201,49 +392,34 @@ ufa::Result ReportsByPeriod::WriteReportFile(srv::IDateProvider& dateProvider,
     srv::IDocumentManager& documentManager,
     std::ofstream& fstream)
 {
-    fstream << "REPORT id: " << m_report.report_id.value() << ", name:\'" << m_report.name.value() << "\'\n\n";
+    fstream << OpenHtml;
+    fstream << Head;
+    fstream << OpenBody;
 
-    if (m_report.description.has_value())
-        fstream << "Report's description: " << m_report.description.value() << "\'\n\n";
+    PrintHeader(fstream, m_report, m_warehouse, dateProvider);
 
-    fstream << "Generated for period: from " << dateProvider.ToIsoTimeString(m_report.period_from.value()) << " to "
-            << dateProvider.ToIsoTimeString(m_report.period_to.value()) << '\n';
-    fstream << "Created in " << dateProvider.ToIsoTimeString(m_report.created_date.value()) << '\n';
-    fstream << "Warehouse: id: " << m_warehouse.warehouse_id.value() << ", name: " << m_warehouse.name.value() << "\n\n";
-    fstream << "Total: " << m_invoices.size() << " invoices\n\n";
+    PrintSummary(fstream, m_invoices);
+
+    fstream << OpenInvoices;
 
     for (const auto& invoice : m_invoices)
     {
-        fstream << "Invoice #" << invoice.invoice_id.value() << " \'" << invoice.name.value() << "\'\n";
-        fstream << "\tCreated in " << dateProvider.ToIsoTimeString(invoice.created_date.value()) << '\n';
-
-        if (invoice.warehouse_from_id.has_value())
-        {
-            fstream << "\tProducts shipped from warehouse " << invoice.warehouse_from_id.value() << '\n';
-        }
-
-        if (invoice.warehouse_to_id.has_value())
-        {
-            fstream << "\tProducts shipped to warehouse " << invoice.warehouse_to_id.value() << '\n';
-        }
-
-        fstream << "\tProducts shipped:" << '\n';
+        OpenInvoice(fstream, invoice, dateProvider);
 
         for (const auto& operation : m_operations[invoice.invoice_id.value()])
         {
             const auto& product = m_products[operation.product_id.value()];
 
-            fstream << "\tId : " << product.id.value() << '\n';
-            fstream << "\t\tName : " << product.name.value() << '\n';
-            fstream << "\t\tPretty_name : " << product.pretty_name.value() << '\n';
-            if (product.description.has_value())
-                fstream << "\t\tDescription : " << product.description.value() << '\n';
-            if (product.main_color.has_value())
-                fstream << "\t\tMain_color : " << product.main_color.value() << '\n';
-            fstream << "\t\tCount : " << product.count.value() << '\n';
-            fstream << "\t\tCreated_date : " << dateProvider.ToIsoTimeString(product.created_date.value()) << '\n';
+            PrintProduct(fstream, product, dateProvider);
         }
+
+        fstream << CloseInvoice;
     }
+
+    fstream << CloseInvoices;
+
+    fstream << CloseBody;
+    fstream << CloseHtml;
 
     return ufa::Result::SUCCESS;
 }
