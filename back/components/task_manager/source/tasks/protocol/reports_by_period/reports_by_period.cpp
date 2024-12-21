@@ -87,6 +87,23 @@ constexpr std::string_view Head = R"(
 		.product-details {
 			margin-left: 20px;
 		}
+
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f4f4f4;
+        }
 	</style>
 </head>
 )";
@@ -153,7 +170,19 @@ void OpenInvoice(std::ostream& os, const Invoice& invoice, const srv::IDateProvi
     )";
 
     constexpr std::string_view InvoiceTemplateEnd = R"(
-			<h4>Products</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Name</th>
+                            <th>Pretty Name</th>
+                            <th>Description</th>
+                            <th>Count</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
     )";
 
     os << fmt::format(InvoiceTemplateBegin,
@@ -178,16 +207,14 @@ void OpenInvoice(std::ostream& os, const Invoice& invoice, const srv::IDateProvi
 void PrintProduct(std::ostream& os, const Product& product, const srv::IDateProvider& dateProvider)
 {
     constexpr std::string_view ProductTemplate = R"(
-			<div class="product">
-				<strong>Product ID:</strong> {}
-				<div class="product-details">
-					<p><strong>Name:</strong> {}</p>
-					<p><strong>Pretty Name:</strong> {}</p>
-					<p><strong>Description:</strong> {}</p>
-					<p><strong>Count:</strong> {}</p>
-					<p><strong>Created Date:</strong> {}</p>
-				</div>
-			</div>
+                <tr>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                </tr>
     )";
 
     os << fmt::format(ProductTemplate,
@@ -200,6 +227,9 @@ void PrintProduct(std::ostream& os, const Product& product, const srv::IDateProv
 }
 
 constexpr std::string_view CloseInvoice = R"(
+                    </tbody>
+                </table>
+            </div>
 		</div>
 )";
 

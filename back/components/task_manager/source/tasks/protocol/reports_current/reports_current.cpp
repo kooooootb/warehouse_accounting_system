@@ -36,56 +36,73 @@ constexpr std::string_view OpenHtml = R"(
 
 constexpr std::string_view Head = R"(
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Report - Report 1</title>
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			background-color: #f4f4f9;
-			color: #333;
-			margin: 0;
-			padding: 20px;
-		}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report - Report 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
 
-		header {
-			background-color: #333;
-			color: #fff;
-			padding: 20px;
-			text-align: center;
-		}
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
 
-		section {
-			background-color: #fff;
-			margin: 20px 0;
-			padding: 20px;
-			border-radius: 8px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		}
+        section {
+            background-color: #fff;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-		h1,
-		h2,
-		h3 {
-			margin: 0 0 10px 0;
-		}
+        h1,
+        h2,
+        h3 {
+            margin: 0 0 10px 0;
+        }
 
-		.invoice {
-			border-top: 2px solid #333;
-			margin-top: 20px;
-			padding-top: 20px;
-		}
+        .invoice {
+            border-top: 2px solid #333;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
 
-		.product {
-			background-color: #f9f9f9;
-			margin-bottom: 10px;
-			padding: 10px;
-			border-radius: 5px;
-		}
+        .product {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
 
-		.product-details {
-			margin-left: 20px;
-		}
-	</style>
+        .product-details {
+            margin-left: 20px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f4f4f4;
+        }
+    </style>
 </head>
 )";
 
@@ -96,12 +113,12 @@ constexpr std::string_view OpenBody = R"(
 void PrintHeader(std::ostream& os, const Report& report, const Warehouse& warehouse, const srv::IDateProvider& dateProvider)
 {
     constexpr std::string_view HeaderTemplate = R"(
-	<header>
-		<h1>Report #{} - {}</h1>
-		<p>Description: {}</p>
-		<p>Generated for warehouse: {} - {}</p>
-		<p>Created on: {}</p>
-	</header>
+    <header>
+        <h1>Report #{} - {}</h1>
+        <p>Description: {}</p>
+        <p>Generated for warehouse: {} - {}</p>
+        <p>Created on: {}</p>
+    </header>
     )";
 
     os << fmt::format(HeaderTemplate,
@@ -116,33 +133,42 @@ void PrintHeader(std::ostream& os, const Report& report, const Warehouse& wareho
 void PrintSummary(std::ostream& os, size_t productsTotal)
 {
     constexpr std::string_view SummaryTemplate = R"(
-	<section>
-		<h2>Summary</h2>
-		<p>Total Products: {}</p>
-	</section>
+    <section>
+        <h2>Summary</h2>
+        <p>Total Products: {}</p>
+    </section>
     )";
 
     os << fmt::format(SummaryTemplate, productsTotal);
 }
 
 constexpr std::string_view OpenProducts = R"(
-	<section>
-		<h2>Products</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Pretty Name</th>
+                    <th>Description</th>
+                    <th>Count</th>
+                    <th>Created Date</th>
+                </tr>
+            </thead>
+            <tbody>
 )";
 
 void PrintProduct(std::ostream& os, const Product& product, const srv::IDateProvider& dateProvider)
 {
     constexpr std::string_view ProductTemplate = R"(
-			<div class="product">
-				<strong>Product ID:</strong> {}
-				<div class="product-details">
-					<p><strong>Name:</strong> {}</p>
-					<p><strong>Pretty Name:</strong> {}</p>
-					<p><strong>Description:</strong> {}</p>
-					<p><strong>Count:</strong> {}</p>
-					<p><strong>Created Date:</strong> {}</p>
-				</div>
-			</div>
+                <tr>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                    <td>{}</td>
+                </tr>
     )";
 
     os << fmt::format(ProductTemplate,
@@ -155,7 +181,10 @@ void PrintProduct(std::ostream& os, const Product& product, const srv::IDateProv
 }
 
 constexpr std::string_view CloseProducts = R"(
-	</section>
+            </tbody>
+        </table>
+    </div>
+</section>
 )";
 
 constexpr std::string_view CloseBody = R"(
